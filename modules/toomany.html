@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Looking at it from the right direction | How PCA and ICA Actually Work</title>
+<meta name="description" content="An object you already recognize, seen from directions that hide it and from the one that does not. The view that shows the most is a mixture of all three axes, and that is dimension reduction before any of the words arrive.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="directions.html">Module 01 →</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 00 &nbsp;·&nbsp; Start here</p>
+    <h1>Looking at it from the right direction</h1>
+    <p class="sub">Nothing in this module is about seismic data, for the first three steps. It is about a teapot, seen from several directions, because the whole of dimension reduction is already in that problem and a teapot is a thing you can recognize when you have found a good view of it. Attributes are not. By the end the same arithmetic will have been applied to both, and the difference between them will be the reason the rest of the set exists.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">A teapot, as a cloud of points <span>&mdash; turn it and watch</span></p>
+        <canvas id="cHead" aria-label="A teapot drawn as a cloud of points, projected onto a viewing plane that can be rotated"></canvas>
+      </div>
+      <div>
+        <p class="cap">Choose a direction to look from <span>&mdash; two angles</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>Turn it</h2>
+            <div class="ctl">
+              <label for="az">Around <span class="val" id="azV">0&deg;</span></label>
+              <input type="range" data-key="az" id="az" min="-180" max="180" step="1" value="0">
+            </div>
+            <div class="ctl">
+              <label for="el">Up and over <span class="val" id="elV">0&deg;</span></label>
+              <input type="range" data-key="el" id="el" min="-89" max="89" step="1" value="0">
+            </div>
+          </div>
+          <div class="ctl-col">
+            <h2>Jump to a view</h2>
+            <div class="seg" id="segView" role="group" aria-label="Preset views">
+              <button type="button" data-view="front">Front</button>
+              <button type="button" data-view="side">Side</button>
+              <button type="button" data-view="top">Top</button>
+              <button type="button" data-view="best">The widest</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">The first three look straight down one of the
+              three axes the teapot is described in. The fourth is step 3.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Five short steps. <b>The first three have no seismic data in them at all.</b></p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Three views</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Find a better one</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · A mixture of axes</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Now with attributes</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Now with twelve</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Three obvious directions, and none of them is any good</h3>
+      <span class="hint">Front, side, top, all at once</span>
+    </div>
+
+    <p class="qbox"><b>Start here.</b> A teapot has four parts: a body, a lid, a spout and a handle.
+      There is no direction you can look from that puts all four in front of you clearly, and the three
+      directions you would think of first are among the worst.</p>
+
+    <p class="lede">The panels below look straight down each of the three axes the teapot happens to be
+      described in. From the front the spout points nearly at you and shortens to almost nothing. From
+      the side the handle folds against the body. From above the pot is a circle and the spout and handle
+      stick out on opposite sides with no sense of which is which.</p>
+    <p class="lede">Each view keeps two dimensions and throws the third away. That is all a picture of a
+      three-dimensional object ever is, and which two you keep is the entire decision.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The same teapot, three ways</h3>
+        <span class="hint">Spout in crimson, handle in teal</span>
+      </div>
+      <canvas id="c1" aria-label="The teapot point cloud projected along each of the three coordinate axes"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <label for="dens">How many points <span class="val" id="densV">medium</span></label>
+        <input type="range" data-key="dens" id="dens" min="0" max="2" step="1" value="1">
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+    <div class="legend prose">
+      <span>The teapot is not built lined up with the axes. It sits at an angle to them, on purpose. A
+        set of seismic attributes is an arbitrary coordinate system in exactly the same way — nothing
+        arranged for coherence and peak frequency to line up with a channel — so a teapot that
+        conveniently pointed along an axis would be teaching the wrong lesson.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Turn it until you can see the most of it</h3>
+      <span class="hint">Use the two sliders above</span>
+    </div>
+
+    <p class="lede">Move the two angles in the header until the teapot looks as much like a teapot as you
+      can get it. Most people land somewhere between the axis views, with the pot turned a little and
+      tipped a little, so the spout goes one way and the handle the other and the lid is visible on top.
+      Nobody chooses a view straight down an axis.</p>
+    <p class="lede">"As much of it as possible" can be measured. Project every point onto the picture,
+      and add up how spread out the picture is: the variance across plus the variance up. A view that
+      squashes the teapot has a small number; a view that spreads it out has a large one. The curve below
+      is that number as you turn it around, at whatever tilt the second slider is set to.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>How much the picture spreads out, as you turn</h3>
+        <span class="hint">Your view in crimson, the three axis views marked</span>
+      </div>
+      <canvas id="c2" aria-label="Total spread of the projected picture plotted against the turning angle, with the current view and the axis views marked"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="az2">Around <span class="val" id="az2V">0&deg;</span></label>
+        <input type="range" data-key="az" id="az2" min="-180" max="180" step="1" value="0">
+      </div>
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="el2">Up and over <span class="val" id="el2V">0&deg;</span></label>
+        <input type="range" data-key="el" id="el2" min="-89" max="89" step="1" value="0">
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>The best direction is part of all three axes</h3>
+      <span class="hint">Press "The widest" in the header</span>
+    </div>
+
+    <p class="lede">There is arithmetic that finds the widest view without any searching. It gives, for
+      this teapot, a view from an angle of about &minus;61 degrees around and 33 degrees over, and a
+      spread of 0.666 against 0.454, 0.573 and 0.618 for the front, side and top.</p>
+    <p class="lede">What matters is not the small improvement in the number. It is what the answer is made
+      of. The horizontal axis of that best picture is
+      <span class="k">0.840&thinsp;x&nbsp;+&nbsp;0.533&thinsp;y&nbsp;&minus;&nbsp;0.097&thinsp;z</span>
+      and the vertical axis is
+      <span class="k">0.359&thinsp;x&nbsp;&minus;&nbsp;0.412&thinsp;y&nbsp;+&nbsp;0.837&thinsp;z</span>.
+      Neither is x, or y, or z. Each is a bit of all three, and the recipe is the answer.</p>
+    <p class="lede">That is the whole idea. <b>The useful direction is a mixture of the directions you
+      were handed.</b> The coordinate system an object arrives in — x, y and z for a teapot, coherence
+      and amplitude and frequency for a survey — was not chosen to suit the thing being looked at, so the
+      good view is a combination rather than one of them.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The two picture axes, as recipes</h3>
+        <span class="hint">How much of each original axis went into each</span>
+      </div>
+      <canvas id="c3" aria-label="The two directions making up the best view, drawn as weights on the three original axes"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Jump to a view</h2>
+        <div class="seg" id="segView3" role="group" aria-label="Preset views">
+          <button type="button" data-view="front">Front</button>
+          <button type="button" data-view="side">Side</button>
+          <button type="button" data-view="top">Top</button>
+          <button type="button" data-view="best">The widest</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+    <div class="legend prose">
+      <span>There were three directions available and the picture used two of them, so one was thrown
+        away. For this teapot the two kept hold 81.0% of the total spread, and the discarded one holds
+        the remaining 19.0%. Going from three numbers per point to two, and losing a fifth of the spread,
+        is a dimension reduction. It is the same trade every module after this one is about.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>The same arithmetic, on something you cannot recognize</h3>
+      <span class="hint">Three attributes instead of three axes</span>
+    </div>
+
+    <p class="lede">Now take a seismic survey and compute three attributes over it: RMS amplitude, peak
+      envelope and peak absolute amplitude. Every trace now has three numbers, exactly as every point on
+      the teapot had three numbers. Five thousand traces make a cloud in three dimensions, and the same
+      question applies: which flat picture of it shows the most?</p>
+    <p class="lede">The arithmetic does not know or care that one cloud is a teapot and the other is a
+      survey. It returns, here, a best picture whose horizontal axis is
+      <span class="k">0.393&thinsp;RMS&nbsp;+&nbsp;0.735&thinsp;envelope&nbsp;+&nbsp;0.553&thinsp;peak</span>
+      — a mixture of all three again — holding 93.9% of the spread against 76.9%, 54.4% and 68.7% for the
+      three axis views.</p>
+    <p class="lede">One thing is completely different. With the teapot you could tell a good view from a
+      bad one by looking, because you know what a teapot is. Nobody knows what a cloud of seismic
+      attributes is supposed to look like. The number is all there is, and whether the number is
+      measuring anything you care about is a question that runs through the whole of the rest of this
+      set.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Three attributes, turned the same way</h3>
+        <span class="hint">Same sliders, same measurement</span>
+      </div>
+      <canvas id="c4" aria-label="A cloud of seismic attribute values in three dimensions, projected onto the current viewing plane"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="az4">Around <span class="val" id="az4V">0&deg;</span></label>
+        <input type="range" data-key="az" id="az4" min="-180" max="180" step="1" value="0">
+      </div>
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="el4">Up and over <span class="val" id="el4V">0&deg;</span></label>
+        <input type="range" data-key="el" id="el4" min="-89" max="89" step="1" value="0">
+      </div>
+      <div class="ctl" style="flex:1 1 200px;min-width:180px">
+        <h2 style="margin:0 0 6px">Jump to</h2>
+        <div class="seg" id="segView4" role="group" aria-label="Preset views">
+          <button type="button" data-view="top">Axis view</button>
+          <button type="button" data-view="best">The widest</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Twelve attributes, and no picture at all</h3>
+      <span class="hint">Where the teapot stops helping</span>
+    </div>
+
+    <p class="lede">A teapot has three dimensions because space does. An attribute set has as many
+      dimensions as there are attributes, and twelve is an ordinary number for a real interpretation.
+      Every trace is then a point with twelve coordinates, in a space that cannot be drawn, turned, or
+      looked at from anywhere.</p>
+    <p class="lede">Three things stop working and one thing keeps working, and sorting out which is which
+      is most of what this module set does.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Turning it by hand stops working.</b> A direction in three dimensions takes two angles.
+        In twelve it takes eleven, and trying them at one-degree spacing would mean about
+        6&times;10²⁴ directions. There is arithmetic that returns the answer directly and it does not
+        care how many dimensions there are, which is why everything from module 04 onward uses it.</li>
+      <li><b>Recognizing a good view stops working.</b> There is no shape to see. A criterion has to
+        stand in for the judgment, and choosing that criterion is the difference between the two methods
+        in the title of this set.</li>
+      <li><b>Getting away with keeping two stops working.</b> The teapot's best two directions held 81%
+        of the spread, and three attributes gave 94%. Twelve attributes here need more: the best three
+        hold 74.3%, and a display has only three color channels.</li>
+      <li><b>Everything else keeps working.</b> A direction is still a recipe mixing the originals. A
+        projection is still a weighted sum. Spread is still the thing being measured. All the arithmetic
+        in this set is the arithmetic on this page, applied where you cannot look.</li>
+    </ul>
+    <p class="lede">The panel below is the twelve-attribute correlation matrix for this survey. It is
+      what replaces the picture: sixty-six pairs, five of them above 0.7, which says the twelve
+      attributes are nothing like twelve separate pieces of information.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Twelve attributes, and how much they repeat each other</h3>
+        <span class="hint">Add them one at a time</span>
+      </div>
+      <canvas id="c5" aria-label="Correlation matrix of twelve seismic attributes, built up one attribute at a time"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 280px;min-width:260px">
+        <label for="nat">Attributes in the set <span class="val" id="natV">12</span></label>
+        <input type="range" data-key="nat" id="nat" min="2" max="12" step="1" value="12">
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>Module 01 goes back to two attributes and finds the best direction by hand, the way you found
+        the teapot's by hand here. Everything after that adds one dimension, or one complication, at a
+        time.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">What this buys you before anything technical</span>
+    </div>
+    <p class="lede">Every term in the rest of this set has a teapot version, and holding onto it makes
+      the technical version much easier to keep straight.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>A feature is an axis.</b> x, y and z for the teapot. An attribute for a survey. The word
+        means the same thing in both.</li>
+      <li><b>A sample is a point.</b> One point on the teapot's surface, one trace in the survey.</li>
+      <li><b>A projection is a view.</b> Choosing what to keep and what to throw away.</li>
+      <li><b>A component is a recipe.</b> So much of this axis, so much of that one. The numbers in the
+        recipe are called loadings and they are what a component <em>is</em>.</li>
+      <li><b>Variance is how spread out the picture is.</b> The thing being maximized when you turn a
+        teapot to see more of it.</li>
+    </ul>
+    <p class="lede"><b>The one place the teapot misleads.</b> A teapot's best view is obviously its best
+      view, because you know what a teapot looks like. That coincidence does not survive the move to
+      attributes, and most of the difficulty in the rest of this set comes from it. Module 05 finds a
+      component holding half the variance that shows a channel worst of any of them, and module 06
+      measures how far the useful direction sits from the one the arithmetic returns.</p>
+    <div class="legend prose">
+      <span>If the rest of the set stops making sense at any point, this is the page to come back to. The
+        arithmetic never becomes anything other than: choose a direction, project onto it, measure what
+        you get.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Find a view where the teapot stops looking like a teapot.</b>
+          <em class="point">Why: a projection throws a dimension away, and it is worth seeing how much
+            can go with it.</em>
+          Use the two sliders to find a view where you could not tell someone what the object is, then
+          read the spread.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Looking almost straight down
+            the long direction of the pot collapses the spout into the body and gives spreads near 0.45.
+            The front view, at 0.454, is close to the worst the object offers. The three axis views come
+            out at 0.454, 0.573 and 0.618 and the widest available is 0.666, so the range across every
+            possible view is not enormous — which is worth noticing, because the difference in how
+            recognizable the pictures are is much larger than the difference in the
+            number.</span></details></li>
+
+        <li><b>Beat the axis views by hand, then check the answer.</b>
+          <em class="point">Why: this is exactly what module 01 does with two attributes and what every
+            method in the set does with many.</em>
+          In step 2, hunt for the widest view with the sliders, write down your two angles and your
+          spread, then press "The widest".
+          <details class="reveal"><summary>Hint</summary><span class="ans">The arithmetic gives about
+            &minus;61 degrees around and 33 degrees over, with a spread of 0.666. The best axis view, from
+            the top, gives 0.618, so the gain is 7.8%. Most people get within a few hundredths by hand in
+            under a minute, which is the point: the arithmetic in module 04 is a shortcut to an answer
+            you could have found yourself, not a different kind of answer.</span></details></li>
+
+        <li><b>Read the recipe.</b>
+          <em class="point">Why: a component is its loadings, and this is the least intimidating place
+            to meet them.</em>
+          In step 3, read how much of x, y and z goes into each of the two picture axes.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Across is
+            0.840x + 0.533y &minus; 0.097z and up is 0.359x &minus; 0.412y + 0.837z. Every one of the
+            six numbers is non-zero, so both picture axes are mixtures of all three original ones. Notice
+            also that each recipe's numbers squared add to one — 0.840² + 0.533² + 0.097² = 1.000 — which
+            is what makes it a direction rather than a direction and a stretch.</span></details></li>
+
+        <li><b>Do it again with attributes and see what is missing.</b>
+          <em class="point">Why: the arithmetic transfers perfectly and the judgment does not.</em>
+          In step 4, turn the attribute cloud with the same sliders, then jump to the widest view.
+          <details class="reveal"><summary>Hint</summary><span class="ans">The widest view holds 93.9% of
+            the spread against 76.9%, 54.4% and 68.7% for the three axis views, so the gain is much larger
+            than it was for the teapot. Its horizontal axis is 0.393 RMS + 0.735 envelope + 0.553 peak
+            amplitude, a mixture of all three. What is missing is any way to tell whether that view is
+            good. With the teapot you could see it. Here the number went up and nothing on the screen
+            says whether anything geological came with it.</span></details></li>
+
+        <li><b>Add attributes one at a time.</b>
+          <em class="point">Why: this is the situation the whole set exists for, and it is worth seeing
+            it fill in.</em>
+          In step 5, walk the attribute count from 2 to 12 and watch the correlation matrix.
+          <details class="reveal"><summary>Hint</summary><span class="ans">At twelve attributes there are
+            sixty-six pairs and five of them are above 0.7 in absolute value, which means several
+            attributes are close to restatements of others. The first three directions hold 74.3% of the
+            spread between them, so nine of the twelve dimensions are carrying the last quarter. A display
+            has three color channels. Those two facts together — twelve inputs, three channels, and a
+            great deal of repetition among the twelve — are the practical problem, and every module from
+            here on is some part of solving it.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>A view is a projection.</b> Keep two directions, throw the rest away. That is all any
+          picture of a higher-dimensional thing ever is.</li>
+        <li><b>The good direction is a mixture of the axes you were given.</b> The teapot's best view is
+          0.840x + 0.533y &minus; 0.097z across and 0.359x &minus; 0.412y + 0.837z up. Not x, not y, not
+          z.</li>
+        <li><b>"How much you can see" is measurable.</b> Project every point and add up how spread out
+          the picture is. Turning the teapot to see more of it is maximizing that number.</li>
+        <li><b>The arithmetic transfers to attributes exactly.</b> Three attributes behave like three
+          axes, and the best view is again a mixture: 0.393 RMS + 0.735 envelope + 0.553 peak.</li>
+        <li><b>The judgment does not transfer.</b> You know what a teapot should look like. Nobody knows
+          what an attribute cloud should look like, so a number has to stand in for the judgment.</li>
+        <li><b>Twelve dimensions cannot be turned by hand.</b> Eleven angles, about 6&times;10²⁴
+          directions at one-degree spacing. The arithmetic does not care; you cannot look.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>The teapot</b> is built from equations in
+      <span class="k">assets/shape3d.js</span> rather than loaded from a model file: the body and lid
+      are surfaces of revolution, the spout and handle are tubes swept along curves, and points are
+      placed on those surfaces with a small deterministic jitter so the result reads as a sampled
+      surface. The default density gives about three thousand points. It is a teapot in the tradition of
+      the Utah teapot used in computer graphics since 1975, and it is not that model.</p>
+    <p class="lede"><b>The tilt.</b> The teapot is rotated by a fixed 34, 27 and 19 degrees about the
+      three axes before anything is measured. Without it the spout and handle lie in one coordinate
+      plane, that plane is the plane of greatest spread, and the best view comes out as exactly the side
+      view — which would teach that the answer is an axis after all. Attribute spaces are arbitrary
+      coordinate systems in the same way, so the general orientation is the honest case.</p>
+    <p class="lede"><b>A view</b> is two perpendicular unit directions: one becomes the horizontal axis
+      of the picture, one the vertical, and everything along the third is discarded. The spread quoted
+      throughout is the variance of the projected points along the horizontal plus the variance along the
+      vertical, which is the quantity that later modules call the retained variance.</p>
+    <p class="lede"><b>The widest view</b> is the first two eigenvectors of the point cloud's covariance
+      matrix, from the same solver every other module in this set uses. That is principal component
+      analysis, applied to three coordinates instead of to attributes, and nothing about it is special to
+      the fact that the three coordinates happen to be positions in space.</p>
+    <p class="lede"><b>The attribute cloud</b> in step 4 uses RMS amplitude, peak envelope and peak
+      absolute amplitude, computed over samples 22 to 50 of a 72 by 72 trace synthetic survey which is
+      described in module 01's Method tab. All three are amplitude measurements in the same units, which
+      is what makes them drawable on axes that share a scale; module 03 is about what happens when they
+      are not. The twelve-attribute matrix in step 5 adds mean absolute amplitude, sweetness, peak
+      frequency, spectral bandwidth, coherence, an amplitude gradient, two texture measures, and RMS
+      amplitude measured on a window above the target.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> The teapot is drawn as a point cloud with
+      depth shading and no hidden-surface removal, so points on the far side show through; a solid
+      rendering would look better and would hide that a projection keeps every point. The comparison
+      between the teapot and the attributes is an analogy and it breaks in the way the Why it matters tab
+      describes. Nothing in this module is standardized or normalized, because both clouds are already in
+      comparable units.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Newell, M. E., 1975, <em>The utilization of procedure models in digital image synthesis</em>:
+          Ph.D. dissertation, University of Utah — the original teapot.</li>
+        <li>Pearson, K., 1901, On lines and planes of closest fit to systems of points in space:
+          <em>Philosophical Magazine</em>, <b>2</b>, 559&ndash;572.</li>
+        <li>Jolliffe, I. T., 2002, <em>Principal Component Analysis</em>, 2nd ed.: Springer.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>01 · A direction through a cloud</h3>
+    <p>Back down to two attributes, where the cloud can be drawn flat on the page and the best direction
+      found by dragging a line through it — the same hunt you just did with the teapot, with the answer
+      measured at every angle.</p>
+    <a class="btn ghost" href="directions.html">Module 01 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="../index.html">← All modules</a>
+    <a class="btn ghost" href="directions.html">Module 01: a direction through a cloud →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened &mdash; no cookie, no account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script src="../assets/shape3d.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined' || typeof SHAPE === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load its assets. It expects multivar.js, attrfield.js ' +
+      'and shape3d.js one directory up, at ../assets/, and file names are case-sensitive.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+
+  var TRIO = ['rms', 'envelope', 'maxabs'];
+  var TRIOLAB = { rms: 'RMS', envelope: 'envelope', maxabs: 'peak amplitude' };
+  var TWELVE = ['rms', 'envelope', 'meanabs', 'maxabs', 'sweetness', 'peakfreq',
+                'bandwidth', 'coherence', 'edge', 'glcmcon', 'glcmhom', 'shallow'];
+  var SHORT12 = {
+    rms: 'RMS', envelope: 'env', meanabs: 'mean|a|', maxabs: 'max|a|', sweetness: 'sweet',
+    peakfreq: 'f peak', bandwidth: 'bandw', coherence: 'coher', edge: 'grad',
+    glcmcon: 'contr', glcmhom: 'homog', shallow: 'shallow'
+  };
+
+  var DEF = { az: 0, el: 0, dens: 1, nat: 12, tab: 'p1' };
+  var S = MV.readState(DEF);
+  S.az = Math.max(-180, Math.min(180, Math.round(S.az)));
+  S.el = Math.max(-89, Math.min(89, Math.round(S.el)));
+  S.dens = Math.max(0, Math.min(2, Math.round(S.dens)));
+  S.nat = Math.max(2, Math.min(12, Math.round(S.nat)));
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  /* =====================================================================
+     THE TWO CLOUDS
+     ===================================================================== */
+
+  var POTS = {};
+  function pot() {
+    var d = [0.7, 1, 1.4][S.dens];
+    if (!POTS[S.dens]) POTS[S.dens] = SHAPE.teapot({ density: d });
+    return POTS[S.dens];
+  }
+  var POTBEST = {};
+  function potBest() {
+    if (!POTBEST[S.dens]) POTBEST[S.dens] = SHAPE.bestView(pot());
+    return POTBEST[S.dens];
+  }
+
+  var SURVEY = null;
+  function survey() {
+    if (SURVEY) return SURVEY;
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var attr = AF.attributes(slab, TWELVE);
+    var G = 1000;
+    var trio = TRIO.map(function (n) {
+      var o = new Float64Array(attr[n].length);
+      for (var i = 0; i < o.length; i++) o[i] = attr[n][i] * G;
+      return o;
+    });
+    // as a cloud of three-dimensional points, centred, exactly like the teapot
+    var mu = trio.map(MV.mean);
+    var pts = new Array(trio[0].length), i;
+    for (i = 0; i < pts.length; i++) {
+      pts[i] = { x: trio[0][i] - mu[0], y: trio[1][i] - mu[1], z: trio[2][i] - mu[2],
+                 part: 'body' };
+    }
+    SURVEY = {
+      slab: slab, attr: attr, trio: trio, pts: pts,
+      P: MV.pca(trio, {}), best: SHAPE.bestView(pts)
+    };
+    return SURVEY;
+  }
+
+  function viewNow() { return SHAPE.viewFromAngles(S.az, S.el); }
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+
+  /* One cloud, one view, one box. The scale is fixed by the object's own
+     overall size rather than by what the current view happens to span, so
+     turning it makes the picture change shape rather than change size. */
+  function drawCloud(ctx, r, pts, view, scale, colored) {
+    var pr = SHAPE.project(pts, view), i;
+    var order = pr.slice().sort(function (a, b) { return b.d - a.d; });
+    var dlo = Infinity, dhi = -Infinity;
+    for (i = 0; i < pr.length; i++) {
+      if (pr[i].d < dlo) dlo = pr[i].d;
+      if (pr[i].d > dhi) dhi = pr[i].d;
+    }
+    var cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+    var k = Math.min(r.w, r.h) / (2 * scale);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+    for (i = 0; i < order.length; i++) {
+      var p = order[i];
+      var t = (p.d - dlo) / (dhi - dlo || 1);
+      var X = cx + p.u * k, Y = cy - p.v * k;
+      if (colored && p.part === 'spout') {
+        ctx.fillStyle = 'rgba(132,22,23,' + (0.45 + 0.5 * t).toFixed(2) + ')';
+      } else if (colored && p.part === 'handle') {
+        ctx.fillStyle = 'rgba(11,114,133,' + (0.45 + 0.5 * t).toFixed(2) + ')';
+      } else {
+        var g = Math.round(150 - 105 * t);
+        ctx.fillStyle = 'rgba(' + g + ',' + g + ',' + (g + 6) + ',' +
+          (colored ? 0.9 : 0.34) + ')';
+      }
+      var s = colored ? 1.5 : 1.0;
+      ctx.fillRect(X - s, Y - s, 2 * s, 2 * s);
+    }
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+
+  function potScale() { return 2.05; }
+  function trioScale() { return 62; }
+
+  function grid(ctx, r, y0, y1, nx, ny, yfmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.strokeStyle = '#E4E7EA';
+    ctx.lineWidth = 1;
+    var i, X, Y, v;
+    for (i = 0; i <= nx; i++) {
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.fillText(yfmt ? yfmt(v) : v.toFixed(2), r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     HEADER
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.max(220, Math.min(330, w - 30));
+    var ctx = fit('cHead', w, size + 34);
+    if (!ctx) return;
+    var onSeismic = (S.tab === 'p4');
+    var r = { x: (w - size) / 2, y: 10, w: size, h: size };
+    if (onSeismic) {
+      var sv = survey();
+      drawCloud(ctx, r, sv.pts, viewNow(), trioScale(), false);
+    } else {
+      drawCloud(ctx, r, pot(), viewNow(), potScale(), true);
+    }
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left';
+    ctx.fillText('around ' + S.az + '\u00b0, over ' + S.el + '\u00b0', r.x + 6, r.y + r.h + 18);
+    ctx.textAlign = 'right';
+    var sp = onSeismic ? SHAPE.spread(survey().pts, viewNow()).total
+                       : SHAPE.spread(pot(), viewNow()).total;
+    ctx.fillText('spread ' + (onSeismic ? sp.toFixed(1) : sp.toFixed(4)),
+      r.x + r.w - 6, r.y + r.h + 18);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     STEPS
+     ===================================================================== */
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(250, (w - 70) / 3);
+    var ctx = fit('c1', w, size + 46);
+    if (!ctx) return;
+    var P = pot();
+    var gap = Math.max(14, (w - 16 - 3 * size) / 3);
+    [['front', 0, 0], ['side', 90, 0], ['top', 0, 89.9]].forEach(function (q, k) {
+      var r = { x: 8 + k * (size + gap), y: 24, w: size, h: size };
+      var v = SHAPE.viewFromAngles(q[1], q[2]);
+      drawCloud(ctx, r, P, v, potScale(), true);
+      ctx.save();
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '600 11px ui-monospace,Menlo,monospace';
+      ctx.fillText(q[0], r.x, r.y - 7);
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillStyle = SLATE;
+      ctx.fillText('spread ' + SHAPE.spread(P, v).total.toFixed(4), r.x, r.y + r.h + 16);
+      ctx.restore();
+    });
+  }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 260;
+    var ctx = fit('c2', w, h);
+    if (!ctx) return;
+    var P = pot();
+    var r = { x: 58, y: 14, w: w - 58 - 24, h: h - 14 - 52 };
+    grid(ctx, r, 0.3, 0.75, 8, 3, function (v) { return v.toFixed(2); });
+    ctx.save();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (var a = -180; a <= 180; a += 4) {
+      var v = SHAPE.spread(P, SHAPE.viewFromAngles(a, S.el)).total;
+      var X = r.x + (a + 180) / 360 * r.w;
+      var Y = r.y + r.h - (Math.max(0.3, Math.min(0.75, v)) - 0.3) / 0.45 * r.h;
+      if (a === -180) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    }
+    ctx.stroke();
+    ctx.restore();
+    function mark(a, color, label, dash) {
+      var X = r.x + (((a + 180) % 360 + 360) % 360) / 360 * r.w;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = dash ? 1.4 : 2;
+      ctx.setLineDash(dash || []);
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+      ctx.setLineDash([]);
+      if (label) {
+        ctx.fillStyle = color;
+        ctx.textAlign = 'center';
+        ctx.font = '10px ui-monospace,Menlo,monospace';
+        ctx.fillText(label, X, r.y + 12);
+      }
+      ctx.restore();
+    }
+    mark(0, SLATE, 'front', [4, 4]);
+    mark(90, SLATE, 'side', [4, 4]);
+    mark(SHAPE.anglesOfView(potBest()).az, TEAL, 'widest', [7, 4]);
+    mark(S.az, CRIM, null);
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText('turning angle, at a tilt of ' + S.el + '\u00b0', r.x + r.w / 2, r.y + r.h + 32);
+    ctx.restore();
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var ctx = fit('c3', w, 150);
+    if (!ctx) return;
+    var b = potBest();
+    var x0 = 92, rw = w - x0 - 40, mid = x0 + rw / 2;
+    ctx.save();
+    ctx.strokeStyle = '#E4E7EA';
+    [-1, -0.5, 0, 0.5, 1].forEach(function (v) {
+      var X = mid + v * rw / 2;
+      ctx.beginPath(); ctx.moveTo(X, 26); ctx.lineTo(X, 122); ctx.stroke();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.fillText(v.toFixed(1), X, 20);
+    });
+    ctx.restore();
+    ['x', 'y', 'z'].forEach(function (nm, i) {
+      var y = 30 + i * 30;
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'right';
+      ctx.fillText('axis ' + nm, x0 - 8, y + 16);
+      ctx.restore();
+      [[b.right[i], CRIM, 0], [b.up[i], TEAL, 11]].forEach(function (q) {
+        var bw = q[0] * rw / 2;
+        ctx.save();
+        ctx.fillStyle = q[1];
+        ctx.globalAlpha = 0.9;
+        ctx.fillRect(Math.min(mid, mid + bw), y + q[2], Math.abs(bw), 9);
+        ctx.restore();
+        ctx.save();
+        ctx.fillStyle = INK;
+        ctx.textAlign = bw >= 0 ? 'left' : 'right';
+        ctx.font = '10px ui-monospace,Menlo,monospace';
+        ctx.fillText(q[0].toFixed(3), mid + bw + (bw >= 0 ? 5 : -5), y + q[2] + 8);
+        ctx.restore();
+      });
+    });
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = CRIM;
+    ctx.fillText('across the picture', x0, 138);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('up the picture', x0 + 160, 138);
+    ctx.restore();
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(300, w * 0.45);
+    var ctx = fit('c4', w, size + 46);
+    if (!ctx) return;
+    var sv = survey();
+    var rA = { x: 8, y: 24, w: size, h: size };
+    drawCloud(ctx, rA, sv.pts, viewNow(), trioScale(), false);
+    var rB = { x: w - size - 8, y: 24, w: size, h: size };
+    drawCloud(ctx, rB, sv.pts, sv.best, trioScale(), false);
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.font = '600 11px ui-monospace,Menlo,monospace';
+    ctx.fillText('your view \u2014 spread ' +
+      SHAPE.spread(sv.pts, viewNow()).total.toFixed(1), rA.x, rA.y - 7);
+    ctx.fillText('the widest \u2014 spread ' +
+      SHAPE.spread(sv.pts, sv.best).total.toFixed(1), rB.x, rB.y - 7);
+    ctx.font = '10px ui-monospace,Menlo,monospace';
+    ctx.fillStyle = SLATE;
+    ctx.fillText('one point per trace, 5184 of them', rA.x, rA.y + rA.h + 16);
+    ctx.restore();
+  }
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var n = S.nat;
+    var cell = Math.min(32, Math.floor((w - 160) / 12));
+    var side = cell * 12;
+    var ctx = fit('c5', w, side + 78);
+    if (!ctx) return;
+    var sv = survey();
+    var use = TWELVE.slice(0, n);
+    var R = MV.corr(use.map(function (m) { return sv.attr[m]; }));
+    var x0 = 96, y0 = 52, i, j;
+    for (i = 0; i < 12; i++) {
+      for (j = 0; j < 12; j++) {
+        var inSet = (i < n && j < n);
+        ctx.save();
+        if (!inSet) {
+          ctx.fillStyle = '#F4F6F7';
+        } else {
+          var v = R[i][j];
+          ctx.globalAlpha = Math.min(1, Math.abs(v));
+          ctx.fillStyle = v >= 0 ? CRIM : TEAL;
+        }
+        ctx.fillRect(x0 + j * cell, y0 + i * cell, cell - 1, cell - 1);
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.fillStyle = i < n ? SLATE : '#C9CDD2';
+      ctx.textAlign = 'right';
+      ctx.font = '9px ui-monospace,Menlo,monospace';
+      ctx.fillText(SHORT12[TWELVE[i]], x0 - 5, y0 + i * cell + cell / 2 + 3);
+      ctx.translate(x0 + i * cell + cell / 2, y0 - 5);
+      ctx.rotate(-Math.PI / 4);
+      ctx.textAlign = 'left';
+      ctx.fillText(SHORT12[TWELVE[i]], 0, 0);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left';
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    ctx.fillText('crimson: the two rise together   \u00b7   teal: one rises as the other falls',
+      x0, y0 + side + 24);
+    ctx.fillText('grey: not in the set yet', x0, y0 + side + 42);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function drawStats() {
+    var P = pot(), b = potBest();
+    if ($('s1')) {
+      $('s1').innerHTML =
+        stat('From the front', SHAPE.spread(P, SHAPE.viewFromAngles(0, 0)).total.toFixed(4), 'spread') +
+        stat('From the side', SHAPE.spread(P, SHAPE.viewFromAngles(90, 0)).total.toFixed(4), 'spread') +
+        stat('From above', SHAPE.spread(P, SHAPE.viewFromAngles(0, 89.9)).total.toFixed(4), 'spread') +
+        stat('Points', String(P.length), 'each with three numbers');
+    }
+    if ($('s2')) {
+      var a = SHAPE.anglesOfView(b);
+      $('s2').innerHTML =
+        stat('Your view', S.az + '\u00b0, ' + S.el + '\u00b0', 'around and over') +
+        stat('Your spread', SHAPE.spread(P, viewNow()).total.toFixed(4), 'higher is more of it') +
+        stat('The widest available', SHAPE.spread(P, b).total.toFixed(4),
+          'at ' + a.az.toFixed(0) + '\u00b0, ' + a.el.toFixed(0) + '\u00b0') +
+        stat('Best axis view', '0.6178', 'from above');
+    }
+    if ($('s3')) {
+      var tot = b.values[0] + b.values[1] + b.values[2];
+      $('s3').innerHTML =
+        stat('Across the picture', b.right.map(function (v) { return v.toFixed(2); }).join(', '),
+          'parts of x, y and z') +
+        stat('Up the picture', b.up.map(function (v) { return v.toFixed(2); }).join(', '),
+          'parts of x, y and z') +
+        stat('Held by the two kept', (100 * (b.values[0] + b.values[1]) / tot).toFixed(1) + '%',
+          'of the total spread') +
+        stat('Thrown away', (100 * b.values[2] / tot).toFixed(1) + '%', 'the third direction');
+    }
+    if ($('s4')) {
+      var sv = survey(), Pt = sv.P, tot2 = Pt.values[0] + Pt.values[1] + Pt.values[2];
+      $('s4').innerHTML =
+        stat('Your spread', SHAPE.spread(sv.pts, viewNow()).total.toFixed(1), 'amplitude units squared') +
+        stat('The widest', SHAPE.spread(sv.pts, sv.best).total.toFixed(1),
+          (100 * (Pt.values[0] + Pt.values[1]) / tot2).toFixed(1) + '% of the total') +
+        stat('Its horizontal axis', TRIO.map(function (n, i) {
+          return Pt.vectors[0][i].toFixed(2);
+        }).join(', '), TRIO.map(function (n) { return TRIOLAB[n]; }).join(', ')) +
+        stat('Traces', String(sv.pts.length), 'one point each');
+    }
+    if ($('s5')) {
+      var sv2 = survey(), use = TWELVE.slice(0, S.nat);
+      var R = MV.corr(use.map(function (m) { return sv2.attr[m]; }));
+      var pairs = 0, strong = 0, i, j;
+      for (i = 0; i < S.nat; i++) for (j = i + 1; j < S.nat; j++) {
+        pairs++;
+        if (Math.abs(R[i][j]) > 0.7) strong++;
+      }
+      var Pz = MV.pca(use.map(function (m) { return sv2.attr[m]; }), { standardize: true });
+      var three = Math.min(3, Pz.explained.length), s3 = 0;
+      for (i = 0; i < three; i++) s3 += Pz.explained[i];
+      $('s5').innerHTML =
+        stat('Attributes', String(S.nat), 'dimensions in the space') +
+        stat('Pairs', String(pairs), String(strong) + ' above 0.7') +
+        stat('Held by the best three', (s3 * 100).toFixed(1) + '%', 'and a display has three channels') +
+        stat('Angles to sweep', S.nat === 2 ? '1' : (S.nat - 1) + ' angles',
+          S.nat >= 6 ? 'no longer possible by hand' : 'still drawable');
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+  var DENSNAME = ['sparse', 'medium', 'dense'];
+
+  function applyView(name) {
+    var v;
+    if (name === 'best') {
+      v = SHAPE.anglesOfView(S.tab === 'p4' ? survey().best : potBest());
+    } else {
+      var a = SHAPE.AXIS_VIEWS[name];
+      v = { az: a.az, el: a.el };
+    }
+    S.az = Math.round(v.az);
+    S.el = Math.round(Math.max(-89, Math.min(89, v.el)));
+  }
+
+  function syncLabels() {
+    ['az', 'az2', 'az4'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.az;
+      var q = $(id + 'V'); if (q) q.textContent = S.az + '\u00b0';
+    });
+    ['el', 'el2', 'el4'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.el;
+      var q = $(id + 'V'); if (q) q.textContent = S.el + '\u00b0';
+    });
+    if ($('dens')) $('dens').value = S.dens;
+    if ($('densV')) $('densV').textContent = DENSNAME[S.dens];
+    if ($('nat')) $('nat').value = S.nat;
+    if ($('natV')) $('natV').textContent = String(S.nat);
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !/^p[1-4]$/.test(id);
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('#segView button, #segView3 button, #segView4 button')
+    .forEach(function (b) {
+      b.addEventListener('click', function () {
+        applyView(b.dataset.view); syncLabels(); drawAll(); saveState();
+      });
+    });
+
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t || t.tagName !== 'INPUT') return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    S[key] = parseFloat(t.value);
+    syncLabels(); drawAll(); saveState();
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawAll, 140);
+  });
+
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M00 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    view: function (name) { applyView(name); syncLabels(); drawAll(); },
+    potViews: function () {
+      var P = pot(), b = potBest();
+      return {
+        front: SHAPE.spread(P, SHAPE.viewFromAngles(0, 0)).total,
+        side: SHAPE.spread(P, SHAPE.viewFromAngles(90, 0)).total,
+        top: SHAPE.spread(P, SHAPE.viewFromAngles(0, 89.9)).total,
+        best: SHAPE.spread(P, b).total,
+        angles: SHAPE.anglesOfView(b),
+        right: b.right.slice(), up: b.up.slice(), values: b.values.slice(),
+        points: P.length
+      };
+    },
+    trio: function () {
+      var sv = survey();
+      return {
+        explained: sv.P.explained.slice(),
+        pc1: TRIO.map(function (n, i) { return sv.P.vectors[0][i]; }),
+        best: SHAPE.spread(sv.pts, sv.best).total,
+        front: SHAPE.spread(sv.pts, SHAPE.viewFromAngles(0, 0)).total,
+        side: SHAPE.spread(sv.pts, SHAPE.viewFromAngles(90, 0)).total,
+        top: SHAPE.spread(sv.pts, SHAPE.viewFromAngles(0, 89.9)).total
+      };
+    },
+    twelve: function () {
+      var sv = survey();
+      var R = MV.corr(TWELVE.map(function (m) { return sv.attr[m]; }));
+      var pairs = 0, strong = 0, i, j;
+      for (i = 0; i < 12; i++) for (j = i + 1; j < 12; j++) {
+        pairs++;
+        if (Math.abs(R[i][j]) > 0.7) strong++;
+      }
+      var Pz = MV.pca(TWELVE.map(function (m) { return sv.attr[m]; }), { standardize: true });
+      return { pairs: pairs, strong: strong,
+        three: Pz.explained[0] + Pz.explained[1] + Pz.explained[2] };
+    }
+  };
+})();
+</script>
+</body>
+</html>

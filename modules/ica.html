@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ICA: whiten, then rotate | How PCA and ICA Actually Work</title>
+<meta name="description" content="What FastICA actually iterates on, why whitening has to come first, the order, sign and scale ambiguities that come back with the answer, what a component that fails to converge is telling you, and the two choices that change the result.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="independence.html">← Module 07</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 08 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>ICA: whiten, then rotate</h1>
+    <p class="sub">Module 07 searched one plane by hand and found a direction that showed the channel far better than anything principal component analysis returned. Doing that over a whole attribute space is independent component analysis. These steps run it on the same six attributes, compare what comes back against everything the set has measured so far, and go through the four things about the answer that are not determined by the data.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">The six independent components <span>&mdash; unordered, by construction</span></p>
+        <canvas id="cHead" aria-label="For each independent component, the channel separation it achieves and its negentropy, as paired bars"></canvas>
+      </div>
+      <div>
+        <p class="cap">The two choices that move the answer <span>&mdash; everything follows them</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>Contrast function</h2>
+            <div class="seg" id="segCon" role="group" aria-label="Contrast function">
+              <button type="button" data-con="logcosh">log cosh</button>
+              <button type="button" data-con="kurtosis">kurtosis</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">What the search maximizes. The first is the
+              robust general-purpose choice; the second is sharper on clean data and easier to upset.</p>
+          </div>
+          <div class="ctl-col">
+            <h2>Components kept before the search</h2>
+            <div class="ctl">
+              <label for="k">Retain the first <span class="val" id="kV">6</span></label>
+              <input type="range" data-key="k" id="k" min="2" max="6" step="1" value="6">
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">The whitening step can keep every direction or
+              only the strongest few. Step 5 is about what that costs.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Three moves</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · What it found</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · What is undetermined</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · When it stalls</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Two choices</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Standardize, whiten, then turn until it looks least Gaussian</h3>
+      <span class="hint">The six components as maps</span>
+    </div>
+
+    <p class="qbox"><b>Why this step is here.</b> ICA is usually described by the cocktail-party story
+      and then implemented by a fixed-point iteration nobody explains. The gap between the two is worth
+      closing, because the parts of the answer that are undetermined follow from what the iteration
+      actually does.</p>
+
+    <p class="lede">The whole method is three moves. <b>Standardize</b>, so that attributes in unlike
+      units are comparable, which is module 03's choice made deliberately. <b>Whiten</b>, so that every
+      direction carries the same variance and second-order statistics can no longer prefer one rotation
+      over another, which is module 07's step 2. <b>Rotate</b>, until each direction's projection is as
+      far from Gaussian as it can be made.</p>
+    <p class="lede">The rotation is where the work is. For each direction in turn, the algorithm applies
+      a fixed-point update that moves the current guess toward a nearby maximum of the contrast function,
+      makes it perpendicular to the directions already found, and repeats until it stops moving. One
+      direction at a time, each from what the previous ones left, which is the same deflation module 04
+      used for principal components — the only thing that changed is what is being maximized.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The independent components, drawn on the survey</h3>
+        <span class="hint">Both channel axes marked on each</span>
+      </div>
+      <canvas id="c1" aria-label="The independent component score maps with both channel axes marked"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Contrast function</h2>
+        <div class="seg" id="segCon1" role="group" aria-label="Contrast function">
+          <button type="button" data-con="logcosh">log cosh</button>
+          <button type="button" data-con="kurtosis">kurtosis</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+    <div class="legend prose">
+      <span>Compare these against the principal component maps in module 06. The same six attributes went
+        in, the same whitened space is being rotated, and what comes out is arranged completely
+        differently.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Set against everything measured so far</h3>
+      <span class="hint">One target, five ways of going after it</span>
+    </div>
+
+    <p class="lede">The younger channel has been the test target since module 01, and by now there are
+      several numbers to put beside each other. The best single input attribute, peak frequency, reaches
+      a separation of 5.97. The best principal component reaches 2.81. The best direction obtainable at
+      all, computed in module 06 with the channel positions in hand, reaches 8.97.</p>
+    <p class="lede">With the log cosh contrast and all six directions retained, the best independent
+      component reaches 6.47. That is more than twice what PCA managed, better than the best raw
+      attribute, and about seventy-two percent of the supervised ceiling — from a method that was never
+      shown where the channel is.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Channel separation, five ways</h3>
+        <span class="hint">Same measurement throughout the set</span>
+      </div>
+      <canvas id="c2" aria-label="Channel separation achieved by the best independent component, the best principal component, the best single attribute and the supervised ceiling"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Which channel system</h2>
+        <div class="seg" id="segTgt" role="group" aria-label="Which target">
+          <button type="button" data-tgt="young">Younger</button>
+          <button type="button" data-tgt="old">Older</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+    <div class="legend prose">
+      <span>The older channel is a harder target for every method on the list, because module 06 measured
+        its ceiling at 1.62 — these six attributes simply carry little about it. A method cannot recover
+        what the inputs do not contain, and comparing against the ceiling is how that gets said with a
+        number rather than an impression.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Order, sign and scale are not in the answer</h3>
+      <span class="hint">Three things the data does not fix</span>
+    </div>
+
+    <p class="lede"><b>Scale.</b> Every independent component here has a variance of exactly 1.0000,
+      because they are rotations of whitened data. There is no equivalent of an eigenvalue and no
+      component is larger than another. Whatever scale a package writes out is a convention it
+      chose.</p>
+    <p class="lede"><b>Order.</b> With no variance to rank by, the numbering is whatever order the
+      deflation happened to produce. On this run the component with the highest negentropy is the first
+      one, and it separates the younger channel at 0.25 — nearly nothing. The component that shows the
+      channel is the second, and no property the algorithm knows about would have put it at the top. In
+      the Taranaki study that introduced this workflow to seismic attributes, the components were sorted
+      by visual inspection for exactly this reason.</p>
+    <p class="lede"><b>Sign.</b> As with eigenvectors, reversing a direction satisfies everything the
+      method asked for, so the sign is a convention. This set fixes it by making the largest loading
+      positive.</p>
+    <p class="lede">The panel below re-runs the search from four different starting rotations and matches
+      each result against the run in the header. The directions come back, and they come back in a
+      different order.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Four different starts, matched against the reference run</h3>
+        <span class="hint">Which reference component each one landed on</span>
+      </div>
+      <canvas id="c3" aria-label="For each of four seeded starts, which reference component each returned direction corresponds to and how closely"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <label for="seed">Which start to show
+          <span class="val" id="seedV">1</span></label>
+        <input type="range" data-key="seed" id="seed" min="1" max="4" step="1" value="1">
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+    <div class="legend prose">
+      <span>A deterministic start does not make the ordering meaningful. It makes it repeatable, which is
+        a different and much weaker property: two runs of the same software on the same data agree, and
+        the number on a component still says nothing about how useful it is.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>A component that will not converge is telling you something</h3>
+      <span class="hint">Count the iterations</span>
+    </div>
+
+    <p class="lede">The fixed-point iteration stops when the direction stops moving. How long that takes
+      varies enormously between components, and on this run it varies from one iteration to three
+      hundred, which is the cap.</p>
+    <p class="lede">The components that converge fastest and the ones that never converge are both worth
+      looking at. A direction whose projection is strongly non-Gaussian has a sharp maximum to climb
+      toward and gets there quickly. A direction whose projection is close to Gaussian has nothing to
+      climb: module 07 established that a Gaussian is exactly the case where non-Gaussianity cannot
+      distinguish one rotation from another, so the update wanders and the iteration limit is what stops
+      it.</p>
+    <p class="lede">On this run, component 4 reached the three-hundred-iteration cap and has an excess
+      kurtosis of &minus;0.29 and a negentropy of 2.6&times;10⁻⁵ — nearly Gaussian, as predicted.
+      Component 6 converged in two iterations, has a negentropy of 1.8&times;10⁻⁶, and carries the
+      most acquisition footprint of any component at 0.322. Neither of those is a malfunction. Both are
+      the method reporting, in its own terms, that the direction it was handed has no structure in it to
+      find.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Iterations to convergence against how non-Gaussian the result is</h3>
+        <span class="hint">Fixed axes, both</span>
+      </div>
+      <canvas id="c4" aria-label="For each independent component, the number of iterations taken and the negentropy reached"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Contrast function</h2>
+        <div class="seg" id="segCon4" role="group" aria-label="Contrast function">
+          <button type="button" data-con="logcosh">log cosh</button>
+          <button type="button" data-con="kurtosis">kurtosis</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Two parameters, and what each is worth</h3>
+      <span class="hint">Move both and watch the target</span>
+    </div>
+
+    <p class="lede">Two things are chosen before an ICA run, and on this data they interact rather than
+      acting separately. The second one first: how many directions to retain in the whitening step before
+      searching. Keeping only two costs almost everything, whichever contrast is used — the best
+      component then reaches 2.72 with log cosh and 2.69 with kurtosis, no better than PCA managed. The
+      subspace the useful rotation lives in is simply not there to be searched.</p>
+    <p class="lede">Above three retained the two contrasts part company. Log cosh is steady, giving 6.33,
+      6.10, 6.18 and 6.47 at three, four, five and six. Kurtosis starts higher, at 6.60 with three
+      retained, which is the best single figure anywhere on this page, and then falls away: 5.91, 5.48
+      and 4.04. The more near-Gaussian directions are included in the space being searched, the worse it
+      does, which is the outlier sensitivity of a fourth power showing up as instability rather than as a
+      uniformly lower number.</p>
+    <p class="lede">So the robust contrast is not better everywhere; it is <em>less sensitive to the
+      other choice</em>. Log cosh varies by 0.38 across the retained counts from three up and kurtosis
+      varies by 2.56. Picking kurtosis and getting the retained count right beats everything; picking
+      kurtosis and getting it wrong is the worst outcome on the page. The common ninety-percent
+      retained-variance convention selects four here, which costs about six percent with log cosh and
+      about eleven percent with kurtosis against each one's own best.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The best component against both choices</h3>
+        <span class="hint">Same target, same measurement</span>
+      </div>
+      <canvas id="c5" aria-label="Best achievable channel separation as a function of how many components are retained before the search, for both contrast functions"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="k5">Retain the first <span class="val" id="k5V">6</span></label>
+        <input type="range" data-key="k" id="k5" min="2" max="6" step="1" value="6">
+      </div>
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Contrast function</h2>
+        <div class="seg" id="segCon5" role="group" aria-label="Contrast function">
+          <button type="button" data-con="logcosh">log cosh</button>
+          <button type="button" data-con="kurtosis">kurtosis</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>Retaining too few directions removes the subspace the useful rotation lives in, and no choice
+        of contrast recovers it afterward. The order of operations matters: the retained-variance
+        decision is made by a criterion that knows only about variance, and module 06 showed that
+        variance is not what the useful direction is large in.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">Where this shows up in real work</span>
+    </div>
+    <p class="lede">An ICA run asks for a handful of parameters and returns a set of volumes with no
+      ranking. Both halves of that are consequences of what the method is, and both change how the result
+      has to be handled.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>The components have to be inspected, not ranked.</b> There is no eigenvalue, the numbering
+        is arbitrary, and the published seismic workflow sorts by looking. Budget time for that.</li>
+      <li><b>Two runs will not agree on numbering.</b> Across software, across parameter changes, and
+        across a random start, IC2 in one run is not IC2 in another. Compare by pattern, not by
+        index.</li>
+      <li><b>A non-converging component is a result.</b> It usually means that direction is close to
+        Gaussian, which usually means noise or a spread-out artifact. Reading the iteration count is a
+        free diagnostic that most write-ups ignore.</li>
+      <li><b>The retained-variance choice is made before the search and constrains it.</b> Keeping too
+        few directions throws away the subspace the useful rotation is in, and the criterion doing the
+        keeping only knows about variance.</li>
+    </ul>
+    <p class="lede"><b>Two points that are commonly confused.</b> The first is that a fixed random seed
+      makes the result meaningful. It makes it repeatable; the ordering still carries no information. The
+      second is that ICA is a better version of PCA. It answers a different question, it costs an
+      iterative search that can fail to converge, and the case where it reliably wins is the case where
+      the inputs really are mixtures of a few non-Gaussian effects — which is an assumption about the
+      data, not a property of the method.</p>
+    <div class="legend prose">
+      <span>Everything measured here is one synthetic survey with two channel systems and a known
+        footprint. The comparison against a supervised ceiling is possible because the answer was built
+        in. On a real survey the equivalent check is a well, a core, or an interpretation somebody
+        trusts.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Put the result beside everything else the set has measured.</b>
+          <em class="point">Why: a method is worth its complexity only if it beats the simpler things,
+            and that is a number rather than an impression.</em>
+          With log cosh and six components retained, read the best independent component's separation on
+          the younger channel and compare it against the best principal component, the best single
+          attribute and the supervised ceiling.
+          <em class="predict">Before looking: PCA reached 2.81 and one raw attribute reached 5.97. Commit
+            to whether ICA will beat the raw attribute.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">The best independent component
+            reaches 6.47, against 2.81 for the best principal component, 5.97 for peak frequency on its
+            own, and a ceiling of 8.97. So it is 2.3 times better than PCA, it does beat the best single
+            attribute, and it recovers about 72% of what was available. The comparison to keep is the one
+            against the raw attribute rather than the one against PCA: any multi-attribute method that
+            cannot beat the best single input has not earned its place in the
+            workflow.</span></details></li>
+
+        <li><b>Find the useful component, then look at where it sits in the list.</b>
+          <em class="point">Why: the numbering on an ICA result carries no information, and this is the
+            cleanest demonstration of that.</em>
+          Read the separation and the negentropy of all six components in the header, and note which is
+          largest on each measure.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Component 1 has the highest
+            negentropy at 1.45&times;10⁻² and the highest excess kurtosis at 14.24, and it separates the
+            younger channel at 0.25 — essentially nothing. Component 2 separates it at 6.47 with a
+            negentropy of 1.06&times;10⁻², second on that measure. So even ranking the components by the
+            quantity the algorithm maximized would put the wrong one first. Nothing available to the
+            method identifies the useful component, which is why the published workflow sorts them by
+            inspection. What component 1 is showing instead is a fair question and not one the numbers
+            answer; it is sharply peaked, carries almost no footprint at 0.018, and would have to be
+            looked at against a geological interpretation to be named.</span></details></li>
+
+        <li><b>Restart the search from somewhere else.</b>
+          <em class="point">Why: this separates repeatability from meaning, which are easy to
+            conflate.</em>
+          In step 3, step through the four seeded starts and read which reference component each returned
+          direction matches.
+          <details class="reveal"><summary>Hint</summary><span class="ans">All four starts return the
+            same six directions, matched at correlations between 0.93 and 0.98, and all four return them
+            in the same permuted order relative to the deterministic run: the first found corresponds to
+            reference component 3, the second to reference 1, the third to reference 2, and so on. So the
+            set of directions is a property of the data and the order is a property of where the search
+            began. A deterministic start, which is what this set uses and what the AASPI implementation
+            uses, guarantees that re-running gives byte-identical weights — useful, and not the same as
+            the order meaning anything.</span></details></li>
+
+        <li><b>Read the iteration counts.</b>
+          <em class="point">Why: it is a free diagnostic that says which components have nothing in
+            them.</em>
+          In step 4, read how many iterations each component took and set it against its negentropy and
+          its footprint.
+          <details class="reveal"><summary>Hint</summary><span class="ans">With log cosh the counts are
+            11, 14, 15, the cap, 6 and 2. Component 4 hit the cap of 300 without converging; its excess
+            kurtosis is &minus;0.29 and its negentropy 2.6&times;10⁻⁵, which is nearly Gaussian, and
+            module 07 established that a Gaussian direction gives the search nothing to climb. Component
+            6 converged in two iterations, has a negentropy of 1.8&times;10⁻⁶, and carries the most
+            acquisition footprint of the six at 0.322. Both extremes point at the same thing: the
+            structure-free directions. The useful component, number 2, took 14 iterations, which is
+            unremarkable — convergence speed identifies what is empty, not what is
+            good.</span></details></li>
+
+        <li><b>Change each of the two parameters and price it.</b>
+          <em class="point">Why: these are the two dialogue-box settings an interpreter is asked for, and
+            the guidance offered with them is usually nothing.</em>
+          In step 5, switch the contrast function, then walk the retained-component count from 2 to 6.
+          <em class="predict">Before starting: log cosh is described everywhere as the robust choice.
+            Commit to whether that means it gives a better answer than kurtosis at every
+            setting.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">It does not. With all six
+            retained, log cosh gives 6.47 and kurtosis gives 4.04, so log cosh wins by a third. With
+            three retained, kurtosis gives 6.60 and log cosh gives 6.33, and kurtosis has the best figure
+            on the page. The full curves are 2.72, 6.33, 6.10, 6.18, 6.47 for log cosh and 2.69, 6.60,
+            5.91, 5.48, 4.04 for kurtosis, at two through six retained. Both fall off a cliff below
+            three, because the subspace holding the useful rotation is not in the search at all. Above
+            three, log cosh varies by 0.38 across the whole range and kurtosis by 2.56. That is what
+            robustness means here: not a better answer, but an answer that depends much less on the other
+            choice. Matching the two runs' directions against each other gives correlations from 0.86 to
+            0.99, so they mostly find the same things and differ on exactly where to put them. The
+            ninety-percent rule picks four, costing about six percent with log cosh and eleven percent
+            with kurtosis against each one's own best — and the criterion setting that number reads
+            variance, which module 06 showed is not what the useful direction is large
+            in.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>Standardize, whiten, rotate.</b> The first two are settled before the search starts; the
+          search itself is only a rotation, which is what whitening buys.</li>
+        <li><b>On this survey it worked.</b> The best independent component separates the channel at
+          6.47 against 2.81 for the best principal component and 5.97 for the best single attribute,
+          reaching 72% of the supervised ceiling.</li>
+        <li><b>There is no ranking.</b> Every component has variance exactly 1, and the component with
+          the highest negentropy here is not the one showing the channel.</li>
+        <li><b>Order and sign are conventions.</b> Four different starts return the same directions in a
+          different order. A fixed start buys repeatability, not meaning.</li>
+        <li><b>A component that will not converge is nearly Gaussian.</b> One hit the 300-iteration cap
+          here, and one converged in a single iteration carrying the footprint.</li>
+        <li><b>The two parameters interact.</b> Retaining two directions instead of six loses nearly
+          everything under either contrast. Above three, log cosh varies by 0.38 and kurtosis by 2.56 —
+          the robust contrast is the one that depends less on the other choice, not the one that always
+          wins.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>The implementation</b> is the deflationary FastICA of Hyvärinen and Oja (2000),
+      in <span class="k">assets/multivar.js</span>. The data are Z-scored, whitened by projecting onto
+      the eigenvectors and dividing each projection by the square root of its eigenvalue, and then one
+      direction at a time is driven by the fixed-point update toward a maximum of the contrast, made
+      orthogonal to the directions already found by Gram-Schmidt, and normalized. Convergence is declared
+      when the direction's overlap with its previous value is within 10⁻⁹ of one; the iteration cap is
+      300.</p>
+    <p class="lede"><b>The two contrasts.</b> Log cosh uses the hyperbolic tangent as its derivative and
+      is the robust general-purpose choice. The kurtosis contrast uses a cube, which is sharper on clean
+      data and gives a handful of extreme samples a great deal of influence. Both are checked in
+      <span class="k">verify-multivar.js</span> against a mixture of two sources with a known mixing
+      matrix, where both recover the sources at correlations above 0.99.</p>
+    <p class="lede"><b>The starting rotation.</b> By default this set starts from the identity rotation,
+      taken one direction at a time with a small deterministic nudge off the axis so a perfectly
+      symmetric start cannot stall. That makes re-runs byte-identical, which
+      <span class="k">verify-multivar.js</span> checks. AASPI's implementation seeds from a decorrelated
+      version of the covariance matrix for the same reason. Step 3 uses seeded pseudo-random starts
+      instead, to show what is and is not determined by the data.</p>
+    <p class="lede"><b>Comparability of the numbers.</b> The separation statistic, the footprint
+      statistic and the target masks are identical to modules 05, 06 and 07, so every figure on this page
+      can be set directly beside the ones there. The supervised ceiling of 8.97 for the younger channel
+      and 1.62 for the older one comes from module 06 and is described in its Method tab.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> The search runs on every one of the 5184
+      traces; production implementations decimate to build a smaller training set, compute the unmixing
+      matrix on that, and apply it to the full volume, which introduces a sampling difference this page
+      does not show. Only the deflationary form is implemented, where directions are found one at a time;
+      the symmetric form estimates them all at once and does not privilege the order of extraction.
+      The linear mixing assumption — that every attribute is a fixed weighted sum of a few underlying
+      effects, with the same weights everywhere in the survey — is a strong one, and where two effects
+      combine differently in different parts of a survey no single unmixing matrix describes it.</p>
+    <p class="lede"><b>Where this departs from production software.</b> The algorithm is standard and the
+      arithmetic is the same. Implementations differ in the contrast offered, in whether the symmetric or
+      deflationary form is used, in the convergence tolerance and cap, in whether they decimate, in the
+      sign convention, and in whether the iteration count is reported at all. The last of those is worth
+      asking for: step 4 shows it is diagnostic and it is usually buried in a log file.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Hyvärinen, A., and E. Oja, 2000, Independent component analysis: algorithms and applications:
+          <em>Neural Networks</em>, <b>13</b>, 411&ndash;430.</li>
+        <li>Hyvärinen, A., 1999, Fast and robust fixed-point algorithms for independent component
+          analysis: <em>IEEE Transactions on Neural Networks</em>, <b>10</b>, 626&ndash;634.</li>
+        <li>Comon, P., 1994, Independent component analysis, a new concept?: <em>Signal Processing</em>,
+          <b>36</b>, 287&ndash;314.</li>
+        <li>Lubo-Robles, D., and K. J. Marfurt, 2019, Independent component analysis for reservoir
+          geomorphology and unsupervised seismic facies classification in the Taranaki Basin, New
+          Zealand: <em>Interpretation</em>, <b>7</b>, SE19&ndash;SE42.</li>
+        <li>Honório, B. C. Z., A. C. Sanchetta, E. P. Leite, and A. C. Vidal, 2014, Independent component
+          spectral analysis: <em>Interpretation</em>, <b>2</b>, SA21&ndash;SA29.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>09 · The two, side by side</h3>
+    <p>One dataset, one set of sliders, both methods live — including the case where PCA appears to work
+      perfectly well, and what about the data made it appear to.</p>
+    <a class="btn ghost" href="sidebyside.html">Module 09 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="independence.html">← Module 07: independence is not decorrelation</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="sidebyside.html">Module 09: the two, side by side →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license. If you use it in a course or a talk, a credit line
+        and a link back are all that is asked.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened, so that the university can see these are being used &mdash; no cookie, no
+        account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js. It ' +
+      'expects them one directory up, at ../assets/, and file names are case-sensitive on GitHub Pages.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+  var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
+
+  /* The ceilings measured in module 06, quoted rather than recomputed. */
+  var CEILING = { young: 8.973, old: 1.615 };
+
+  var DEF = { con: 'logcosh', k: 6, tgt: 'young', seed: 1, tab: 'p1' };
+  var S = MV.readState(DEF);
+  if (S.con !== 'logcosh' && S.con !== 'kurtosis') S.con = 'logcosh';
+  S.k = Math.max(2, Math.min(6, Math.round(S.k)));
+  if (S.tgt !== 'young' && S.tgt !== 'old') S.tgt = 'young';
+  S.seed = Math.max(1, Math.min(4, Math.round(S.seed)));
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  var SURVEY = null;
+  function survey() {
+    if (SURVEY) return SURVEY;
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var attr = AF.attributes(slab, CORE);
+    var X = CORE.map(function (n) { return attr[n]; });
+    SURVEY = { slab: slab, X: X, P: MV.pca(X, { standardize: true }) };
+    return SURVEY;
+  }
+
+  /* An ICA run is a few hundred thousand operations; cached by every setting
+     that changes the answer, so the sliders stay responsive. */
+  var ICACHE = {};
+  function run(contrast, k, seed) {
+    var key = contrast + '|' + k + '|' + (seed || 0);
+    if (ICACHE[key]) return ICACHE[key];
+    var opt = { contrast: contrast, standardize: true, k: k };
+    if (seed) opt.seed = seed * 7919;
+    ICACHE[key] = MV.fastICA(survey().X, k, opt);
+    return ICACHE[key];
+  }
+  function current() { return run(S.con, S.k, 0); }
+
+  /* Targets and statistics, identical to modules 05 to 07. */
+  var MASKS = {};
+  function masksFor(which) {
+    if (MASKS[which]) return MASKS[which];
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny;
+    var spec = which === 'young' ? AF.YOUNG : AF.OLD;
+    var axis = [], marg = [], ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      var yc = AF.centerline(ix, nx, spec) * (ny - 1);
+      var d = Math.abs(iy - yc) / (spec.halfWidth * (ny - 1));
+      var k = ix * ny + iy;
+      if (d < 0.45) axis.push(k); else if (d > 1.1 && d < 2.0) marg.push(k);
+    }
+    MASKS[which] = { axis: axis, marg: marg };
+    return MASKS[which];
+  }
+  function sep(m, which) {
+    var M = masksFor(which || S.tgt);
+    var a = M.axis.map(function (k) { return m[k]; });
+    var b = M.marg.map(function (k) { return m[k]; });
+    var ma = MV.mean(a), mb = MV.mean(b);
+    var sa = MV.std(a, ma), sb = MV.std(b, mb);
+    return (ma - mb) / Math.sqrt((sa * sa + sb * sb) / 2 || 1);
+  }
+  function foot(m) {
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny, s = 0, n = 0, ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      s += m[ix * ny + iy] * Math.cos(2 * Math.PI * ix / 6) * Math.cos(2 * Math.PI * iy / 6);
+      n++;
+    }
+    return Math.abs(s / n) / (MV.std(m) || 1);
+  }
+  function absCorr(a, b) {
+    var ma = MV.mean(a), mb = MV.mean(b);
+    var sa = MV.std(a, ma) || 1, sb = MV.std(b, mb) || 1, s = 0;
+    for (var i = 0; i < a.length; i++) s += (a[i] - ma) * (b[i] - mb);
+    return Math.abs(s / a.length / (sa * sb));
+  }
+  function bestOf(list, which) {
+    var b = 0;
+    for (var i = 0; i < list.length; i++) {
+      if (Math.abs(sep(list[i], which)) > Math.abs(sep(list[b], which))) b = i;
+    }
+    return { index: b, value: Math.abs(sep(list[b], which)) };
+  }
+
+  /* =====================================================================
+     DRAWING HELPERS
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+
+  function grid(ctx, r, y0, y1, nx, ny, yfmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.strokeStyle = '#E4E7EA';
+    ctx.lineWidth = 1;
+    var i, X, Y, v;
+    for (i = 0; i <= nx; i++) {
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      if (yfmt !== false) ctx.fillText(yfmt ? yfmt(v) : v.toFixed(v === Math.round(v) ? 0 : 1),
+        r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var stops = [[26, 47, 63], [61, 109, 125], [166, 196, 198], [244, 240, 227],
+                 [214, 156, 110], [166, 71, 52], [102, 20, 24]];
+    var u = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(u)), f = u - i;
+    var a = stops[i], b = stops[i + 1];
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * f) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * f) + ',' +
+      Math.round(a[2] + (b[2] - a[2]) * f) + ')';
+  }
+
+  function drawMap(ctx, r, m, title) {
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny;
+    var q = Math.max(Math.abs(AF.percentile(m, 0.01)), Math.abs(AF.percentile(m, 0.99))) || 1;
+    var cw = r.w / nx, ch = r.h / ny, ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      ctx.fillStyle = cmap((m[ix * ny + iy] + q) / (2 * q));
+      ctx.fillRect(r.x + ix * cw, r.y + (ny - 1 - iy) * ch, cw + 0.6, ch + 0.6);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    if (title) {
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 5);
+      ctx.font = '11px ui-monospace,Menlo,monospace';
+    }
+    ctx.restore();
+  }
+
+  function markChannels(ctx, r) {
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny;
+    ctx.save();
+    ctx.lineWidth = 1.1;
+    [[AF.YOUNG, 'rgba(255,255,255,0.9)', []], [AF.OLD, 'rgba(255,255,255,0.7)', [4, 3]]]
+      .forEach(function (p) {
+        ctx.strokeStyle = p[1];
+        ctx.setLineDash(p[2]);
+        ctx.beginPath();
+        for (var ix = 0; ix < nx; ix++) {
+          var yc = AF.centerline(ix, nx, p[0]) * (ny - 1);
+          var X = r.x + (ix + 0.5) * r.w / nx;
+          var Y = r.y + r.h - (yc + 0.5) * r.h / ny;
+          if (ix === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+        }
+        ctx.stroke();
+      });
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     HEADER
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 236;
+    var ctx = fit('cHead', w, h);
+    if (!ctx) return;
+    var R = current(), n = R.S.length;
+    var r = { x: 56, y: 14, w: w - 56 - 60, h: h - 14 - 58 };
+    grid(ctx, r, 0, 8, n, 4);
+    var cw = r.w / n, i;
+    for (i = 0; i < n; i++) {
+      var cx = r.x + (i + 0.5) * cw;
+      var sv2 = Math.abs(sep(R.S[i]));
+      var y = r.y + r.h - Math.min(8, sv2) / 8 * r.h;
+      ctx.save();
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = CRIM;
+      ctx.fillRect(cx - cw * 0.30, y, cw * 0.26, r.y + r.h - y);
+      ctx.restore();
+      // negentropy on its own fixed scale, drawn as the second bar
+      var ng = MV.negentropy(R.S[i]);
+      var y2 = r.y + r.h - Math.min(0.016, ng) / 0.016 * r.h;
+      ctx.save();
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = TEAL;
+      ctx.fillRect(cx + cw * 0.04, y2, cw * 0.26, r.y + r.h - y2);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('IC' + (i + 1), cx, r.y + r.h + 16);
+      ctx.fillText(sv2.toFixed(2), cx, r.y + r.h + 30);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = CRIM;
+    ctx.fillText('channel separation (left bars)', r.x + 8, r.y + 14);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('negentropy (right bars, \u00d710\u207b\u00b3)', r.x + 8, r.y + 30);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = TEAL;
+    [0, 4, 8, 12, 16].forEach(function (v) {
+      ctx.fillText(String(v), r.x + r.w + 8, r.y + r.h - (v / 16) * r.h + 4);
+    });
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     STEP PANELS
+     ===================================================================== */
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var R = current(), n = R.S.length;
+    var cols = Math.min(n, 3);
+    var rows = Math.ceil(n / cols);
+    var size = Math.min(200, (w - 60) / cols);
+    var ctx = fit('c1', w, rows * (size + 30) + 8);
+    if (!ctx) return;
+    var gap = Math.max(12, (w - 16 - cols * size) / cols);
+    for (var i = 0; i < n; i++) {
+      var cx = i % cols, cy = Math.floor(i / cols);
+      var r = { x: 8 + cx * (size + gap), y: 20 + cy * (size + 30), w: size, h: size };
+      drawMap(ctx, r, R.S[i], 'IC' + (i + 1) + '   separation ' +
+        Math.abs(sep(R.S[i])).toFixed(2));
+      markChannels(ctx, r);
+    }
+  }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 280;
+    var ctx = fit('c2', w, h);
+    if (!ctx) return;
+    var sv = survey(), R = current();
+    var bars = [
+      ['best IC', bestOf(R.S).value, CRIM],
+      ['best PC', bestOf(sv.P.scores).value, SLATE],
+      ['best single attribute', bestOf(sv.X).value, SLATE],
+      ['ceiling', CEILING[S.tgt], TEAL]
+    ];
+    var r = { x: 56, y: 14, w: w - 56 - 24, h: h - 14 - 62 };
+    grid(ctx, r, 0, 10, 4, 5);
+    var cw = r.w / 4;
+    bars.forEach(function (b, i) {
+      var cx = r.x + (i + 0.5) * cw;
+      var y = r.y + r.h - Math.min(10, b[1]) / 10 * r.h;
+      ctx.save();
+      ctx.globalAlpha = 0.88;
+      ctx.fillStyle = b[2];
+      ctx.fillRect(cx - cw * 0.26, y, cw * 0.52, r.y + r.h - y);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'center';
+      ctx.font = '600 11px ui-monospace,Menlo,monospace';
+      ctx.fillText(b[1].toFixed(2), cx, y - 7);
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillStyle = SLATE;
+      ctx.fillText(b[0], cx, r.y + r.h + 18);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.strokeStyle = TEAL;
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash([6, 4]);
+    var yc = r.y + r.h - Math.min(10, CEILING[S.tgt]) / 10 * r.h;
+    ctx.beginPath(); ctx.moveTo(r.x, yc); ctx.lineTo(r.x + r.w, yc); ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left';
+    ctx.fillText('separation of the ' + (S.tgt === 'young' ? 'younger' : 'older') +
+      ' channel axis from its margins, pooled sd', r.x + 6, r.y + 14);
+    ctx.restore();
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 290;
+    var ctx = fit('c3', w, h);
+    if (!ctx) return;
+    var ref = current(), n = ref.S.length;
+    var r = { x: 56, y: 22, w: w - 56 - 24, h: h - 22 - 62 };
+    var cw = r.w / n, rowH = r.h / 4;
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+    for (var sd = 1; sd <= 4; sd++) {
+      var alt = run(S.con, S.k, sd);
+      for (var i = 0; i < n; i++) {
+        var best = 0, bv = 0;
+        for (var j = 0; j < n; j++) {
+          var c = absCorr(alt.S[i], ref.S[j]);
+          if (c > bv) { bv = c; best = j; }
+        }
+        var x = r.x + i * cw, y = r.y + (sd - 1) * rowH;
+        ctx.save();
+        ctx.globalAlpha = (sd === S.seed) ? 0.95 : 0.35;
+        ctx.fillStyle = (best === i) ? SLATE : CRIM;
+        ctx.fillRect(x + 2, y + 2, cw - 4, rowH - 4);
+        ctx.restore();
+        ctx.save();
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.font = '600 10px ui-monospace,Menlo,monospace';
+        ctx.fillText('\u2192 IC' + (best + 1), x + cw / 2, y + rowH / 2 - 1);
+        ctx.font = '9px ui-monospace,Menlo,monospace';
+        ctx.fillText('|r| ' + bv.toFixed(2), x + cw / 2, y + rowH / 2 + 12);
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'right';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('start ' + sd, r.x - 8, r.y + (sd - 1) * rowH + rowH / 2 + 4);
+      ctx.restore();
+    }
+    for (i = 0; i < n; i++) {
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('found ' + (i + 1) + 'st', r.x + (i + 0.5) * cw, r.y - 8);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left';
+    ctx.fillText('grey: landed in the same slot as the reference run. ' +
+      'crimson: a different slot.', r.x, r.y + r.h + 22);
+    ctx.restore();
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 310;
+    var ctx = fit('c4', w, h);
+    if (!ctx) return;
+    var R = current(), n = R.S.length;
+    var rw = w - 62 - 24, rh = 106;
+    var rA = { x: 62, y: 14, w: rw, h: rh };
+    var rB = { x: 62, y: 14 + rh + 40, w: rw, h: rh };
+    grid(ctx, rA, 0, 300, n, 3);
+    grid(ctx, rB, 0, 0.016, n, 4, function (v) { return (v * 1000).toFixed(0); });
+    var cw = rA.w / n, i;
+    for (i = 0; i < n; i++) {
+      var cx = rA.x + (i + 0.5) * cw;
+      var stalled = R.iters[i] >= 300;
+      var it = stalled ? 300 : R.iters[i] + 1;
+      var y = rA.y + rA.h - Math.min(300, it) / 300 * rA.h;
+      ctx.save();
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = stalled ? CRIM : SLATE;
+      ctx.fillRect(cx - cw * 0.26, y, cw * 0.52, rA.y + rA.h - y);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(stalled ? 'cap' : String(it), cx, y - 6);
+      ctx.restore();
+
+      var ng = MV.negentropy(R.S[i]);
+      var y2 = rB.y + rB.h - Math.min(0.016, ng) / 0.016 * rB.h;
+      ctx.save();
+      ctx.globalAlpha = 0.9;
+      ctx.fillStyle = TEAL;
+      ctx.fillRect(cx - cw * 0.26, y2, cw * 0.52, rB.y + rB.h - y2);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('IC' + (i + 1), cx, rB.y + rB.h + 18);
+      ctx.fillText('fp ' + foot(R.S[i]).toFixed(2), cx, rB.y + rB.h + 32);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = INK;
+    ctx.fillText('iterations to convergence (crimson: hit the 300 cap)', rA.x + 8, rA.y + 16);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('negentropy, \u00d710\u207b\u00b3', rB.x + 8, rB.y + 16);
+    ctx.restore();
+  }
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 290;
+    var ctx = fit('c5', w, h);
+    if (!ctx) return;
+    var r = { x: 56, y: 14, w: w - 56 - 24, h: h - 14 - 62 };
+    grid(ctx, r, 0, 8, 4, 4);
+    var cw = r.w / 5, kk;
+    ['logcosh', 'kurtosis'].forEach(function (con, ci) {
+      ctx.save();
+      ctx.strokeStyle = ci === 0 ? CRIM : TEAL;
+      ctx.lineWidth = (con === S.con) ? 2.6 : 1.4;
+      ctx.globalAlpha = (con === S.con) ? 1 : 0.5;
+      ctx.beginPath();
+      for (kk = 2; kk <= 6; kk++) {
+        var v = bestOf(run(con, kk, 0).S).value;
+        var X = r.x + (kk - 2 + 0.5) * cw;
+        var Y = r.y + r.h - Math.min(8, v) / 8 * r.h;
+        if (kk === 2) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      }
+      ctx.stroke();
+      for (kk = 2; kk <= 6; kk++) {
+        var v2 = bestOf(run(con, kk, 0).S).value;
+        var X2 = r.x + (kk - 2 + 0.5) * cw;
+        var Y2 = r.y + r.h - Math.min(8, v2) / 8 * r.h;
+        ctx.beginPath();
+        ctx.arc(X2, Y2, (con === S.con && kk === S.k) ? 6 : 3.5, 0, 2 * Math.PI);
+        ctx.fillStyle = ci === 0 ? CRIM : TEAL;
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+    // reference lines: the best PC and the ceiling
+    var sv = survey();
+    [[bestOf(sv.P.scores).value, SLATE, 'best principal component'],
+     [CEILING[S.tgt], INK, 'supervised ceiling']].forEach(function (q) {
+      var Y = r.y + r.h - Math.min(8, q[0]) / 8 * r.h;
+      ctx.save();
+      ctx.strokeStyle = q[1];
+      ctx.lineWidth = 1.3;
+      ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = q[1];
+      ctx.textAlign = 'right';
+      ctx.fillText(q[2], r.x + r.w - 6, Y - 6);
+      ctx.restore();
+    });
+    for (kk = 2; kk <= 6; kk++) {
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(String(kk), r.x + (kk - 2 + 0.5) * cw, r.y + r.h + 18);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText('components retained before the search', r.x + r.w / 2, r.y + r.h + 36);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = CRIM;
+    ctx.fillText('log cosh', r.x + 8, r.y + 16);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('kurtosis', r.x + 80, r.y + 16);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function drawStats() {
+    var sv = survey(), R = current();
+    var b = bestOf(R.S);
+    if ($('s1')) {
+      $('s1').innerHTML =
+        stat('Contrast', S.con === 'logcosh' ? 'log cosh' : 'kurtosis', 'what the search maximizes') +
+        stat('Components', String(R.S.length), 'retained and returned') +
+        stat('Best for the channel', 'IC' + (b.index + 1), b.value.toFixed(3) + ' separation') +
+        stat('Variance of each', MV.variance(R.S[0]).toFixed(4), 'the same for all of them');
+    }
+    if ($('s2')) {
+      $('s2').innerHTML =
+        stat('Best independent component', b.value.toFixed(3), 'IC' + (b.index + 1)) +
+        stat('Best principal component', bestOf(sv.P.scores).value.toFixed(3), 'from module 06') +
+        stat('Best single attribute', bestOf(sv.X).value.toFixed(3),
+          CORE[bestOf(sv.X).index]) +
+        stat('Fraction of the ceiling', (100 * b.value / CEILING[S.tgt]).toFixed(0) + '%',
+          'ceiling ' + CEILING[S.tgt].toFixed(2));
+    }
+    if ($('s3')) {
+      var alt = run(S.con, S.k, S.seed), n = R.S.length, moved = 0, worst = 1, i, j;
+      for (i = 0; i < n; i++) {
+        var best = 0, bv = 0;
+        for (j = 0; j < n; j++) {
+          var c = absCorr(alt.S[i], R.S[j]);
+          if (c > bv) { bv = c; best = j; }
+        }
+        if (best !== i) moved++;
+        worst = Math.min(worst, bv);
+      }
+      $('s3').innerHTML =
+        stat('Start', String(S.seed), 'a different initial rotation') +
+        stat('Components in a new slot', moved + ' of ' + n, 'the order is not determined') +
+        stat('Weakest match', worst.toFixed(3), 'the directions themselves came back') +
+        stat('Variance of each', MV.variance(alt.S[0]).toFixed(4), 'no ranking available');
+    }
+    if ($('s4')) {
+      var slow = 0, fast = 0, i2;
+      for (i2 = 0; i2 < R.iters.length; i2++) {
+        if (R.iters[i2] >= 300) slow++;
+        if (R.iters[i2] + 1 <= 2) fast++;
+      }
+      var stalledIdx = -1;
+      for (i2 = 0; i2 < R.iters.length; i2++) if (R.iters[i2] >= 300) { stalledIdx = i2; break; }
+      $('s4').innerHTML =
+        stat('Hit the cap', String(slow), slow ? 'IC' + (stalledIdx + 1) + ', nearly Gaussian' : 'none') +
+        stat('Converged at once', String(fast), 'nothing to climb toward') +
+        stat('The useful one', 'IC' + (b.index + 1),
+          (R.iters[b.index] >= 300 ? 'did not converge' : (R.iters[b.index] + 1) + ' iterations')) +
+        stat('Most footprint', (function () {
+          var f = 0, i3;
+          for (i3 = 0; i3 < R.S.length; i3++) if (foot(R.S[i3]) > foot(R.S[f])) f = i3;
+          return 'IC' + (f + 1) + ' at ' + foot(R.S[f]).toFixed(3);
+        })(), 'and near-Gaussian with it');
+    }
+    if ($('s5')) {
+      var other = S.con === 'logcosh' ? 'kurtosis' : 'logcosh';
+      $('s5').innerHTML =
+        stat('This setting', b.value.toFixed(3),
+          (S.con === 'logcosh' ? 'log cosh' : 'kurtosis') + ', ' + S.k + ' retained') +
+        stat('Other contrast', bestOf(run(other, S.k, 0).S).value.toFixed(3),
+          other === 'logcosh' ? 'log cosh' : 'kurtosis') +
+        stat('Retaining two', bestOf(run(S.con, 2, 0).S).value.toFixed(3), 'the cliff') +
+        stat('Retaining all six', bestOf(run(S.con, 6, 0).S).value.toFixed(3), 'the most available');
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+
+  function syncLabels() {
+    ['k', 'k5'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.k;
+      var v = $(id + 'V'); if (v) v.textContent = String(S.k);
+    });
+    if ($('seed')) $('seed').value = S.seed;
+    if ($('seedV')) $('seedV').textContent = String(S.seed);
+    document.querySelectorAll('#segCon button, #segCon1 button, #segCon4 button, #segCon5 button')
+      .forEach(function (b) {
+        var on = b.dataset.con === S.con;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on);
+      });
+    document.querySelectorAll('#segTgt button').forEach(function (b) {
+      var on = b.dataset.tgt === S.tgt;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !/^p[1-5]$/.test(id);
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('#segCon button, #segCon1 button, #segCon4 button, #segCon5 button')
+    .forEach(function (b) {
+      b.addEventListener('click', function () {
+        S.con = b.dataset.con; syncLabels(); drawAll(); saveState();
+      });
+    });
+  document.querySelectorAll('#segTgt button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.tgt = b.dataset.tgt; syncLabels(); drawAll(); saveState();
+    });
+  });
+
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t || t.tagName !== 'INPUT') return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    S[key] = parseFloat(t.value);
+    syncLabels(); drawAll(); saveState();
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawAll, 140);
+  });
+
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M08 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    components: function (contrast, k) {
+      var R = run(contrast || S.con, k || S.k, 0);
+      return R.S.map(function (s, i) {
+        return {
+          ic: i + 1, young: sep(s, 'young'), old: sep(s, 'old'),
+          kurt: MV.kurtosis(s), neg: MV.negentropy(s),
+          variance: MV.variance(s), foot: foot(s),
+          iters: R.iters[i] >= 300 ? 300 : R.iters[i] + 1,
+          converged: R.iters[i] < 300
+        };
+      });
+    },
+    comparison: function () {
+      var sv = survey(), R = current();
+      return {
+        bestIC: bestOf(R.S), bestPC: bestOf(sv.P.scores), bestAttr: bestOf(sv.X),
+        ceiling: CEILING[S.tgt], target: S.tgt
+      };
+    },
+    starts: function () {
+      var ref = current(), n = ref.S.length, out = [], sd, i, j;
+      for (sd = 1; sd <= 4; sd++) {
+        var alt = run(S.con, S.k, sd), row = [];
+        for (i = 0; i < n; i++) {
+          var best = 0, bv = 0;
+          for (j = 0; j < n; j++) {
+            var c = absCorr(alt.S[i], ref.S[j]);
+            if (c > bv) { bv = c; best = j; }
+          }
+          row.push({ found: i + 1, matches: best + 1, r: bv });
+        }
+        out.push({ seed: sd, row: row });
+      }
+      return out;
+    },
+    curve: function () {
+      var out = [];
+      ['logcosh', 'kurtosis'].forEach(function (con) {
+        for (var k = 2; k <= 6; k++) {
+          out.push({ contrast: con, k: k, best: bestOf(run(con, k, 0).S).value });
+        }
+      });
+      return out;
+    },
+    contrastAgreement: function () {
+      var la = run('logcosh', 6, 0), ku = run('kurtosis', 6, 0), out = [], i, j;
+      for (i = 0; i < la.S.length; i++) {
+        var best = 0, bv = 0;
+        for (j = 0; j < ku.S.length; j++) {
+          var c = absCorr(la.S[i], ku.S[j]);
+          if (c > bv) { bv = c; best = j; }
+        }
+        out.push({ logcosh: i + 1, kurtosis: best + 1, r: bv });
+      }
+      return out;
+    }
+  };
+})();
+</script>
+</body>
+</html>

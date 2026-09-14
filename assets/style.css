@@ -880,3 +880,13 @@ details.reveal .ans { display: block; margin-top: 9px; }
   color: var(--crimson); margin-top: 10px;
 }
 .terms dd { margin: 2px 0 0; font-size: 14px; color: var(--ink-soft); max-width: 88ch; }
+
+
+/* ---------------------------------------------------------------------------
+   Cards for modules that are not built yet. The grid styles every .card as a
+   link; these are not links, so they are stood down visually rather than left
+   looking like a link that does not work.
+   --------------------------------------------------------------------------- */
+.card.is-soon { opacity: .55; cursor: default; }
+.card.is-soon:hover { transform: none; box-shadow: none; }
+.card.is-soon h3 { color: var(--slate, #5C6670); }

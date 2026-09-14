@@ -13,7 +13,13 @@ opening a paper on the subject meets *feature*, *sample*, *dimension*,
 *loading*, *score*, *whitening*, *latent variable* and *explained variance* in
 the first two pages, and none of them are defined there.
 
-These modules build both methods from a crossplot upward. The first four name
+These modules start with a teapot. Look at one from the front and the spout
+points at you; from the side the handle folds against the body; from above it
+is a circle. The view that shows the most is none of those — it is a mixture of
+all three directions at once. That is dimension reduction, and module 00 does
+nothing but that, with no seismic data in it for the first three steps.
+
+From there they build both methods from a crossplot upward. The first four name
 no method at all; they establish the picture and the words. The eigenvector
 arithmetic arrives only after the thing it computes has already been found by
 hand, by dragging a line through a cloud of points and writing down numbers.
@@ -27,7 +33,7 @@ textbook version of the same figure — and in two places, it does.
 
 | | | |
 |---|---|---|
-| 00 | Too many measurements | sample, feature, dimension, feature space |
+| 00 | Looking at it from the right direction | a teapot, and why the good view is a mixture of axes |
 | 01 | A direction through a cloud | projection and variance, found by hand |
 | 02 | Spread, and the shape of the cloud | covariance, correlation, redundancy |
 | 03 | Units, and why they decide the answer | standardization |

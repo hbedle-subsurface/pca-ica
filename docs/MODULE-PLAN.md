@@ -10,10 +10,43 @@ written here before any of it is built.
 
 ## Fundamentals — no method named
 
-**00 · Too many measurements.** *Twenty volumes and three color channels. Now
-what?* A channel system through a dozen attributes, several visibly redundant.
-Interactive: add features one at a time, watch the correlation matrix fill in.
-Introduces sample, feature, dimension, feature space.
+**00 · Looking at it from the right direction.** *You know what a teapot looks
+like. What happens when you do not?* **Built**, and rebuilt around Heather's
+teapot intuition rather than the original "too many measurements" framing.
+
+The spine of the module: a view IS a projection, and the view that shows the
+most of a teapot is a mixture of all three axes rather than any one of them.
+Three axis views give spreads of 0.4540 (front), 0.5730 (side) and 0.6178
+(top); the widest available is 0.6659, at azimuth -61.2 and elevation -32.5.
+Its two picture axes are 0.840x + 0.533y - 0.097z across and 0.359x - 0.412y +
+0.837z up — every one of the six weights non-zero. The two kept directions hold
+81.0% and the discarded one 19.0%.
+
+CRITICAL BUILD DETAIL. The teapot is rotated by a fixed 34/27/19 degrees before
+anything is measured. Without the tilt the spout and handle lie in a coordinate
+plane, that plane IS the plane of greatest spread, and the best view comes out
+as exactly the side view — which would teach that the answer is an axis after
+all. An attribute space is an arbitrary coordinate system in the same way, so
+the oblique orientation is the honest case. This was caught by measuring before
+writing: the first build returned azimuth -90, elevation 0.
+
+Step 4 repeats the identical arithmetic on three amplitude attributes (RMS,
+peak envelope, peak absolute amplitude) as a cloud of 5184 points in three
+dimensions: the widest view holds 93.89% against 76.9%, 54.4% and 68.7% for the
+axis views, with PC1 = 0.393 RMS + 0.735 envelope + 0.553 peak — a mixture
+again. Step 5 makes the leap explicit: twelve attributes, 66 pairs, 5 above
+|r| = 0.7, best three holding 74.28%, and 180^11 = 6.4e24 directions to sweep.
+Three things stop working (turning by hand, recognizing a good view, getting
+away with two) and one keeps working (all the arithmetic).
+
+The honest caveat is in Why it matters: a teapot's best view is obviously its
+best view because you know what a teapot is, and that coincidence does not
+survive the move to attributes. Modules 05 and 06 are where that bill comes
+due.
+
+assets/shape3d.js builds the teapot from equations — surfaces of revolution for
+the body and lid, swept tubes for the spout and handle — so nothing is a stored
+model.
 
 **01 · A direction through a cloud.** *What is the best single number to
 replace two attributes with?* Crossplot, a rotating line, the projected
@@ -204,7 +237,39 @@ Note: three sets of quoted numbers had to be corrected against the running page
 source sums use a different random stream than the scratch measurement did.
 
 **08 · ICA: whiten, then rotate.** *Why did my components come back in a
-different order?* The search, and the order, sign and scale ambiguities.
+different order?* The three moves, the result against every earlier
+measurement, the ambiguities, convergence as a diagnostic, and the two
+parameters. **Built.**
+
+The result: with log cosh and six directions retained, IC2 separates the
+younger channel at 6.473, against 2.812 for the best principal component, 5.972
+for peak frequency alone, and the supervised ceiling of 8.973 — 72% of what was
+available, from a method never shown the channel. On the older channel, 1.351
+against a ceiling of 1.615.
+
+Order is genuinely undetermined and the module demonstrates it hard. IC1 has
+the HIGHEST negentropy (1.45e-2) and kurtosis (14.24) of the six and separates
+the channel at 0.246 — so even ranking by the quantity the algorithm maximizes
+puts the wrong component first. Four seeded starts all return the same six
+directions (|r| 0.93 to 0.98) in the same permuted order relative to the
+deterministic run. Every component has variance exactly 1.0000; there is no
+ranking to be had.
+
+Convergence as a diagnostic: with log cosh the iteration counts are 11, 14, 15,
+the 300 cap, 6 and 2. IC4 hit the cap and is nearly Gaussian (kurtosis -0.29,
+negentropy 2.6e-5) — exactly module 07's prediction that a Gaussian direction
+gives the search nothing to climb. IC6 converged in 2 and carries the most
+footprint of the six at 0.322. The useful component took 14, which is
+unremarkable: convergence speed identifies what is empty, not what is good.
+
+CORRECTION DURING THE BUILD, and the more interesting lesson. The draft claimed
+log cosh is simply the better contrast. It is not. Measured across retained
+counts 2 to 6: log cosh gives 2.72, 6.33, 6.10, 6.18, 6.47; kurtosis gives
+2.69, 6.60, 5.91, 5.48, 4.04. At three retained, kurtosis produces the best
+figure anywhere in the module. Both fall off a cliff below three. Above three,
+log cosh varies by 0.38 and kurtosis by 2.56. Robustness here means insensitivity
+to the OTHER parameter, not a uniformly better number, and the module now says
+that. The iteration readout also had to be fixed: it displayed the cap as 301.
 
 **09 · The two, side by side.** *Which should I run?* One dataset, one set of
 sliders, both methods live.
