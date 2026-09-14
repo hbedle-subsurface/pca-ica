@@ -323,3 +323,34 @@ To be reported rather than reproduced:
 - The 3500–4500 Hz band in the `pca_waveform_classification` example is
   implausible for a 1.2–2.2 s window, and those fields appear to belong to the
   spectral program rather than the waveform one.
+
+
+## Revision pass: writing for a first encounter (September 2026)
+
+Heather's note: these may be a student's first exposure to dimension reduction,
+and the audience is used to short video and does not read. Measured before
+changing anything — module 00 carried 684 words in front of its panels, module
+01 carried 637.
+
+Done in this pass:
+- Module 00 and module 01 cut to 319 and 231 visible words, with everything
+  removed placed behind `<details>` toggles rather than deleted. Nothing was
+  lost from the page or from the companion paper.
+- Drag-to-rotate on the module 00 teapot, replacing two angle sliders as the
+  primary interaction (the sliders remain for fine adjustment and for anyone
+  who cannot drag).
+- A `.score` strip: the reader is asked to beat the arithmetic's own answer,
+  and the answer is on screen as a filling bar with a percentage and a win
+  state at 99%. Scaled from the worst available view to the best, so the front
+  view reads 26%, the side 68%, the top 83%, and the answer 100%.
+- The pattern is written up as section 8 of STYLE_BRIEF.md.
+
+STILL TO DO: modules 02 through 08 have not had this pass. Their step panes
+still open with two or three full ledes. The work is mechanical — keep the
+first two sentences, bold the instruction in one of them, move the rest into a
+`<details class="reveal">` — and the measurement to check it by is the visible
+word count before the panel, which should land near 40 per step.
+
+Also worth considering and not done: module 01's angle could be draggable
+directly on the crossplot line rather than only through a slider, which is the
+same argument as the teapot.

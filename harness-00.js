@@ -87,6 +87,15 @@ JSDOM.fromFile(file, {
     console.log('  pairs '+tw.pairs+'   above 0.7: '+tw.strong+
       '   best three hold '+(tw.three*100).toFixed(2)+'%');
 
+    console.log('\n=== THE SCORE BAR: what a reader sees as they drag');
+    [[0,0],[90,0],[0,89],[-30,-15],[-50,-25],[-61,-33],[-61,-32]].forEach(function(v){
+      M.set('az',v[0]); M.set('el',v[1]);
+      const s=M.score();
+      console.log('  az '+String(v[0]).padStart(4)+'  el '+String(v[1]).padStart(4)+
+        '   spread '+s.now.toFixed(4)+'   '+s.pct.toFixed(1)+'% of best   bar '+
+        (s.frac*100).toFixed(0)+'%'+(s.pct>=99?'   WIN':''));
+    });
+
     console.log('\n=== GLOSSARY');
     const marked=win.document.querySelectorAll('button.gterm');
     const names=new Set(); marked.forEach(x=>names.add(x.getAttribute('data-term')));

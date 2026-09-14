@@ -89,16 +89,15 @@
       that follows happens in the second arrangement, so it is worth being certain the two hold identical
       information.</p>
 
-    <p class="lede">Below are the two attribute maps for the pair selected above, computed on a stratal
-      slab through a synthetic survey containing two channel systems of different age. Each map has one
-      value per trace. The crossplot in the panel above the tabs contains exactly the same values: for
-      each trace, its value in the first map gives the horizontal position of a point and its value in
-      the second map gives the vertical position.</p>
-    <p class="lede">The points form a tilted cloud rather than a round blob. The tilt exists because the
-      two attributes are measuring overlapping things: a trace with a strong reflection tends to be
-      strong in both. That overlap is what makes one of the two attributes partly predictable from the
-      other, and it is the reason a dataset of twelve attributes is rarely twelve independent pieces of
-      information.</p>
+    <p class="lede">Two maps below. <b>The crossplot above the tabs is those same numbers, replotted:</b>
+      one point per trace, its value in the left map across and its value in the right map up.</p>
+    <p class="lede">Notice the cloud leans. That lean is the whole subject of this module set.</p>
+
+    <details class="reveal"><summary>Why it leans</summary>
+      <p class="lede">The two attributes are measuring overlapping things, so a trace with a strong
+        reflection tends to be strong in both. That overlap is what makes one of them partly predictable
+        from the other, and it is the reason a set of twelve attributes is rarely twelve independent
+        pieces of information.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -129,14 +128,15 @@
       <span class="hint">Drag the angle and watch the histogram</span>
     </div>
 
-    <p class="lede">The line drawn through the cloud above passes through its center and points in the
-      direction set by the angle slider. Every point in the cloud can be dropped onto that line at right
-      angles, which gives each trace a single number: how far along the line it sits. That operation is
-      called a projection, and the number replaces the two the trace started with.</p>
-    <p class="lede">The histogram below counts how many traces land at each position along the line. Its
-      width is the spread of the projection, measured as variance. As the angle changes, the cloud does
-      not move and the histogram does, because the line is being asked a different question of the same
-      points.</p>
+    <p class="lede"><b>Drag the angle slider.</b> Every trace drops onto the line; how far along it
+      lands is its one number. The histogram below counts where they land.</p>
+    <p class="lede">The cloud never moves. The histogram does.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">Dropping a point onto a line at right angles is called a projection, and the number
+        it gives replaces the two the trace started with. The width of the histogram is the spread of
+        that projection, measured as variance. Turning the line asks a different question of the same
+        points, which is why one panel changes and the other does not.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -166,15 +166,16 @@
       <span class="hint">Sweep the angle across the whole range</span>
     </div>
 
-    <p class="lede">Projecting at one angle gives one number for the spread. Doing it at every angle gives
-      the curve below: variance along the horizontal axis of angle, from zero to a hundred and eighty
-      degrees. Beyond a hundred and eighty the curve repeats, because a direction and its opposite give
-      the same line and therefore the same spread.</p>
-    <p class="lede">The curve has one maximum and one minimum, and they are exactly ninety degrees apart.
-      The direction at the maximum is the first principal component of this pair. Nothing has been
-      computed here that a student could not have found by dragging the slider and writing down numbers,
-      which is the point of this step: the eigenvector arithmetic in module 04 is a shortcut to this
-      answer, not a different answer.</p>
+    <p class="lede">One angle gives one number. Every angle gives the curve below. <b>Its peak is the
+      first principal component</b> — and you just found it by dragging.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">The curve runs from zero to a hundred and eighty degrees and then repeats, because
+        a direction and its opposite give the same line and therefore the same spread. It has exactly one
+        maximum and one minimum and they are ninety degrees apart.</p>
+      <p class="lede">Nothing here could not have been found by moving the slider and writing numbers
+        down, which is the point: the eigenvector arithmetic in module 04 is a shortcut to this answer,
+        not a different one.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -204,14 +205,15 @@
       <span class="hint">Both histograms share one axis</span>
     </div>
 
-    <p class="lede">A direction has a perpendicular, and the cloud has a spread along that too. The two
-      histograms below are the projections onto the chosen direction and onto the direction at right
-      angles to it, drawn against a single shared horizontal axis so their widths can be compared
-      directly.</p>
-    <p class="lede">The two variances sum to the same total at every angle. Turning the line to gain
-      spread in one direction loses exactly as much in the other, so the question is never how much
-      spread there is in total, only how unevenly it is divided. At the widest direction the division is
-      as uneven as it can be, and that is the sense in which one number then stands in for two.</p>
+    <p class="lede">Two histograms: along your direction, and across it. <b>Move the angle and watch
+      them trade.</b> Whatever one gains the other loses, exactly.</p>
+    <p class="lede">The total never changes. Only how unevenly it is split.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">The two variances sum to the same number at every angle, so the question is never
+        how much spread there is, only how unevenly it is divided. At the widest direction the division
+        is as uneven as it can be, and that is the sense in which one number then stands in for
+        two.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -236,15 +238,18 @@
       <span class="hint">Two attributes in, one map out</span>
     </div>
 
-    <p class="lede">The projection gives every trace a single number, and every trace has a position in
-      the survey, so the projection can be drawn as a map. That map is what a dimension reduction
-      actually delivers: two input volumes have become one, and the direction chosen is what decides
-      what the one contains.</p>
-    <p class="lede">Three maps are drawn below: the projection along the chosen direction, the projection
-      across it, and the two input attributes for comparison. Guide lines mark the two channel axes on
-      every panel, so a feature can be followed from an input map into the output. At some angles the
-      channels are clearer in the along map, at others they survive only in the across map, and at the
-      widest direction the across map is mostly what the two attributes disagreed about.</p>
+    <p class="lede">Every trace has one number now, and a position in the survey. So draw it as a map.
+      <b>Two volumes in, one volume out.</b></p>
+    <p class="lede">Move the angle and watch the channels move between the two output maps. The white
+      lines mark where they are.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">Four maps are drawn: the two input attributes, the projection along the chosen
+        direction, and the projection across it. At some angles the channels are clearer in the along
+        map, at others they survive only in the across map, and at the widest direction the across map is
+        mostly what the two attributes disagreed about.</p>
+      <p class="lede">This is what a dimension reduction actually delivers. The direction chosen is what
+        decides what the surviving volume contains.</p></details>
 
     <div class="plot">
       <div class="plot-head">

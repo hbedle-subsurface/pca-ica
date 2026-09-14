@@ -29,11 +29,16 @@
   <div class="labhead">
     <div class="labgrid">
       <div>
-        <p class="cap">A teapot, as a cloud of points <span>&mdash; turn it and watch</span></p>
-        <canvas id="cHead" aria-label="A teapot drawn as a cloud of points, projected onto a viewing plane that can be rotated"></canvas>
+        <p class="cap">A teapot, as a cloud of points <span>&mdash; drag it around</span></p>
+        <canvas id="cHead" class="grabbable" aria-label="A teapot drawn as a cloud of points, projected onto a viewing plane that can be rotated by dragging"></canvas>
+        <div class="score" id="score">
+          <span class="say" id="scoreSay">drag the teapot around</span>
+          <span class="track"><span class="fill" id="scoreFill"></span><span class="target" id="scoreTgt"></span></span>
+          <span class="pct" id="scorePct">&mdash;</span>
+        </div>
       </div>
       <div>
-        <p class="cap">Choose a direction to look from <span>&mdash; two angles</span></p>
+        <p class="cap">Or use the sliders <span>&mdash; how far can you get the bar?</span></p>
         <div class="controls" id="winControls">
           <div class="ctl-col">
             <h2>Turn it</h2>
@@ -83,16 +88,10 @@
       <span class="hint">Front, side, top, all at once</span>
     </div>
 
-    <p class="qbox"><b>Start here.</b> A teapot has four parts: a body, a lid, a spout and a handle.
-      There is no direction you can look from that puts all four in front of you clearly, and the three
-      directions you would think of first are among the worst.</p>
+    <p class="qbox"><b>A teapot has four parts.</b> Body, lid, spout, handle. Find a direction that shows
+      you all four at once.</p>
 
-    <p class="lede">The panels below look straight down each of the three axes the teapot happens to be
-      described in. From the front the spout points nearly at you and shortens to almost nothing. From
-      the side the handle folds against the body. From above the pot is a circle and the spout and handle
-      stick out on opposite sides with no sense of which is which.</p>
-    <p class="lede">Each view keeps two dimensions and throws the third away. That is all a picture of a
-      three-dimensional object ever is, and which two you keep is the entire decision.</p>
+    <p class="lede">These three are the obvious ones. Every one of them hides something.</p>
 
     <div class="plot">
       <div class="plot-head">
@@ -123,14 +122,16 @@
       <span class="hint">Use the two sliders above</span>
     </div>
 
-    <p class="lede">Move the two angles in the header until the teapot looks as much like a teapot as you
-      can get it. Most people land somewhere between the axis views, with the pot turned a little and
-      tipped a little, so the spout goes one way and the handle the other and the lid is visible on top.
-      Nobody chooses a view straight down an axis.</p>
-    <p class="lede">"As much of it as possible" can be measured. Project every point onto the picture,
-      and add up how spread out the picture is: the variance across plus the variance up. A view that
-      squashes the teapot has a small number; a view that spreads it out has a large one. The curve below
-      is that number as you turn it around, at whatever tilt the second slider is set to.</p>
+    <p class="lede"><b>Drag the teapot until it looks as much like a teapot as you can get it.</b> Watch
+      the bar. It is measuring how spread out the picture is, and the teal mark is the best view that
+      exists. Get past 99% and it turns green.</p>
+    <p class="lede">The curve below is that same measurement at every turning angle.</p>
+
+    <details class="reveal"><summary>What the bar is actually measuring</summary>
+      <p class="lede">Project every point of the teapot onto the flat picture and add up how spread out
+        that picture is: the variance left to right plus the variance up and down. A view that squashes
+        the pot gives a small number, a view that opens it out gives a large one. Nothing in that
+        calculation knows what a teapot is — it is counting how far apart the points land.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -159,19 +160,21 @@
       <span class="hint">Press "The widest" in the header</span>
     </div>
 
-    <p class="lede">There is arithmetic that finds the widest view without any searching. It gives, for
-      this teapot, a view from an angle of about &minus;61 degrees around and 33 degrees over, and a
-      spread of 0.666 against 0.454, 0.573 and 0.618 for the front, side and top.</p>
-    <p class="lede">What matters is not the small improvement in the number. It is what the answer is made
-      of. The horizontal axis of that best picture is
-      <span class="k">0.840&thinsp;x&nbsp;+&nbsp;0.533&thinsp;y&nbsp;&minus;&nbsp;0.097&thinsp;z</span>
-      and the vertical axis is
-      <span class="k">0.359&thinsp;x&nbsp;&minus;&nbsp;0.412&thinsp;y&nbsp;+&nbsp;0.837&thinsp;z</span>.
-      Neither is x, or y, or z. Each is a bit of all three, and the recipe is the answer.</p>
-    <p class="lede">That is the whole idea. <b>The useful direction is a mixture of the directions you
-      were handed.</b> The coordinate system an object arrives in — x, y and z for a teapot, coherence
-      and amplitude and frequency for a survey — was not chosen to suit the thing being looked at, so the
-      good view is a combination rather than one of them.</p>
+    <p class="lede">Here is the view you were hunting for, written down:</p>
+    <p class="lede" style="font-size:1.05em"><span class="k">across = 0.840&thinsp;x + 0.533&thinsp;y
+      &minus; 0.097&thinsp;z</span><br><span class="k">up&nbsp;&nbsp;&nbsp;&nbsp; = 0.359&thinsp;x
+      &minus; 0.412&thinsp;y + 0.837&thinsp;z</span></p>
+    <p class="lede"><b>Neither one is x, or y, or z.</b> Each is a bit of all three. That is the whole
+      idea of this module set, and everything after here is that sentence with more dimensions in it.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">There is arithmetic that finds this without any searching, and module 04 builds it.
+        It gives a view from about &minus;61 degrees around and 33 degrees over, with a spread of 0.666
+        against 0.454, 0.573 and 0.618 for the front, side and top.</p>
+      <p class="lede">What matters is not that small improvement in the number. It is what the answer is
+        made of. The coordinate system a thing arrives in — x, y and z for a teapot, coherence and
+        amplitude and frequency for a survey — was not chosen to suit the thing being looked at, so the
+        good view is a combination rather than one of them.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -207,20 +210,23 @@
       <span class="hint">Three attributes instead of three axes</span>
     </div>
 
-    <p class="lede">Now take a seismic survey and compute three attributes over it: RMS amplitude, peak
-      envelope and peak absolute amplitude. Every trace now has three numbers, exactly as every point on
-      the teapot had three numbers. Five thousand traces make a cloud in three dimensions, and the same
-      question applies: which flat picture of it shows the most?</p>
-    <p class="lede">The arithmetic does not know or care that one cloud is a teapot and the other is a
-      survey. It returns, here, a best picture whose horizontal axis is
-      <span class="k">0.393&thinsp;RMS&nbsp;+&nbsp;0.735&thinsp;envelope&nbsp;+&nbsp;0.553&thinsp;peak</span>
-      — a mixture of all three again — holding 93.9% of the spread against 76.9%, 54.4% and 68.7% for the
-      three axis views.</p>
-    <p class="lede">One thing is completely different. With the teapot you could tell a good view from a
-      bad one by looking, because you know what a teapot is. Nobody knows what a cloud of seismic
-      attributes is supposed to look like. The number is all there is, and whether the number is
-      measuring anything you care about is a question that runs through the whole of the rest of this
-      set.</p>
+    <p class="lede">Same thing, but each point is now a seismic trace and the three axes are three
+      attributes. <b>Drag it. Nothing about the arithmetic changed.</b></p>
+    <p class="lede">The best view is a mixture again:
+      <span class="k">0.393&thinsp;RMS + 0.735&thinsp;envelope + 0.553&thinsp;peak</span>, holding 93.9%
+      against 76.9%, 54.4% and 68.7% for the three axis views.</p>
+    <p class="lede"><b>One thing is completely different, and it is the important one.</b> You knew when
+      the teapot looked right. Nobody knows what this is supposed to look like.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">The three attributes are RMS amplitude, peak envelope and peak absolute amplitude,
+        computed over the same window on 5184 traces. Every trace has three numbers, exactly as every
+        point on the teapot had three numbers, and the cloud they make is a cloud in three dimensions in
+        exactly the same sense.</p>
+      <p class="lede">The arithmetic does not know or care which is which. What it cannot supply is the
+        recognition — with the teapot you could tell a good view from a bad one by looking. Here the
+        number is all there is, and whether the number is measuring anything you care about is the
+        question the rest of this set is about.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -978,6 +984,73 @@
   }
 
   /* =====================================================================
+     THE SCORE
+
+     The reader is being asked to beat an answer the arithmetic already has,
+     so the answer has to be visible while they try. The bar runs from the
+     worst view available to the best, which are the two smallest eigenvalues
+     added together and the two largest added together — so it is full only at
+     the genuine maximum and there is real distance to cover.
+     ===================================================================== */
+
+  function scoreNow() {
+    var onSeismic = (S.tab === 'p4');
+    var cloud = onSeismic ? survey().pts : pot();
+    var b = onSeismic ? survey().best : potBest();
+    var v = b.values;
+    var best = v[0] + v[1];
+    var worst = v[v.length - 1] + v[v.length - 2];
+    var now = SHAPE.spread(cloud, viewNow()).total;
+    return {
+      now: now, best: best,
+      pct: 100 * now / best,
+      frac: Math.max(0, Math.min(1, (now - worst) / (best - worst || 1)))
+    };
+  }
+
+  function drawScore() {
+    var box = $('score');
+    if (!box) return;
+    var s = scoreNow();
+    var win = s.pct >= 99;
+    box.classList.toggle('win', win);
+    var fill = $('scoreFill'), tgt = $('scoreTgt'), pct = $('scorePct'), say = $('scoreSay');
+    if (fill) fill.style.width = (s.frac * 100).toFixed(1) + '%';
+    if (tgt) tgt.style.left = 'calc(100% - 1px)';
+    if (pct) pct.textContent = s.pct.toFixed(1) + '%';
+    if (say) {
+      say.textContent = win ? 'that is the widest view there is'
+        : s.pct >= 96 ? 'very close \u2014 keep nudging'
+        : s.pct >= 88 ? 'better. keep going'
+        : 'drag it around';
+    }
+  }
+
+  /* Dragging beats two sliders for turning an object, and the canvas says so
+     with its cursor. Pointer events cover mouse, pen and touch together. */
+  function wireDrag(id) {
+    var c = $(id);
+    if (!c) return;
+    var down = false, lx = 0, ly = 0;
+    c.addEventListener('pointerdown', function (ev) {
+      down = true; lx = ev.clientX; ly = ev.clientY;
+      c.setPointerCapture(ev.pointerId);
+      ev.preventDefault();
+    });
+    c.addEventListener('pointermove', function (ev) {
+      if (!down) return;
+      var dx = ev.clientX - lx, dy = ev.clientY - ly;
+      lx = ev.clientX; ly = ev.clientY;
+      S.az = Math.round(((S.az - dx * 0.55 + 180 + 360) % 360) - 180);
+      S.el = Math.round(Math.max(-89, Math.min(89, S.el + dy * 0.45)));
+      syncLabels(); drawAll(); ev.preventDefault();
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (e) {
+      c.addEventListener(e, function () { if (down) { down = false; saveState(); } });
+    });
+  }
+
+  /* =====================================================================
      WIRING
      ===================================================================== */
 
@@ -1015,6 +1088,7 @@
     drawHead();
     drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
     drawStats();
+    drawScore();
   }
 
   function showTab(id) {
@@ -1024,6 +1098,9 @@
     });
     var lab = document.querySelector('.labhead');
     if (lab) lab.hidden = !/^p[1-4]$/.test(id);
+    var sc = $('score');
+    // the score is a challenge on the two steps that ask for one
+    if (sc) sc.hidden = !(id === 'p2' || id === 'p4');
     var done = (id === 'pe' || id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
     if ($('pager')) $('pager').hidden = !done;
@@ -1057,12 +1134,14 @@
     rt = setTimeout(drawAll, 140);
   });
 
+  wireDrag('cHead');
   syncLabels();
   showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
 
   window.__M00 = {
     set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
     view: function (name) { applyView(name); syncLabels(); drawAll(); },
+    score: function () { return scoreNow(); },
     potViews: function () {
       var P = pot(), b = potBest();
       return {

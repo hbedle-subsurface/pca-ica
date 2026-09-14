@@ -890,3 +890,35 @@ details.reveal .ans { display: block; margin-top: 9px; }
 .card.is-soon { opacity: .55; cursor: default; }
 .card.is-soon:hover { transform: none; box-shadow: none; }
 .card.is-soon h3 { color: var(--slate, #5C6670); }
+
+
+/* ---------------------------------------------------------------------------
+   The score strip.
+
+   Added for module 00, where the reader is asked to beat an answer the
+   arithmetic already has. A number on its own is not much of an invitation; a
+   bar that fills as they drag is, and it gives instant feedback on an action
+   whose effect is otherwise only visible as a shape changing.
+   --------------------------------------------------------------------------- */
+.score {
+  display: flex; align-items: center; gap: 12px;
+  margin: 10px 0 0; padding: 10px 12px;
+  background: var(--panel, #F4F6F7); border: 1px solid var(--grid, #C9CDD2);
+}
+.score .track {
+  position: relative; flex: 1 1 auto; height: 12px;
+  background: #fff; border: 1px solid var(--grid, #C9CDD2); overflow: hidden;
+}
+.score .fill { position: absolute; left: 0; top: 0; bottom: 0; background: var(--crimson); }
+.score .target { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--teal); }
+.score .pct {
+  font-family: var(--mono); font-size: 15px; font-weight: 600;
+  color: var(--ink); min-width: 4.6em; text-align: right;
+}
+.score .say { font-family: var(--mono); font-size: 11px; color: var(--slate); min-width: 12em; }
+.score.win .fill { background: var(--teal); }
+.score.win .say { color: var(--teal); }
+
+/* A drag-to-turn canvas says so with its cursor. */
+.labhead canvas.grabbable { cursor: grab; touch-action: none; }
+.labhead canvas.grabbable:active { cursor: grabbing; }

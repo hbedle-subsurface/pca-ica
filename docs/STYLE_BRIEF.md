@@ -184,3 +184,42 @@ balance, `$('id')` references against ids present, and the headless render.
 
 *Companion to* How Geometric Attributes Actually Work,
 https://hbedle-subsurface.github.io/geometric-attributes/
+
+---
+
+## 8. Writing for a first encounter (added while building the PCA/ICA set)
+
+The set was drafted at a density that suits a graduate student and a companion
+paper, and then measured: module 00 had 684 words of prose sitting in front of
+the panels and module 01 had 637. A first-year undergraduate deciding in a few
+seconds whether to stay does not read 684 words. The revision pass brought
+those to 319 and 231 without deleting anything.
+
+**The rule that came out of it: a step pane opens with at most two short
+sentences, one of which tells the reader what to do with their hands.**
+Everything else that was there goes into `<details class="reveal">` with a
+summary of *The longer version* or a specific question — *Why it leans*, *What
+the bar is actually measuring*. The depth is still on the page, still in the
+working paper, and no longer in the way.
+
+Three things that followed from the same pass and are worth repeating:
+
+- **Bold the instruction.** "**Drag the teapot until it looks as much like a
+  teapot as you can get it.**" A reader skimming sees one thing to do.
+- **Drag beats sliders for anything spatial.** Two angle sliders for a
+  three-dimensional object feel like data entry; a pointer drag feels like
+  picking the object up. Pointer events cover mouse, pen and touch in one
+  handler, and `.plot canvas` already sets `touch-action: none`.
+- **Give a target and show the distance to it.** Module 00 asks the reader to
+  beat an answer the arithmetic already has, so the answer is on screen as a
+  bar that fills while they drag, with a percentage and a state change when
+  they get within one percent. The bar runs from the worst available view to
+  the best, not from zero, so there is real distance to cover: the front view
+  reads 26%, the side 68%, the top 83%. The `.score` block in `style.css` is
+  reusable for any module that can state a best achievable value.
+
+The trap to avoid: none of this means saying less that is true. Every number,
+caveat and simplification is still there. What changed is the order — the thing
+to touch first, the sentence that says why second, the argument behind a
+toggle — and the fact that the first screen now asks for an action instead of
+attention.
