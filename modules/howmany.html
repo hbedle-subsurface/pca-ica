@@ -1,0 +1,1270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How many components to keep | How PCA and ICA Actually Work</title>
+<meta name="description" content="The scree plot, five selection rules that disagree with each other on the same six attributes, the reconstruction and its residual looked at as images rather than as a percentage, and what a share of the variance does and does not tell you about a component.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="eigen.html">← Module 04</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 05 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>How many components to keep</h1>
+    <p class="sub">Six attributes give six components and nobody carries six. Choosing where to stop is presented in most write-ups as a matter of reading a graph, and on this attribute set five standard ways of reading that graph return five different numbers. These steps run all of them, then look at what each choice actually discards, as a picture rather than as a percentage.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">The scree plot <span>&mdash; eigenvalues in order, and the running total</span></p>
+        <canvas id="cHead" aria-label="Eigenvalues of the six components in descending order with the cumulative variance curve and the current cut marked"></canvas>
+      </div>
+      <div>
+        <p class="cap">Where to stop <span>&mdash; every panel follows this</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>Components kept</h2>
+            <div class="ctl">
+              <label for="k">Keep the first <span class="val" id="kV">3</span></label>
+              <input type="range" data-key="k" id="k" min="1" max="6" step="1" value="3">
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">The slider is the decision. Everything on the
+              page is downstream of it.</p>
+          </div>
+          <div class="ctl-col">
+            <h2>Or let a rule decide</h2>
+            <div class="seg" id="segRule" role="group" aria-label="Selection rule">
+              <button type="button" data-rule="stick">Broken stick</button>
+              <button type="button" data-rule="kaiser">Kaiser</button>
+              <button type="button" data-rule="v80">80%</button>
+              <button type="button" data-rule="v90">90%</button>
+              <button type="button" data-rule="v95">95%</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">Each button moves the slider to what that rule
+              returns on this attribute set. Step 2 is about why they do not agree.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · The scree</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Five rules</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · The residual</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Per attribute</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Which one has the channel</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>The plot you are told to look for a break in</h3>
+      <span class="hint">Move the cut and watch the total</span>
+    </div>
+
+    <p class="qbox"><b>Why this step is here.</b> The scree plot is named after the loose rubble at the
+      foot of a cliff, and the instruction that comes with it is to keep the components above the point
+      where the curve flattens into the rubble. That works when there is a cliff.</p>
+
+    <p class="lede">The eigenvalues of the six standardized attributes, in descending order, are 3.13,
+      1.29, 0.74, 0.45, 0.26 and 0.13. Plotted, they fall away smoothly. There is a step between the
+      first and the second, and after that the curve bends without ever clearly stopping, which is what
+      most real attribute sets look like.</p>
+    <p class="lede">The panel below adds the reconstruction of one attribute alongside the plot, so the
+      abstract decision has something attached to it from the start. Everything to the left of the cut is
+      kept and everything to the right is thrown away.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>One attribute, rebuilt from the components kept</h3>
+        <span class="hint">Original, reconstruction, residual</span>
+      </div>
+      <canvas id="c1" aria-label="One attribute map beside its reconstruction from the kept components and the residual between them"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="at1">Which attribute</label>
+        <select id="at1" data-key="at"></select>
+      </div>
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="k1">Keep the first <span class="val" id="k1V">3</span></label>
+        <input type="range" data-key="k" id="k1" min="1" max="6" step="1" value="3">
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Five rules, five answers</h3>
+      <span class="hint">Press each button in the header</span>
+    </div>
+
+    <p class="lede">Several rules for where to cut are in common use, and all of them are defensible.
+      The broken-stick rule compares each eigenvalue against what it would have been if the total
+      variance had been divided up at random, and keeps the components that beat that. The Kaiser rule
+      keeps components whose eigenvalue exceeds one, on the argument that a standardized attribute
+      carries a variance of one and a component carrying less than that has done worse than an attribute
+      would have. The retained-variance rules keep enough components to reach a stated fraction of the
+      total.</p>
+    <p class="lede">On these six attributes they return one, two, three, four and five. Every number
+      between the extremes is somebody's correct answer, and the choice between them is not settled by
+      anything in the data.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>What each rule keeps</h3>
+        <span class="hint">Eigenvalues against the thresholds each rule applies</span>
+      </div>
+      <canvas id="c2" aria-label="The six eigenvalues with the thresholds applied by the broken-stick, Kaiser and retained-variance rules drawn across them"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Apply a rule</h2>
+        <div class="seg" id="segRule2" role="group" aria-label="Selection rule">
+          <button type="button" data-rule="stick">Broken stick</button>
+          <button type="button" data-rule="kaiser">Kaiser</button>
+          <button type="button" data-rule="v80">80%</button>
+          <button type="button" data-rule="v90">90%</button>
+          <button type="button" data-rule="v95">95%</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+    <div class="legend prose">
+      <span>The rules are not competing estimates of one true number. They answer different questions:
+        whether a component beats chance, whether it beats an attribute, and how much of the total is
+        wanted. Which question applies depends on what the components are going to be used for, which is
+        the subject of step 5.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Look at what was thrown away</h3>
+      <span class="hint">All six attributes, residual only</span>
+    </div>
+
+    <p class="lede">A percentage of variance discarded is a summary of the residual and not a
+      description of it. The residual is a set of maps, one per attribute, and it can be looked at
+      directly. Random noise thrown away looks like random noise. Geology thrown away looks like
+      geology.</p>
+    <p class="lede">The panels below are the residual of every attribute at the current cut, each drawn
+      at its own scale so that whatever is in it is visible. At a cut of one component the channels are
+      plainly still there in most of them. By four they are mostly gone from the residual and what
+      remains is closer to noise and footprint. That transition, looked at rather than computed, is a
+      better basis for the decision than any of the rules in step 2.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>What the discarded components were carrying</h3>
+        <span class="hint">Channel axes marked on every panel</span>
+      </div>
+      <canvas id="c3" aria-label="Residual maps for all six attributes at the current number of kept components"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="k3">Keep the first <span class="val" id="k3V">3</span></label>
+        <input type="range" data-key="k" id="k3" min="1" max="6" step="1" value="3">
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+    <div class="legend prose">
+      <span>Each residual panel is scaled to its own range, which is what makes the contents visible and
+        also what makes them look more important than they are. A residual holding two percent of an
+        attribute's spread and a residual holding forty percent are drawn the same way here. The bars in
+        step 4 carry the sizes.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Ninety percent of what, exactly</h3>
+      <span class="hint">The total is not shared out evenly</span>
+    </div>
+
+    <p class="lede">A retained-variance figure is a total across all the attributes at once. It says
+      nothing about how the shortfall is distributed between them, and it is never distributed evenly.
+      The bars below give, for each attribute, how much of its own spread the reconstruction fails to
+      account for at the current cut.</p>
+    <p class="lede">Keeping four components reaches 93.40% of the total variance. At that cut peak
+      frequency is reconstructed to within eleven percent of its own spread and spectral bandwidth to
+      within nine, while coherence is still missing thirty-five percent and GLCM contrast thirty-seven.
+      An attribute can be almost entirely absent from a reconstruction that a headline number describes
+      as ninety-three percent complete.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Residual per attribute, as a fraction of its own spread</h3>
+        <span class="hint">Fixed axis, so the bars fall as the cut moves right</span>
+      </div>
+      <canvas id="c4" aria-label="For each attribute, the standard deviation of its residual as a fraction of its own standard deviation, at the current cut"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="k4">Keep the first <span class="val" id="k4V">3</span></label>
+        <input type="range" data-key="k" id="k4" min="1" max="6" step="1" value="3">
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Which component has the channel in it</h3>
+      <span class="hint">Compare the two panels against each other</span>
+    </div>
+
+    <p class="lede">Everything so far has ranked the components by variance, because that is the only
+      thing the method knows about them. The panels below add a second ranking: how well each component
+      separates the axis of the younger channel from its own margins, measured in pooled standard
+      deviations. The two rankings are not the same ranking.</p>
+    <p class="lede">The first component holds 52.19% of the variance and separates the channel at 0.33,
+      which is no separation at all. The second holds 21.43% and separates at 2.81; the third holds
+      12.31% and separates at 2.57. The work is being done by the two components below the top, and a
+      rule that kept only the first would have discarded both of them.</p>
+    <p class="lede">The lower panel is the same measurement on the six input attributes, and it makes a
+      point that is easy to leave out of a lecture on dimension reduction. Peak frequency on its own
+      separates the channel at 5.97, twice as well as the best component. For this particular target on
+      this particular survey, the dimension reduction did not improve on the best single input.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Variance held against channel separation</h3>
+        <span class="hint">Components above, input attributes below</span>
+      </div>
+      <canvas id="c5" aria-label="For each component, the fraction of variance held and the separation it achieves, with the same separation measured on the input attributes below"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">What to measure</h2>
+        <div class="seg" id="segMeas" role="group" aria-label="Which measurement">
+          <button type="button" data-meas="sep">Channel separation</button>
+          <button type="button" data-meas="foot">Acquisition footprint</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>The separation statistic uses the model's own knowledge of where the channel is, which no
+        real survey provides. It stands in for an interpreter's judgment of whether a map is useful, and
+        it is used here because a number can be plotted and a judgment cannot.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">Where this shows up in real work</span>
+    </div>
+    <p class="lede">The number of components kept is a parameter every implementation asks for, and the
+      guidance that comes with it is usually a single convention stated without alternatives. On a real
+      attribute set the conventions disagree by a factor of several.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>RGB blending fixes the number at three.</b> Not because three is right, but because a
+        display has three channels. The question then becomes which three, and the answer is not
+        obliged to be the top three.</li>
+      <li><b>Noise reduction wants the break.</b> Reconstructing from the components above a break and
+        discarding the rest is a filter, and it works when the break exists and the discarded components
+        are noise. Step 3 is how to check the second half of that.</li>
+      <li><b>Feeding a classifier.</b> Unsupervised classification on components is common, and the
+        count chosen upstream sets what the classifier can possibly see. A feature that lives in a
+        discarded component cannot be recovered downstream.</li>
+      <li><b>Reading a reported figure.</b> "Four components, ninety-three percent of the variance" is a
+        statement about a total. Whether the attribute that mattered is among the well-reconstructed ones
+        is a separate question and usually goes unasked.</li>
+    </ul>
+    <p class="lede"><b>Two points that are commonly confused.</b> The first is that variance explained
+      measures how much of the useful content was kept. It measures how much of the spread was kept, and
+      spread includes noise and footprint, which the reconstruction preserves as faithfully as it
+      preserves geology. The second is that dimension reduction necessarily improves on the inputs. It
+      reorganizes them. Whether the reorganization helps depends on the target, and step 5 shows a target
+      for which one of the original attributes was better than anything the method produced.</p>
+    <div class="legend prose">
+      <span>None of this argues against running the method. It argues for looking at the residual before
+        accepting the cut, which takes about a minute and is skipped almost universally.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Run all five rules on the same six attributes.</b>
+          <em class="point">Why: the disagreement is the point, and it is larger than most write-ups
+            suggest.</em>
+          Press each of the five rule buttons in turn and record what each returns and what fraction of
+          the variance it keeps.
+          <em class="predict">Before starting: how far apart do you expect the five answers to be?
+            Commit to a range.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">Broken stick keeps 1 and
+            52.19% of the variance. Kaiser keeps 2 and 73.63%. The 80% rule keeps 3 and 85.94%. The 90%
+            rule keeps 4 and 93.40%. The 95% rule keeps 5 and 97.81%. Five rules, five answers, one
+            through five out of six possible. The eigenvalues they are reading are 3.13, 1.29, 0.74,
+            0.45, 0.26 and 0.13, and nothing in that list is a cliff. The honest summary is that the
+            scree plot did not answer the question, and the rules are conventions applied in its
+            place.</span></details></li>
+
+        <li><b>Look at the residual instead of the number.</b>
+          <em class="point">Why: the question a rule cannot answer is whether what was discarded was
+            noise, and that one can simply be looked at.</em>
+          In step 3, walk the cut from 1 to 5 and watch the six residual maps, looking specifically for
+          the channel axes marked on them.
+          <details class="reveal"><summary>Hint</summary><span class="ans">At a cut of 1 the channels
+            are visible in the residual of nearly every attribute, which means a great deal of geology
+            was discarded — and the broken-stick rule would have stopped there. By 3 they have faded
+            from most of the panels. By 4 the residuals are dominated by the six-trace footprint
+            striping and by speckle, which is what a reader wants to see before accepting a cut. Note
+            that the residual panels each use their own scale, so a nearly empty residual and a
+            substantial one look equally emphatic; the sizes are in step 4.</span></details></li>
+
+        <li><b>Find the attribute that ninety percent left behind.</b>
+          <em class="point">Why: a retained-variance figure is a total, and totals hide their own
+            distribution.</em>
+          Set the cut to 4, which the 90% rule selects, and read the per-attribute residual bars in step
+          4.
+          <details class="reveal"><summary>Hint</summary><span class="ans">At four components the total
+            retained is 93.40%, and the residual as a fraction of each attribute's own spread reads 0.289
+            for RMS amplitude, 0.194 for peak envelope, 0.114 for peak frequency, 0.088 for spectral
+            bandwidth, 0.348 for coherence and 0.365 for GLCM contrast. The two texture-related
+            attributes are each still missing more than a third of their spread inside a reconstruction
+            described as ninety-three percent complete. Going to five components collapses GLCM contrast
+            to 0.005 and coherence to 0.135, because the fifth component is largely those two. A cut
+            chosen on the total would have thrown away almost the whole of the attribute pair a texture
+            interpretation depends on.</span></details></li>
+
+        <li><b>Rank the components by variance, then by usefulness.</b>
+          <em class="point">Why: the method's ranking is by spread, and it is not obliged to agree with
+            anything an interpreter cares about.</em>
+          In step 5, compare the fraction of variance each component holds against how well it separates
+          the young channel axis from its margins.
+          <details class="reveal"><summary>Hint</summary><span class="ans">By variance the order is
+            52.19%, 21.43%, 12.31%, 7.46%, 4.41%, 2.19%. By channel separation the order is 0.33, 2.81,
+            2.57, 0.28, 0.42, 0.99. The largest component is the worst of the six at the job, and the
+            two that do the work are the second and third. A broken-stick cut at one component keeps only
+            the component that separates the channel least well of any of them. The Kaiser cut at two
+            keeps the best one and discards the second best.</span></details></li>
+
+        <li><b>Compare the components against the raw attributes.</b>
+          <em class="point">Why: a method is worth running if it beats what went into it, and that is a
+            testable claim rather than an assumption.</em>
+          Still in step 5, read the lower panel, which applies the same separation measurement to the six
+          input attributes.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Peak frequency separates the
+            channel at 5.97 on its own. The best component manages 2.81. RMS amplitude at 2.79 is also
+            competitive with the best component, and coherence at 0.18 is worse than anything. So for
+            this target the dimension reduction produced nothing better than an attribute that was
+            already on the list, and the honest use of the analysis here is as a way of finding out
+            which attribute that was. Switch the measurement to acquisition footprint and a different
+            picture appears. The artifact enters the set mainly through peak envelope, which carries
+            0.272 of it, and RMS amplitude at 0.140; peak frequency and GLCM contrast carry
+            essentially none, at 0.001. Among the components it does not spread evenly: it concentrates
+            in the fourth at 0.213, which holds 7.46% of the variance. So a cut at three components
+            would have removed most of the footprint along with whatever else the fourth was carrying,
+            and the 90% rule, which keeps four, would have kept it. Neither rule was considering the
+            footprint at all.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>Real scree plots usually have no cliff.</b> These eigenvalues fall away smoothly from 3.13
+          to 0.13 with nothing that can be called a break.</li>
+        <li><b>The standard rules disagree by a factor of five.</b> Broken stick, Kaiser, 80%, 90% and
+          95% return one, two, three, four and five components on the same six attributes.</li>
+        <li><b>Look at the residual.</b> If the channels are still visible in what was discarded, the cut
+          was too early, and that takes a minute to check.</li>
+        <li><b>A retained-variance figure is a total.</b> At 93.40% retained, two of these six attributes
+          are still missing more than a third of their own spread.</li>
+        <li><b>The variance ranking is not a usefulness ranking.</b> The component holding half the
+          variance separates the channel worst of the six; the second and third do the work.</li>
+        <li><b>Check the method against its own inputs.</b> Here one raw attribute separated the channel
+          twice as well as any component, which is a result worth knowing rather than hiding.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>The survey, the attributes and the standardization</b> are the same as module 04:
+      six attributes on samples 22 to 50 of a 72 by 72 trace synthetic slab, Z-scored before the matrix
+      is formed, so the six eigenvalues sum to exactly six.</p>
+    <p class="lede"><b>The five rules.</b> The retained-variance rules keep the smallest number of
+      components whose cumulative share reaches the stated fraction. The Kaiser rule keeps components
+      with an eigenvalue above one, which is meaningful only on standardized data, where one is the
+      variance of a single attribute; applied to a covariance matrix in native units the threshold means
+      nothing. The broken-stick rule compares each eigenvalue against the expected length of the
+      <em>i</em>th longest piece when a stick of length <em>p</em> is broken at <em>p</em>&minus;1 random
+      points, which for six attributes gives expected shares of 40.83%, 24.17%, 15.83%, 10.28%, 6.11% and
+      2.78%, and keeps components while they exceed it. It is the strictest of the five here and it stops
+      at one.</p>
+    <p class="lede"><b>The reconstruction</b> rebuilds each attribute from the first <em>k</em>
+      components by adding back each component multiplied by its loadings, then restores the original
+      standard deviation and mean. Using all six returns the input to within 10⁻¹⁵. The residual is the
+      input minus the reconstruction, and the residual figure quoted for each attribute is the standard
+      deviation of its residual divided by the standard deviation of the attribute itself, so it is a
+      fraction of that attribute's own spread rather than of the total.</p>
+    <p class="lede"><b>The separation statistic</b> in step 5 compares traces within half a channel width
+      of the younger channel axis against traces between 1.1 and 2.0 channel widths from it, as the
+      difference of the two means divided by the pooled standard deviation. It is the same statistic used
+      in module 01 and it is a convenience for this teaching set rather than a standard seismic
+      measurement. The footprint statistic is the projection of a map onto the six-trace striping that
+      was put into the survey, as a fraction of the map's own standard deviation.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> The separation statistic uses the model's own
+      record of where the channel is, which no real survey supplies; on real data the equivalent judgment
+      is made by an interpreter looking at a map. The residual panels are each scaled to their own range,
+      which makes their contents visible and makes a small residual look as emphatic as a large one, so
+      the sizes are given separately as bars. Nothing here decimates before computing the matrix. The
+      analysis is on one stratal slab; a component count chosen on one interval does not transfer to
+      another.</p>
+    <p class="lede"><b>Where this departs from production software.</b> In the choice offered rather than
+      the arithmetic. Implementations typically expose one rule, most often a retained-variance
+      threshold, and some apply it without reporting the eigenvalues at all. AASPI's ICA implementation
+      uses a retained-variance criterion of ninety percent, treating the variance above that as signal
+      and the remainder as noise; on the Taranaki dataset that returned four independent components at
+      94.04%. The number a rule returns is a property of the rule and of the attribute set, and moving
+      either one moves the answer.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Cattell, R. B., 1966, The scree test for the number of factors: <em>Multivariate Behavioral
+          Research</em>, <b>1</b>, 245&ndash;276.</li>
+        <li>Kaiser, H. F., 1960, The application of electronic computers to factor analysis:
+          <em>Educational and Psychological Measurement</em>, <b>20</b>, 141&ndash;151.</li>
+        <li>Frontier, S., 1976, Étude de la décroissance des valeurs propres dans une analyse en
+          composantes principales: comparaison avec le modèle du bâton brisé: <em>Journal of Experimental
+          Marine Biology and Ecology</em>, <b>25</b>, 67&ndash;75 — the broken-stick comparison.</li>
+        <li>Jolliffe, I. T., 2002, <em>Principal Component Analysis</em>, 2nd ed.: Springer — chapter 6
+          reviews the selection rules and their failure modes.</li>
+        <li>Lubo-Robles, D., and K. J. Marfurt, 2019, Independent component analysis for reservoir
+          geomorphology and unsupervised seismic facies classification in the Taranaki Basin, New
+          Zealand: <em>Interpretation</em>, <b>7</b>, SE19&ndash;SE42.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>06 · Where PCA stops</h3>
+    <p>The components are perpendicular because of how they were computed, not because anything in the
+      ground is. What that costs when two geological effects both show up in the same attributes.</p>
+    <a class="btn ghost" href="wherepcastops.html">Module 06 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="eigen.html">← Module 04: eigenvectors, loadings and scores</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="wherepcastops.html">Module 06: where PCA stops →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license. If you use it in a course or a talk, a credit line
+        and a link back are all that is asked.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened, so that the university can see these are being used &mdash; no cookie, no
+        account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js. It ' +
+      'expects them one directory up, at ../assets/, and file names are case-sensitive on GitHub Pages.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+
+  var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
+  var LABEL = {
+    rms: 'RMS amplitude', envelope: 'Peak envelope', peakfreq: 'Peak frequency',
+    bandwidth: 'Spectral bandwidth', coherence: 'Coherence', glcmcon: 'GLCM contrast'
+  };
+  var SHORT = {
+    rms: 'RMS', envelope: 'envelope', peakfreq: 'f peak', bandwidth: 'bandwidth',
+    coherence: 'coherence', glcmcon: 'GLCM contrast'
+  };
+
+  var DEF = { k: 3, at: 'rms', meas: 'sep', tab: 'p1' };
+  var S = MV.readState(DEF);
+  if (CORE.indexOf(S.at) < 0) S.at = DEF.at;
+  S.k = Math.max(1, Math.min(6, Math.round(S.k)));
+  if (S.meas !== 'sep' && S.meas !== 'foot') S.meas = 'sep';
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  var SURVEY = null;
+  function survey() {
+    if (SURVEY) return SURVEY;
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var attr = AF.attributes(slab, CORE);
+    var X = CORE.map(function (n) { return attr[n]; });
+    SURVEY = { slab: slab, attr: attr, X: X, P: MV.pca(X, { standardize: true }) };
+    return SURVEY;
+  }
+
+  /* Reconstruction and residual, cached per cut. */
+  var RC = {};
+  function recon(k) {
+    if (RC[k]) return RC[k];
+    var sv = survey();
+    var R = MV.reconstruct(sv.P, k);
+    var res = MV.residual(sv.X, R);
+    var rel = CORE.map(function (n, i) { return MV.std(res[i]) / MV.std(sv.X[i]); });
+    RC[k] = { R: R, res: res, rel: rel };
+    return RC[k];
+  }
+
+  /* =====================================================================
+     THE SELECTION RULES
+
+     Each returns how many components it keeps on the current set.
+     ===================================================================== */
+
+  function brokenStick(p) {
+    var out = [], i, j;
+    for (i = 0; i < p; i++) {
+      var s = 0;
+      for (j = i; j < p; j++) s += 1 / (j + 1);
+      out.push(s / p);
+    }
+    return out;
+  }
+
+  function ruleValue(rule) {
+    var P = survey().P, p = P.values.length, i;
+    if (rule === 'kaiser') {
+      var n = 0;
+      for (i = 0; i < p; i++) if (P.values[i] > 1) n++;
+      return Math.max(1, n);
+    }
+    if (rule === 'stick') {
+      var bs = brokenStick(p), k = 0;
+      for (i = 0; i < p; i++) {
+        if (P.explained[i] > bs[i]) k = i + 1; else break;
+      }
+      return Math.max(1, k);
+    }
+    var frac = rule === 'v80' ? 0.8 : rule === 'v90' ? 0.9 : 0.95;
+    return MV.componentsFor(P, frac);
+  }
+
+  var RULES = [
+    { id: 'stick', label: 'Broken stick' },
+    { id: 'kaiser', label: 'Kaiser' },
+    { id: 'v80', label: '80%' },
+    { id: 'v90', label: '90%' },
+    { id: 'v95', label: '95%' }
+  ];
+
+  /* =====================================================================
+     THE TWO JUDGMENT STATISTICS
+     ===================================================================== */
+
+  var MASK = null;
+  function masks() {
+    if (MASK) return MASK;
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny;
+    var axis = [], marg = [], ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      var yc = AF.centerline(ix, nx, AF.YOUNG) * (ny - 1);
+      var d = Math.abs(iy - yc) / (AF.YOUNG.halfWidth * (ny - 1));
+      var k = ix * ny + iy;
+      if (d < 0.45) axis.push(k); else if (d > 1.1 && d < 2.0) marg.push(k);
+    }
+    MASK = { axis: axis, marg: marg };
+    return MASK;
+  }
+
+  function separation(m) {
+    var M = masks();
+    var a = M.axis.map(function (k) { return m[k]; });
+    var b = M.marg.map(function (k) { return m[k]; });
+    var ma = MV.mean(a), mb = MV.mean(b);
+    var sa = MV.std(a, ma), sb = MV.std(b, mb);
+    return Math.abs(ma - mb) / Math.sqrt((sa * sa + sb * sb) / 2 || 1);
+  }
+
+  function footprint(m) {
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny, s = 0, n = 0, ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      s += m[ix * ny + iy] * Math.cos(2 * Math.PI * ix / 6) * Math.cos(2 * Math.PI * iy / 6);
+      n++;
+    }
+    return Math.abs(s / n) / (MV.std(m) || 1);
+  }
+
+  function measure(m) { return S.meas === 'sep' ? separation(m) : footprint(m); }
+  function measMax() { return S.meas === 'sep' ? 6.5 : 0.30; }
+  function measName() {
+    return S.meas === 'sep' ? 'channel separation, pooled sd' : 'footprint, fraction of sd';
+  }
+
+  /* =====================================================================
+     DRAWING HELPERS
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+
+  function grid(ctx, r, x0, x1, y0, y1, nx, ny, fmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.strokeStyle = '#E4E7EA';
+    ctx.lineWidth = 1;
+    var i, v, X, Y;
+    ctx.textAlign = 'center';
+    for (i = 0; i <= nx; i++) {
+      v = x0 + (x1 - x0) * i / nx;
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+      if (fmt !== false) ctx.fillText(fmt ? fmt(v) : String(Math.round(v)), X, r.y + r.h + 14);
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.fillText(v.toFixed(v >= 10 ? 0 : (v === Math.round(v) ? 0 : 1)), r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var stops = [[26, 47, 63], [61, 109, 125], [166, 196, 198], [244, 240, 227],
+                 [214, 156, 110], [166, 71, 52], [102, 20, 24]];
+    var u = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(u)), f = u - i;
+    var a = stops[i], b = stops[i + 1];
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * f) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * f) + ',' +
+      Math.round(a[2] + (b[2] - a[2]) * f) + ')';
+  }
+
+  function drawMap(ctx, r, m, title, symmetric) {
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny, lo, hi;
+    if (symmetric) {
+      var q = Math.max(Math.abs(AF.percentile(m, 0.01)), Math.abs(AF.percentile(m, 0.99))) || 1;
+      lo = -q; hi = q;
+    } else {
+      lo = AF.percentile(m, 0.01); hi = AF.percentile(m, 0.99);
+    }
+    var cw = r.w / nx, ch = r.h / ny, ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      ctx.fillStyle = cmap((m[ix * ny + iy] - lo) / (hi - lo || 1));
+      ctx.fillRect(r.x + ix * cw, r.y + (ny - 1 - iy) * ch, cw + 0.6, ch + 0.6);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    if (title) {
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 5);
+      ctx.font = '11px ui-monospace,Menlo,monospace';
+    }
+    ctx.restore();
+  }
+
+  function markChannels(ctx, r) {
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny;
+    ctx.save();
+    ctx.lineWidth = 1.1;
+    [[AF.YOUNG, 'rgba(255,255,255,0.85)', []], [AF.OLD, 'rgba(255,255,255,0.5)', [4, 4]]]
+      .forEach(function (p) {
+        ctx.strokeStyle = p[1];
+        ctx.setLineDash(p[2]);
+        ctx.beginPath();
+        for (var ix = 0; ix < nx; ix++) {
+          var yc = AF.centerline(ix, nx, p[0]) * (ny - 1);
+          var X = r.x + (ix + 0.5) * r.w / nx;
+          var Y = r.y + r.h - (yc + 0.5) * r.h / ny;
+          if (ix === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+        }
+        ctx.stroke();
+      });
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     HEADER: THE SCREE PLOT
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 230;
+    var ctx = fit('cHead', w, h);
+    if (!ctx) return;
+    var P = survey().P;
+    var r = { x: 52, y: 14, w: w - 52 - 52, h: h - 14 - 44 };
+    grid(ctx, r, 0, 6, 0, 3.4, 6, 4, false);
+
+    // the shaded region to the right of the cut, which is what gets discarded
+    ctx.save();
+    ctx.globalAlpha = 0.07;
+    ctx.fillStyle = INK;
+    ctx.fillRect(r.x + S.k * r.w / 6, r.y, r.w - S.k * r.w / 6, r.h);
+    ctx.restore();
+
+    var cw = r.w / 6, i;
+    for (i = 0; i < 6; i++) {
+      var cx = r.x + (i + 0.5) * cw;
+      var y = r.y + r.h - P.values[i] / 3.4 * r.h;
+      ctx.save();
+      ctx.globalAlpha = i < S.k ? 0.9 : 0.35;
+      ctx.fillStyle = CRIM;
+      ctx.fillRect(cx - cw * 0.26, y, cw * 0.52, r.y + r.h - y);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('PC' + (i + 1), cx, r.y + r.h + 16);
+      ctx.fillText(P.values[i].toFixed(2), cx, r.y + r.h + 30);
+      ctx.restore();
+    }
+
+    // the cumulative curve, on its own right-hand axis of 0 to 100
+    ctx.save();
+    ctx.strokeStyle = TEAL;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    var run = 0;
+    for (i = 0; i < 6; i++) {
+      run += P.explained[i];
+      var X = r.x + (i + 0.5) * cw;
+      var Y = r.y + r.h - run * r.h;
+      if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    }
+    ctx.stroke();
+    run = 0;
+    for (i = 0; i < 6; i++) {
+      run += P.explained[i];
+      ctx.beginPath();
+      ctx.arc(r.x + (i + 0.5) * cw, r.y + r.h - run * r.h, 3, 0, 2 * Math.PI);
+      ctx.fillStyle = TEAL;
+      ctx.fill();
+    }
+    ctx.fillStyle = TEAL;
+    ctx.textAlign = 'left';
+    [0, 0.25, 0.5, 0.75, 1].forEach(function (f) {
+      ctx.fillText(Math.round(f * 100) + '%', r.x + r.w + 8, r.y + r.h - f * r.h + 4);
+    });
+    ctx.restore();
+
+    ctx.save();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.moveTo(r.x + S.k * cw, r.y);
+    ctx.lineTo(r.x + S.k * cw, r.y + r.h);
+    ctx.stroke();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.fillText('eigenvalue', r.x + 6, r.y + 14);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('cumulative', r.x + 80, r.y + 14);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     STEP PANELS
+     ===================================================================== */
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(240, (w - 80) / 3);
+    var ctx = fit('c1', w, size + 40);
+    if (!ctx) return;
+    var sv = survey(), j = CORE.indexOf(S.at), R = recon(S.k);
+    var panels = [
+      [sv.X[j], LABEL[S.at], false],
+      [R.R[j], 'rebuilt from ' + S.k, false],
+      [R.res[j], 'residual', true]
+    ];
+    var gap = Math.max(14, (w - 16 - 3 * size) / 3);
+    panels.forEach(function (p, k) {
+      var r = { x: 8 + k * (size + gap), y: 22, w: size, h: size };
+      drawMap(ctx, r, p[0], p[1], p[2]);
+      markChannels(ctx, r);
+    });
+  }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 300;
+    var ctx = fit('c2', w, h);
+    if (!ctx) return;
+    var P = survey().P, bs = brokenStick(6);
+    var r = { x: 52, y: 14, w: w - 52 - 24, h: h - 14 - 76 };
+    grid(ctx, r, 0, 6, 0, 3.4, 6, 4, false);
+
+    var cw = r.w / 6, i;
+    for (i = 0; i < 6; i++) {
+      var cx = r.x + (i + 0.5) * cw;
+      var y = r.y + r.h - P.values[i] / 3.4 * r.h;
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = SLATE;
+      ctx.fillRect(cx - cw * 0.26, y, cw * 0.52, r.y + r.h - y);
+      ctx.restore();
+      // the broken-stick expectation for this position
+      var ys = r.y + r.h - bs[i] * 6 / 3.4 * r.h;
+      ctx.save();
+      ctx.strokeStyle = TEAL;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - cw * 0.34, ys); ctx.lineTo(cx + cw * 0.34, ys);
+      ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('PC' + (i + 1), cx, r.y + r.h + 16);
+      ctx.restore();
+    }
+
+    // the Kaiser line at one
+    var yk = r.y + r.h - 1 / 3.4 * r.h;
+    ctx.save();
+    ctx.strokeStyle = CRIM;
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(r.x, yk); ctx.lineTo(r.x + r.w, yk); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = CRIM;
+    ctx.textAlign = 'right';
+    ctx.fillText('Kaiser: eigenvalue = 1', r.x + r.w - 6, yk - 6);
+    ctx.fillStyle = TEAL;
+    ctx.textAlign = 'left';
+    ctx.fillText('broken stick: what chance would give', r.x + 6, r.y + 14);
+    ctx.restore();
+
+    // where each rule cuts
+    var y0 = r.y + r.h + 34;
+    RULES.forEach(function (R, i2) {
+      var k = ruleValue(R.id);
+      var X = r.x + k * cw;
+      ctx.save();
+      ctx.strokeStyle = INK;
+      ctx.globalAlpha = 0.5;
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(R.label + ': keep ' + k, r.x + i2 * (r.w / 5), y0 + 14);
+      ctx.restore();
+    });
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var cols = 3;
+    var size = Math.min(200, (w - 60) / cols);
+    var ctx = fit('c3', w, 2 * (size + 30) + 8);
+    if (!ctx) return;
+    var R = recon(S.k);
+    var gap = Math.max(12, (w - 16 - cols * size) / cols);
+    CORE.forEach(function (n, i) {
+      var cx = i % cols, cy = Math.floor(i / cols);
+      var r = { x: 8 + cx * (size + gap), y: 20 + cy * (size + 30), w: size, h: size };
+      drawMap(ctx, r, R.res[i], SHORT[n] + '  residual ' + R.rel[i].toFixed(3), true);
+      markChannels(ctx, r);
+    });
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 270;
+    var ctx = fit('c4', w, h);
+    if (!ctx) return;
+    var R = recon(S.k);
+    var r = { x: 52, y: 14, w: w - 52 - 24, h: h - 14 - 52 };
+    grid(ctx, r, 0, 6, 0, 1, 6, 5, false);
+    var cw = r.w / 6;
+    CORE.forEach(function (n, i) {
+      var cx = r.x + (i + 0.5) * cw;
+      var y = r.y + r.h - Math.min(1, R.rel[i]) * r.h;
+      ctx.save();
+      ctx.globalAlpha = 0.88;
+      ctx.fillStyle = R.rel[i] > 0.3 ? CRIM : SLATE;
+      ctx.fillRect(cx - cw * 0.28, y, cw * 0.56, r.y + r.h - y);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(R.rel[i].toFixed(3), cx, y - 6);
+      ctx.fillStyle = SLATE;
+      ctx.fillText(SHORT[n], cx, r.y + r.h + 18);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left';
+    ctx.fillText('residual standard deviation as a fraction of the attribute\u2019s own',
+      r.x + 6, r.y + 14);
+    ctx.restore();
+  }
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 340;
+    var ctx = fit('c5', w, h);
+    if (!ctx) return;
+    var sv = survey(), P = sv.P;
+    var rw = w - 62 - 24, rh = 116;
+    var rA = { x: 62, y: 14, w: rw, h: rh };
+    var rB = { x: 62, y: 14 + rh + 48, w: rw, h: rh };
+    var MMAX = measMax();
+    grid(ctx, rA, 0, 6, 0, MMAX, 6, 4, false);
+    grid(ctx, rB, 0, 6, 0, MMAX, 6, 4, false);
+
+    var cw = rA.w / 6, i;
+    for (i = 0; i < 6; i++) {
+      var cx = rA.x + (i + 0.5) * cw;
+      var v = measure(P.scores[i]);
+      var y = rA.y + rA.h - Math.min(MMAX, v) / MMAX * rA.h;
+      ctx.save();
+      ctx.globalAlpha = i < S.k ? 0.9 : 0.35;
+      ctx.fillStyle = CRIM;
+      ctx.fillRect(cx - cw * 0.20, y, cw * 0.40, rA.y + rA.h - y);
+      ctx.restore();
+      // the share of variance, as a thin marker against the same box
+      var ys = rA.y + rA.h - P.explained[i] * rA.h;
+      ctx.save();
+      ctx.strokeStyle = TEAL;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(cx - cw * 0.32, ys); ctx.lineTo(cx + cw * 0.32, ys);
+      ctx.stroke();
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(v.toFixed(2), cx, y - 6);
+      ctx.fillStyle = SLATE;
+      ctx.fillText('PC' + (i + 1), cx, rA.y + rA.h + 16);
+      ctx.fillText((P.explained[i] * 100).toFixed(1) + '%', cx, rA.y + rA.h + 30);
+      ctx.restore();
+
+      var v2 = measure(sv.X[i]);
+      var y2 = rB.y + rB.h - Math.min(MMAX, v2) / MMAX * rB.h;
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = SLATE;
+      ctx.fillRect(cx - cw * 0.20, y2, cw * 0.40, rB.y + rB.h - y2);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(v2.toFixed(2), cx, y2 - 6);
+      ctx.fillStyle = SLATE;
+      ctx.fillText(SHORT[CORE[i]], cx, rB.y + rB.h + 18);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.fillText('components \u2014 ' + measName(), rA.x + 6, rA.y + 14);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('teal marks: share of the variance', rA.x + 250, rA.y + 14);
+    ctx.fillStyle = INK;
+    ctx.fillText('the six input attributes \u2014 same measurement, same axis',
+      rB.x + 6, rB.y + 14);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function cumAt(k) {
+    var P = survey().P, s = 0;
+    for (var i = 0; i < k; i++) s += P.explained[i];
+    return s;
+  }
+
+  function drawStats() {
+    var P = survey().P, R = recon(S.k);
+    if ($('s1')) {
+      var j = CORE.indexOf(S.at);
+      $('s1').innerHTML =
+        stat('Components kept', String(S.k), 'of six') +
+        stat('Variance retained', (cumAt(S.k) * 100).toFixed(2) + '%', 'across all six attributes') +
+        stat('Residual on ' + SHORT[S.at], R.rel[j].toFixed(3), 'fraction of its own spread') +
+        stat('Eigenvalue at the cut', P.values[S.k - 1].toFixed(4), 'the last one kept');
+    }
+    if ($('s2')) {
+      $('s2').innerHTML = RULES.map(function (r) {
+        var k = ruleValue(r.id);
+        return stat(r.label, String(k), (cumAt(k) * 100).toFixed(1) + '% retained');
+      }).join('');
+    }
+    if ($('s3')) {
+      var worst = 0, i;
+      for (i = 0; i < 6; i++) if (R.rel[i] > R.rel[worst]) worst = i;
+      var best = 0;
+      for (i = 0; i < 6; i++) if (R.rel[i] < R.rel[best]) best = i;
+      $('s3').innerHTML =
+        stat('Components kept', String(S.k), 'of six') +
+        stat('Variance retained', (cumAt(S.k) * 100).toFixed(2) + '%', 'the headline figure') +
+        stat('Worst reconstructed', SHORT[CORE[worst]], 'residual ' + R.rel[worst].toFixed(3)) +
+        stat('Best reconstructed', SHORT[CORE[best]], 'residual ' + R.rel[best].toFixed(3));
+    }
+    if ($('s4')) {
+      var over = 0;
+      for (var i2 = 0; i2 < 6; i2++) if (R.rel[i2] > 0.3) over++;
+      $('s4').innerHTML =
+        stat('Variance retained', (cumAt(S.k) * 100).toFixed(2) + '%', 'across the whole set') +
+        stat('Attributes over 30% short', String(over), 'of six, at this cut') +
+        stat('Largest shortfall', (Math.max.apply(null, R.rel) * 100).toFixed(1) + '%',
+          'of one attribute\u2019s own spread') +
+        stat('Smallest shortfall', (Math.min.apply(null, R.rel) * 100).toFixed(1) + '%', 'of another\u2019s');
+    }
+    if ($('s5')) {
+      var sv = survey(), b = 0, i3;
+      for (i3 = 0; i3 < 6; i3++) if (measure(P.scores[i3]) > measure(P.scores[b])) b = i3;
+      var ba = 0;
+      for (i3 = 0; i3 < 6; i3++) if (measure(sv.X[i3]) > measure(sv.X[ba])) ba = i3;
+      $('s5').innerHTML =
+        stat('Best component', 'PC' + (b + 1), measure(P.scores[b]).toFixed(2) + ', holding ' +
+          (P.explained[b] * 100).toFixed(1) + '%') +
+        stat('First component', measure(P.scores[0]).toFixed(2), 'holding ' +
+          (P.explained[0] * 100).toFixed(1) + '%') +
+        stat('Best input attribute', SHORT[CORE[ba]], measure(sv.X[ba]).toFixed(2)) +
+        stat('Measuring', S.meas === 'sep' ? 'separation' : 'footprint', measName());
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+
+  function fillSelect(id) {
+    var el = $(id);
+    if (!el) return;
+    el.innerHTML = '';
+    CORE.forEach(function (n) {
+      var o = document.createElement('option');
+      o.value = n;
+      o.textContent = LABEL[n];
+      el.appendChild(o);
+    });
+    el.value = S.at;
+  }
+
+  function syncLabels() {
+    ['k', 'k1', 'k3', 'k4'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.k;
+      var v = $(id + 'V'); if (v) v.textContent = String(S.k);
+    });
+    if ($('at1')) $('at1').value = S.at;
+    document.querySelectorAll('#segRule button, #segRule2 button').forEach(function (b) {
+      var on = ruleValue(b.dataset.rule) === S.k;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+    document.querySelectorAll('#segMeas button').forEach(function (b) {
+      var on = b.dataset.meas === S.meas;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !/^p[1-5]$/.test(id);
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('#segRule button, #segRule2 button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.k = ruleValue(b.dataset.rule); syncLabels(); drawAll(); saveState();
+    });
+  });
+  document.querySelectorAll('#segMeas button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.meas = b.dataset.meas; syncLabels(); drawAll(); saveState();
+    });
+  });
+
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t) return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    if (t.tagName === 'SELECT') S[key] = t.value;
+    else if (t.tagName === 'INPUT') S[key] = parseFloat(t.value);
+    else return;
+    syncLabels(); drawAll(); saveState();
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawAll, 140);
+  });
+
+  fillSelect('at1');
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M05 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    scree: function () {
+      var P = survey().P;
+      return {
+        values: P.values.slice(),
+        explained: P.explained.slice(),
+        cumulative: P.cumulative.slice(),
+        stick: brokenStick(6)
+      };
+    },
+    rules: function () {
+      return RULES.map(function (r) {
+        var k = ruleValue(r.id);
+        return { id: r.id, label: r.label, k: k, retained: cumAt(k) };
+      });
+    },
+    residuals: function (k) { return recon(k).rel.slice(); },
+    judgement: function (which) {
+      var sv = survey(), P = sv.P, old = S.meas;
+      S.meas = which;
+      var out = {
+        components: P.scores.map(function (s) { return measure(s); }),
+        attributes: sv.X.map(function (x) { return measure(x); }),
+        explained: P.explained.slice()
+      };
+      S.meas = old;
+      return out;
+    }
+  };
+})();
+</script>
+</body>
+</html>

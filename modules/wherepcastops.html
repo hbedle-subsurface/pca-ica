@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Where PCA stops | How PCA and ICA Actually Work</title>
+<meta name="description" content="The components come out perpendicular because of how they were computed, not because anything in the ground is. Measured on two channel systems whose best directions in attribute space sit 37 degrees apart, and what that costs.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="howmany.html">← Module 05</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 06 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>Where PCA stops</h1>
+    <p class="sub">Two constraints are built into principal component analysis and neither of them comes from the earth. The components are ranked by spread, and they are forced to be at right angles to each other. This survey contains two channel systems of different age, and the directions in attribute space that best show each of them sit thirty-seven degrees apart. These steps measure what a method that insists on ninety can do with that.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">Two targets, six components <span>&mdash; how well each is shown</span></p>
+        <canvas id="cHead" aria-label="Separation of the young and old channel systems achieved by each of the six components, against the variance each holds"></canvas>
+      </div>
+      <div>
+        <p class="cap">Choose a target <span>&mdash; steps 2 to 4 follow it</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>Which channel system</h2>
+            <div class="seg" id="segTgt" role="group" aria-label="Which target">
+              <button type="button" data-tgt="young">Younger channel</button>
+              <button type="button" data-tgt="old">Older channel</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">The younger one is wider, sand-filled and
+              sinuous. The older one is thinner, at a different orientation, and partly overprinted
+              where the two cross.</p>
+          </div>
+          <div class="ctl-col">
+            <h2>Rotate within a component pair</h2>
+            <div class="ctl">
+              <label for="rot">Angle inside the PC2&ndash;PC3 plane
+                <span class="val" id="rotV">0&deg;</span></label>
+              <input type="range" data-key="rot" id="rot" min="0" max="175" step="5" value="0">
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">At zero this is component 2 exactly. Step 4 is
+              about what lives at the other angles, and why PCA does not go there.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Two targets</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · What the geology wants</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · Ninety degrees</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Rotate the pair</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · What is left</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Two channel systems, spread across six components</h3>
+      <span class="hint">Neither one lands anywhere cleanly</span>
+    </div>
+
+    <p class="qbox"><b>Why this step is here.</b> A common expectation of dimension reduction is that
+      distinct geological features will come out on distinct components. Nothing in the method promises
+      that, and it is worth seeing what happens instead before seeing why.</p>
+
+    <p class="lede">The survey contains a younger sinuous channel and an older, thinner one at a
+      different orientation. Both are real features of the model, both affect several attributes, and
+      both are things an interpreter would want mapped separately.</p>
+    <p class="lede">The bars above the tabs give how well each component separates each channel axis from
+      its own margins. The younger channel is best shown by components 2 and 3, at 2.81 and 2.57, and
+      the older one is best shown by component 3 at 1.03. No component holds one of them without holding
+      some of the other, and the first component, which holds more than half the variance, shows
+      neither.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The first four components, as maps</h3>
+        <span class="hint">Both channel axes marked on each</span>
+      </div>
+      <canvas id="c1" aria-label="The first four component score maps with both channel axes marked"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Which channel system</h2>
+        <div class="seg" id="segTgt1" role="group" aria-label="Which target">
+          <button type="button" data-tgt="young">Younger</button>
+          <button type="button" data-tgt="old">Older</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+    <div class="legend prose">
+      <span>The solid white line is the younger channel axis and the dashed one is the older. Where they
+        cross, the younger sand overprints the older, so any attribute measured over the window carries
+        both, and a method working only from those attributes has no way to know they are two
+        things.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>The direction each target would have chosen</h3>
+      <span class="hint">Computed with the answer in hand</span>
+    </div>
+
+    <p class="lede">Suppose the position of each channel were known, and the best possible direction in
+      attribute space were computed for showing it: the weighted combination of the six attributes that
+      pushes the channel axis furthest from its margins relative to the scatter within each. That is a
+      standard discriminant calculation, and it uses information the method does not have. It is done
+      here only to establish what the answer would have been.</p>
+    <p class="lede">For the younger channel that direction achieves a separation of 8.97, against 2.81
+      for the best component and 5.97 for the best single attribute. For the older one it achieves 1.62
+      against 1.03. Both directions exist, both are available inside the same six attributes, and
+      neither is any component.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The two directions, as weights on the six attributes</h3>
+        <span class="hint">Shared axis, both drawn the same way</span>
+      </div>
+      <canvas id="c2" aria-label="The best separating direction for each channel system, as weights on the six attributes"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Which channel system</h2>
+        <div class="seg" id="segTgt2" role="group" aria-label="Which target">
+          <button type="button" data-tgt="young">Younger</button>
+          <button type="button" data-tgt="old">Older</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+    <div class="legend prose">
+      <span>This calculation is supervised: it was told where the channel is. The point of putting it on
+        the page is not that it could be run on a real survey without an interpretation already in hand,
+        but that it establishes a ceiling. Any unsupervised method is trying to find something near
+        these directions without being shown them, and knowing where they are makes it possible to say
+        how close anything got.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Thirty-seven degrees apart, and the method insists on ninety</h3>
+      <span class="hint">The constraint, stated as a number</span>
+    </div>
+
+    <p class="lede">The two directions from step 2 are 37.14 degrees apart. That is the whole of this
+      module in one measurement. Principal components are perpendicular to each other by construction,
+      because each is taken from the residual of the last; if two features in the ground want directions
+      thirty-seven degrees apart, no pair of perpendicular components can point along both.</p>
+    <p class="lede">The panel below gives the angle between every component and each of the two target
+      directions. Nothing is close. The nearest approach in the whole set is component 3 at 36.9 degrees
+      from the older channel's direction, and component 2 at 50.4 degrees from the younger one's. A
+      direction fifty degrees away from what you wanted still carries some of it, which is why the
+      components show the channels at all, and carries the rest of whatever else is in that direction,
+      which is why they show them mixed.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Angle between each component and each target direction</h3>
+        <span class="hint">Ninety would mean the component carries none of that target</span>
+      </div>
+      <canvas id="c3" aria-label="The angle between each principal component and the best separating direction for each channel system"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Which channel system</h2>
+        <div class="seg" id="segTgt3" role="group" aria-label="Which target">
+          <button type="button" data-tgt="young">Younger</button>
+          <button type="button" data-tgt="old">Older</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Turn the pair and watch the ranking fail</h3>
+      <span class="hint">Variance falls while the map improves</span>
+    </div>
+
+    <p class="lede">Components 2 and 3 span a plane. Any direction inside that plane is available as a
+      weighted combination of the two, and any of them could be written out as a volume. The slider in
+      the header turns a direction through that plane, starting on component 2 at zero degrees and
+      reaching component 3 at ninety.</p>
+    <p class="lede">At zero degrees the direction separates the younger channel at 2.81 and holds a
+      variance of 1.286. At forty-five degrees it separates at 7.42 and holds 1.012. The map gets
+      dramatically better while the quantity the method ranks by gets worse, so the ranking is pointing
+      away from the useful direction. Nothing was added to the data to make this happen; the better
+      direction was inside the span of the components PCA already returned, and PCA had no reason to
+      prefer it.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Separation and variance as the direction turns</h3>
+        <span class="hint">One shared angle axis, both fixed</span>
+      </div>
+      <canvas id="c4" aria-label="Separation of each channel system and the variance held, as a direction is rotated within the plane of components two and three"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <label for="rot4">Angle inside the PC2&ndash;PC3 plane
+          <span class="val" id="rot4V">0&deg;</span></label>
+        <input type="range" data-key="rot" id="rot4" min="0" max="175" step="5" value="0">
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+    <div class="legend prose">
+      <span>Both channel systems improve together as the direction turns, rather than trading against
+        each other, and that follows from the thirty-seven degrees: two targets whose directions are
+        that close cannot be pulled apart by choosing between them. Separating them would need more than
+        a rotation of one plane.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Second-order statistics are used up. Something is left</h3>
+      <span class="hint">The opening the next module walks through</span>
+    </div>
+
+    <p class="lede">Everything PCA can see is in the covariance matrix, which holds variances and
+      covariances and nothing else. Once the components are found, that matrix has been fully used: the
+      scores are uncorrelated with each other, and no rotation of them can produce more decorrelation
+      than that.</p>
+    <p class="lede">But decorrelated is not the same as finished. The crossplot below is the score of one
+      component against another, and if the scores were shapeless the cloud would be a featureless round
+      ball with nothing in it to prefer one rotation over any other. It is not shapeless. The excess
+      kurtosis of the first component's score is 5.11, of the second 3.73, of the third 3.85: strongly
+      peaked distributions with long tails, which a shapeless cloud would not have.</p>
+    <p class="lede">That structure is invisible to a covariance matrix, which means it is invisible to
+      PCA, which means there is something left in the data that a method looking at it could still use.
+      That is module 07.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Two scores against each other, and their distributions</h3>
+        <span class="hint">Round would mean nothing left to find</span>
+      </div>
+      <canvas id="c5" aria-label="Crossplot of two component scores with their histograms, compared against a Gaussian of the same variance"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 200px;min-width:180px">
+        <label for="ca">Horizontal</label>
+        <select id="ca" data-key="ca"></select>
+      </div>
+      <div class="ctl" style="flex:1 1 200px;min-width:180px">
+        <label for="cb">Vertical</label>
+        <select id="cb" data-key="cb"></select>
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">Where this shows up in real work</span>
+    </div>
+    <p class="lede">The two constraints examined here are the reason a PCA result can be correct and
+      unhelpful at the same time, and they are the reason a second family of methods exists.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Expecting one feature per component.</b> Distinct geology arriving on distinct components
+        happens when the features' directions in attribute space happen to be near perpendicular. That
+        is a property of the attribute set and the geology together, not something the method
+        arranges.</li>
+      <li><b>Reading a mixed component.</b> A component showing two things at once is not a failure of
+        the run. It is what a perpendicular basis does with features that are not perpendicular, and no
+        parameter choice fixes it.</li>
+      <li><b>Rotating components afterward.</b> Factor analysis has rotated solutions for exactly this
+        reason, and the seismic equivalent is to stop insisting on orthogonality, which is what module 08
+        does.</li>
+      <li><b>Judging whether a method helped.</b> The supervised ceiling in step 2 is worth computing
+        whenever a ground truth exists, even on part of a survey. It converts "the components look
+        reasonable" into a number.</li>
+    </ul>
+    <p class="lede"><b>Two points that are commonly confused.</b> The first is that orthogonality is a
+      natural property of independent geological effects. Independent causes do not generally produce
+      perpendicular directions in an arbitrary attribute space, and the two channel systems here are
+      independent in origin and thirty-seven degrees apart in attributes. The second is that a low
+      variance component is a minor one. Step 4 reaches its best map at a direction whose variance is
+      lower than the component it started from.</p>
+    <div class="legend prose">
+      <span>None of this is an argument that PCA is the wrong tool. Decorrelating a redundant attribute
+        set, compressing it, and whitening it before something else runs are all jobs it does exactly.
+        The argument is against expecting it to isolate geology, which it was never constructed to
+        do.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Look for each channel in each component.</b>
+          <em class="point">Why: the expectation that features separate onto components is worth testing
+            rather than assuming.</em>
+          Switch between the two targets in the header and read the separation each component achieves
+          for each.
+          <em class="predict">Before starting: two distinct geological features, six components. How many
+            components do you expect to hold one feature and not the other?</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">For the younger channel the
+            six components give 0.33, &minus;2.81, &minus;2.57, 0.28, &minus;0.42 and 0.99. For the older
+            one they give &minus;0.30, &minus;0.56, &minus;1.03, 0.11, &minus;0.18 and &minus;0.04. No
+            component holds one and not the other: component 3 is the best available for the older
+            channel at 1.03 and it is also the second best for the younger at 2.57. The first component,
+            with 52.19% of the variance, is the worst in the set for both. Six components, two features,
+            and not one clean assignment between them.</span></details></li>
+
+        <li><b>Find the ceiling.</b>
+          <em class="point">Why: knowing what was achievable is what turns a judgment about a map into a
+            measurement.</em>
+          In step 2, read the separation achieved by the best direction for each target, and compare it
+          against the best component and the best single attribute from module 05.
+          <details class="reveal"><summary>Hint</summary><span class="ans">For the younger channel the
+            best possible direction reaches 8.97. The best component reaches 2.81 and the best single
+            attribute, peak frequency, reaches 5.97. For the older channel the ceiling is 1.62 against
+            1.03 from the best component. So on the younger channel the unsupervised result recovered
+            less than a third of what was available, and a single raw attribute did better than it. The
+            older channel is a harder target in every direction, which is itself worth knowing: its
+            ceiling of 1.62 says the six attributes carry little about it, and no method could have
+            fixed that.</span></details></li>
+
+        <li><b>Measure the constraint.</b>
+          <em class="point">Why: this is the number that says in advance whether a perpendicular basis
+            can work on a given problem.</em>
+          In step 3, read the angle between the two target directions, and the angle between each
+          component and each target.
+          <details class="reveal"><summary>Hint</summary><span class="ans">The two target directions are
+            37.14 degrees apart. Principal components are exactly 90 degrees apart, so no two of them can
+            sit along two directions that are 37 apart — the geometry forbids it before any data is
+            considered. The closest any component comes to either target is component 3 at 36.9 degrees
+            from the older channel's direction; for the younger channel the closest is component 2 at
+            50.4 degrees. Component 1, holding half the variance, sits at 85.4 and 87.9 degrees, which is
+            nearly perpendicular to both and explains why it shows neither.</span></details></li>
+
+        <li><b>Turn the direction and watch the ranking point the wrong way.</b>
+          <em class="point">Why: the ordering by variance is not a proxy for usefulness, and here it is
+            actively anti-correlated with it.</em>
+          In step 4, take the rotation from 0 to 90 degrees in steps and read the separation and the
+          variance at each.
+          <details class="reveal"><summary>Hint</summary><span class="ans">At 0 degrees, which is
+            component 2 exactly, the younger channel separates at 2.81 with a variance of 1.286. At 30
+            degrees it is 6.23 with 1.149, at 45 degrees 7.42 with 1.012, at 60 degrees 6.00 with 0.875,
+            and at 90 degrees, which is component 3, it is 2.57 with 0.739. The best map in the plane is
+            at 45 degrees and it holds less variance than the component the rotation started from. PCA
+            had every one of these directions available and chose the two least useful ones in the plane,
+            because the only thing it was ranking by was the quantity that falls as the map
+            improves.</span></details></li>
+
+        <li><b>Check whether anything is left.</b>
+          <em class="point">Why: if the component scores were shapeless, PCA would be the end of the
+            story, and the next module would have nothing to work with.</em>
+          In step 5, look at the crossplots of the first few scores against each other and read the
+          excess kurtosis of each.
+          <details class="reveal"><summary>Hint</summary><span class="ans">The excess kurtosis of the
+            six scores is 5.11, 3.73, 3.85, &minus;0.18, 5.13 and 2.78. A shapeless cloud would give zero
+            for all of them. Five of the six are strongly positive, meaning sharply peaked distributions
+            with long tails, and the crossplots show clear structure rather than round blobs. The
+            covariance matrix has nothing to say about any of it — every pair of scores is uncorrelated
+            at about ten to the minus fifteen, which is as decorrelated as anything gets. So the
+            second-order statistics are exhausted and the data is still visibly structured. The fourth
+            score, at &minus;0.18, is the one that is close to shapeless, and it is also the one carrying
+            most of the acquisition footprint.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>The components are perpendicular because of the procedure.</b> Each is taken from the
+          residual of the last, so orthogonality is guaranteed whatever the geology does.</li>
+        <li><b>Geological features do not generally want perpendicular directions.</b> The two channel
+          systems here want directions 37.14 degrees apart, and no perpendicular pair can serve both.</li>
+        <li><b>A mixed component is the expected outcome, not a bad run.</b> No parameter choice
+          separates features whose directions are close together.</li>
+        <li><b>The variance ranking can point away from the useful direction.</b> Rotating inside the
+          plane of components 2 and 3 nearly triples the channel separation while lowering the
+          variance.</li>
+        <li><b>A supervised ceiling turns a judgment into a measurement.</b> The best possible direction
+          reaches 8.97 here; the best component reached 2.81.</li>
+        <li><b>Decorrelated is not finished.</b> The scores are uncorrelated to machine precision and
+          their distributions are still strongly non-Gaussian, which is structure PCA cannot see.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>The survey, the attributes and the standardization</b> are those of modules 04 and
+      05: six attributes on samples 22 to 50 of a 72 by 72 trace slab, Z-scored before the matrix is
+      formed.</p>
+    <p class="lede"><b>The two targets.</b> The younger channel is the sand-filled sinuous system with a
+      maximum bed thickness of 26 ms; the older one is thinner, at a different orientation and a
+      different level in the window. For each, the axis is the set of traces within half a channel width
+      of the model's centerline and the margin is the set between 1.1 and 2.0 channel widths from it:
+      249 and 498 traces for the younger, 170 and 342 for the older.</p>
+    <p class="lede"><b>The separation statistic</b> is the difference between the mean over the axis
+      traces and the mean over the margin traces, divided by the pooled standard deviation of the two
+      groups. It is signed here, unlike in module 05, because the sign says which way round the feature
+      appears and a comparison between directions needs it. It is a convenience for this teaching set
+      rather than a standard seismic measurement.</p>
+    <p class="lede"><b>The best separating direction</b> in step 2 is Fisher's linear discriminant:
+      the pooled within-class covariance matrix inverted and applied to the difference of the two class
+      means, in standardized attribute space, then normalized to unit length. The inverse is computed
+      from the matrix's own eigendecomposition by
+      <span class="k">assets/multivar.js</span>, with eigenvalues clamped at a floor so that a matrix
+      that is singular to working precision gives a pseudo-inverse rather than infinities.</p>
+    <p class="lede"><b>This calculation is supervised and the module says so repeatedly.</b> It is told
+      where the channel is, which no unsupervised method is, and it could not be run on a real survey
+      before an interpretation existed. It is on the page to establish a ceiling: without it, a statement
+      that the components did badly has nothing to be measured against.</p>
+    <p class="lede"><b>Step 4's rotation</b> forms unit directions cos&theta;·v₂ + sin&theta;·v₃ from the
+      second and third eigenvectors and projects the standardized data onto each. Every direction in that
+      plane is a valid weighted sum of the six input attributes and could be written out as a volume by
+      any package that can add volumes with coefficients.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> The channel positions come from the model,
+      and on real data they would be interpretations with their own uncertainty, which would widen every
+      separation figure here. The window is one stratal slab; a direction that works on it is not
+      guaranteed to work on another. Only two features are considered, where a real survey holds many and
+      they are not cleanly separable into a list. The discriminant assumes the two classes share a
+      covariance structure, which they do not exactly.</p>
+    <p class="lede"><b>Where this departs from production software.</b> Nowhere in the arithmetic. The
+      constraint this module measures is a property of principal component analysis rather than of any
+      implementation of it, so every package has it. Some offer a rotation of the retained components
+      afterward — varimax and its relatives, familiar from factor analysis — which relaxes the
+      interpretation of the axes without relaxing orthogonality. Dropping the orthogonality requirement
+      altogether is what module 08 does.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Fisher, R. A., 1936, The use of multiple measurements in taxonomic problems: <em>Annals of
+          Eugenics</em>, <b>7</b>, 179&ndash;188.</li>
+        <li>Jolliffe, I. T., 2002, <em>Principal Component Analysis</em>, 2nd ed.: Springer — chapter 11
+          on rotation and on the interpretation of components.</li>
+        <li>Hyvärinen, A., and E. Oja, 2000, Independent component analysis: algorithms and applications:
+          <em>Neural Networks</em>, <b>13</b>, 411&ndash;430.</li>
+        <li>Lubo-Robles, D., and K. J. Marfurt, 2019, Independent component analysis for reservoir
+          geomorphology and unsupervised seismic facies classification in the Taranaki Basin, New
+          Zealand: <em>Interpretation</em>, <b>7</b>, SE19&ndash;SE42.</li>
+        <li>Lubo-Robles, D., H. Bedle, K. J. Marfurt, and M. J. Pranter, 2023, Evaluation of principal
+          component analysis for seismic attribute selection and self-organizing maps for seismic facies
+          discrimination in the presence of gas hydrates: <em>Marine and Petroleum Geology</em>,
+          <b>150</b>, 106097.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>07 · Independence is not decorrelation</h3>
+    <p>The scores are uncorrelated and their distributions are still structured. What kind of statistic
+      can see that structure, and why a mixture of things always looks more shapeless than the things
+      that went into it.</p>
+    <a class="btn ghost" href="independence.html">Module 07 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="howmany.html">← Module 05: how many components to keep</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="independence.html">Module 07: independence is not decorrelation →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license. If you use it in a course or a talk, a credit line
+        and a link back are all that is asked.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened, so that the university can see these are being used &mdash; no cookie, no
+        account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js. It ' +
+      'expects them one directory up, at ../assets/, and file names are case-sensitive on GitHub Pages.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+
+  var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
+  var SHORT = {
+    rms: 'RMS', envelope: 'envelope', peakfreq: 'f peak', bandwidth: 'bandwidth',
+    coherence: 'coherence', glcmcon: 'GLCM contrast'
+  };
+
+  var DEF = { tgt: 'young', rot: 0, ca: 0, cb: 1, tab: 'p1' };
+  var S = MV.readState(DEF);
+  if (S.tgt !== 'young' && S.tgt !== 'old') S.tgt = 'young';
+  S.rot = Math.max(0, Math.min(175, Math.round(S.rot / 5) * 5));
+  S.ca = Math.max(0, Math.min(5, Math.round(S.ca)));
+  S.cb = Math.max(0, Math.min(5, Math.round(S.cb)));
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  var SURVEY = null;
+  function survey() {
+    if (SURVEY) return SURVEY;
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var attr = AF.attributes(slab, CORE);
+    var X = CORE.map(function (n) { return attr[n]; });
+    SURVEY = { slab: slab, X: X, Z: MV.zscore(X), P: MV.pca(X, { standardize: true }) };
+    return SURVEY;
+  }
+
+  /* =====================================================================
+     THE TWO TARGETS
+
+     Axis traces and margin traces for each channel system, taken from the
+     model. No real survey supplies these; they stand in for an
+     interpretation and the Method tab says so.
+     ===================================================================== */
+
+  var MASKS = {};
+  function masksFor(which) {
+    if (MASKS[which]) return MASKS[which];
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny;
+    var spec = which === 'young' ? AF.YOUNG : AF.OLD;
+    var axis = [], marg = [], ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      var yc = AF.centerline(ix, nx, spec) * (ny - 1);
+      var d = Math.abs(iy - yc) / (spec.halfWidth * (ny - 1));
+      var k = ix * ny + iy;
+      if (d < 0.45) axis.push(k); else if (d > 1.1 && d < 2.0) marg.push(k);
+    }
+    MASKS[which] = { axis: axis, marg: marg };
+    return MASKS[which];
+  }
+
+  function sep(m, which) {
+    var M = masksFor(which);
+    var a = M.axis.map(function (k) { return m[k]; });
+    var b = M.marg.map(function (k) { return m[k]; });
+    var ma = MV.mean(a), mb = MV.mean(b);
+    var sa = MV.std(a, ma), sb = MV.std(b, mb);
+    return (ma - mb) / Math.sqrt((sa * sa + sb * sb) / 2 || 1);
+  }
+
+  /* Fisher's linear discriminant: the direction in standardized attribute
+     space that pushes the two groups furthest apart relative to the scatter
+     within them. Supervised, and used only to establish a ceiling. */
+  var FISH = {};
+  function fisher(which) {
+    if (FISH[which]) return FISH[which];
+    var sv = survey(), Z = sv.Z, p = CORE.length;
+    var M = masksFor(which);
+
+    function groupStats(idx) {
+      var mu = [], j, k;
+      for (j = 0; j < p; j++) {
+        var s = 0;
+        for (k = 0; k < idx.length; k++) s += Z[j][idx[k]];
+        mu.push(s / idx.length);
+      }
+      var C = [];
+      for (j = 0; j < p; j++) C.push(new Float64Array(p));
+      for (j = 0; j < p; j++) {
+        for (var l = j; l < p; l++) {
+          var s2 = 0;
+          for (k = 0; k < idx.length; k++) {
+            s2 += (Z[j][idx[k]] - mu[j]) * (Z[l][idx[k]] - mu[l]);
+          }
+          s2 /= idx.length;
+          C[j][l] = s2; C[l][j] = s2;
+        }
+      }
+      return { mu: mu, C: C, n: idx.length };
+    }
+
+    var a = groupStats(M.axis), b = groupStats(M.marg);
+    var tot = a.n + b.n, Sw = [], i, j;
+    for (i = 0; i < p; i++) {
+      Sw.push(new Float64Array(p));
+      for (j = 0; j < p; j++) Sw[i][j] = (a.n * a.C[i][j] + b.n * b.C[i][j]) / tot;
+    }
+    var Si = MV.inverse(Sw);
+    var w = new Float64Array(p);
+    for (i = 0; i < p; i++) {
+      var s3 = 0;
+      for (j = 0; j < p; j++) s3 += Si[i][j] * (a.mu[j] - b.mu[j]);
+      w[i] = s3;
+    }
+    FISH[which] = MV.unit(w);
+    return FISH[which];
+  }
+
+  function angleBetween(u, v) {
+    var s = 0;
+    for (var i = 0; i < u.length; i++) s += u[i] * v[i];
+    return Math.acos(Math.min(1, Math.abs(s))) * 180 / Math.PI;
+  }
+
+  /* The direction at the current rotation inside the plane of PC2 and PC3. */
+  function rotated(deg) {
+    var P = survey().P, th = (deg === undefined ? S.rot : deg) * Math.PI / 180;
+    var u = new Float64Array(CORE.length);
+    for (var i = 0; i < CORE.length; i++) {
+      u[i] = Math.cos(th) * P.vectors[1][i] + Math.sin(th) * P.vectors[2][i];
+    }
+    return MV.unit(u);
+  }
+
+  /* =====================================================================
+     DRAWING HELPERS
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+
+  function grid(ctx, r, x0, x1, y0, y1, nx, ny, labels) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.strokeStyle = '#E4E7EA';
+    ctx.lineWidth = 1;
+    var i, v, X, Y;
+    ctx.textAlign = 'center';
+    for (i = 0; i <= nx; i++) {
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+      if (labels) {
+        v = x0 + (x1 - x0) * i / nx;
+        ctx.fillText(String(Math.round(v)), X, r.y + r.h + 14);
+      }
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.fillText(Math.abs(v) >= 10 || v === Math.round(v) ? String(Math.round(v)) : v.toFixed(1),
+        r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var stops = [[26, 47, 63], [61, 109, 125], [166, 196, 198], [244, 240, 227],
+                 [214, 156, 110], [166, 71, 52], [102, 20, 24]];
+    var u = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(u)), f = u - i;
+    var a = stops[i], b = stops[i + 1];
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * f) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * f) + ',' +
+      Math.round(a[2] + (b[2] - a[2]) * f) + ')';
+  }
+
+  function drawMap(ctx, r, m, title) {
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny;
+    var q = Math.max(Math.abs(AF.percentile(m, 0.01)), Math.abs(AF.percentile(m, 0.99))) || 1;
+    var cw = r.w / nx, ch = r.h / ny, ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      ctx.fillStyle = cmap((m[ix * ny + iy] + q) / (2 * q));
+      ctx.fillRect(r.x + ix * cw, r.y + (ny - 1 - iy) * ch, cw + 0.6, ch + 0.6);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    if (title) {
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 5);
+      ctx.font = '11px ui-monospace,Menlo,monospace';
+    }
+    ctx.restore();
+  }
+
+  function markChannels(ctx, r) {
+    var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny;
+    ctx.save();
+    ctx.lineWidth = 1.2;
+    [[AF.YOUNG, 'rgba(255,255,255,0.9)', []], [AF.OLD, 'rgba(255,255,255,0.75)', [4, 3]]]
+      .forEach(function (p) {
+        ctx.strokeStyle = p[1];
+        ctx.setLineDash(p[2]);
+        ctx.beginPath();
+        for (var ix = 0; ix < nx; ix++) {
+          var yc = AF.centerline(ix, nx, p[0]) * (ny - 1);
+          var X = r.x + (ix + 0.5) * r.w / nx;
+          var Y = r.y + r.h - (yc + 0.5) * r.h / ny;
+          if (ix === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+        }
+        ctx.stroke();
+      });
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     HEADER
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 230;
+    var ctx = fit('cHead', w, h);
+    if (!ctx) return;
+    var P = survey().P;
+    var r = { x: 56, y: 14, w: w - 56 - 24, h: h - 14 - 52 };
+    grid(ctx, r, 0, 6, -3.5, 3.5, 6, 7, false);
+
+    var cw = r.w / 6, zero = r.y + r.h / 2, i;
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath(); ctx.moveTo(r.x, zero); ctx.lineTo(r.x + r.w, zero); ctx.stroke();
+    ctx.restore();
+
+    for (i = 0; i < 6; i++) {
+      var cx = r.x + (i + 0.5) * cw;
+      [['young', CRIM, -0.30], ['old', TEAL, 0.04]].forEach(function (q) {
+        var v = sep(P.scores[i], q[0]);
+        var hh = -v / 3.5 * (r.h / 2);
+        ctx.save();
+        ctx.globalAlpha = (q[0] === S.tgt) ? 0.92 : 0.30;
+        ctx.fillStyle = q[1];
+        ctx.fillRect(cx + q[2] * cw, Math.min(zero, zero + hh), cw * 0.26, Math.abs(hh));
+        ctx.restore();
+      });
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('PC' + (i + 1), cx, r.y + r.h + 16);
+      ctx.fillText((P.explained[i] * 100).toFixed(1) + '%', cx, r.y + r.h + 30);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = CRIM;
+    ctx.fillText('younger channel', r.x + 8, r.y + 14);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('older channel', r.x + 130, r.y + 14);
+    ctx.fillStyle = SLATE;
+    ctx.fillText('separation, pooled sd', r.x + 8, r.y + r.h - 6);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     STEP PANELS
+     ===================================================================== */
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(210, (w - 70) / 4);
+    var ctx = fit('c1', w, size + 40);
+    if (!ctx) return;
+    var P = survey().P;
+    var gap = Math.max(12, (w - 16 - 4 * size) / 4);
+    for (var i = 0; i < 4; i++) {
+      var r = { x: 8 + i * (size + gap), y: 22, w: size, h: size };
+      drawMap(ctx, r, P.scores[i], 'PC' + (i + 1) + '   ' +
+        sep(P.scores[i], S.tgt).toFixed(2));
+      markChannels(ctx, r);
+    }
+  }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var rowH = 26;
+    var ctx = fit('c2', w, 34 + CORE.length * rowH + 26);
+    if (!ctx) return;
+    var wy = fisher('young'), wo = fisher('old');
+    var x0 = 112, rw = w - x0 - 30, mid = x0 + rw / 2;
+    ctx.save();
+    ctx.strokeStyle = '#E4E7EA';
+    [-1, -0.5, 0, 0.5, 1].forEach(function (v) {
+      var X = mid + v * rw / 2;
+      ctx.beginPath(); ctx.moveTo(X, 30); ctx.lineTo(X, 30 + CORE.length * rowH); ctx.stroke();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.fillText(v.toFixed(1), X, 24);
+    });
+    ctx.restore();
+    CORE.forEach(function (n, i) {
+      var y = 30 + i * rowH;
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'right';
+      ctx.fillText(SHORT[n], x0 - 8, y + rowH / 2 + 4);
+      ctx.restore();
+      [[wy[i], CRIM, 2, 'young'], [wo[i], TEAL, 13, 'old']].forEach(function (q) {
+        var bw = q[0] * rw / 2;
+        ctx.save();
+        ctx.globalAlpha = (q[3] === S.tgt) ? 0.92 : 0.32;
+        ctx.fillStyle = q[1];
+        ctx.fillRect(Math.min(mid, mid + bw), y + q[2], Math.abs(bw), 9);
+        ctx.restore();
+      });
+    });
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = CRIM;
+    ctx.fillText('younger channel direction', x0, 34 + CORE.length * rowH + 14);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('older channel direction', x0 + 200, 34 + CORE.length * rowH + 14);
+    ctx.restore();
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 270;
+    var ctx = fit('c3', w, h);
+    if (!ctx) return;
+    var P = survey().P, wy = fisher('young'), wo = fisher('old');
+    var r = { x: 56, y: 14, w: w - 56 - 24, h: h - 14 - 52 };
+    grid(ctx, r, 0, 6, 0, 90, 6, 6, false);
+    var cw = r.w / 6, i;
+    for (i = 0; i < 6; i++) {
+      var cx = r.x + (i + 0.5) * cw;
+      [[angleBetween(wy, P.vectors[i]), CRIM, -0.30, 'young'],
+       [angleBetween(wo, P.vectors[i]), TEAL, 0.04, 'old']].forEach(function (q) {
+        var y = r.y + r.h - q[0] / 90 * r.h;
+        ctx.save();
+        ctx.globalAlpha = (q[3] === S.tgt) ? 0.92 : 0.30;
+        ctx.fillStyle = q[1];
+        ctx.fillRect(cx + q[2] * cw, y, cw * 0.26, r.y + r.h - y);
+        ctx.restore();
+        if (q[3] === S.tgt) {
+          ctx.save();
+          ctx.fillStyle = INK;
+          ctx.textAlign = 'center';
+          ctx.font = '10px ui-monospace,Menlo,monospace';
+          ctx.fillText(q[0].toFixed(1), cx + q[2] * cw + cw * 0.13, y - 5);
+          ctx.restore();
+        }
+      });
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('PC' + (i + 1), cx, r.y + r.h + 16);
+      ctx.restore();
+    }
+    var y90 = r.y;
+    ctx.save();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1.4;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(r.x, y90); ctx.lineTo(r.x + r.w, y90); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'right';
+    ctx.fillText('90\u00b0: carries none of that target', r.x + r.w - 6, y90 + 14);
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left';
+    ctx.fillText('angle to the best direction, degrees', r.x + 8, r.y + r.h - 8);
+    ctx.restore();
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 310;
+    var ctx = fit('c4', w, h);
+    if (!ctx) return;
+    var sv = survey();
+    var rw = w - 62 - 24, rh = 106;
+    var rA = { x: 62, y: 14, w: rw, h: rh };
+    var rB = { x: 62, y: 14 + rh + 34, w: rw, h: rh };
+    grid(ctx, rA, 0, 180, 0, 8, 6, 4, true);
+    grid(ctx, rB, 0, 180, 0, 1.6, 6, 4, true);
+
+    var ys = [], yo = [], vv = [], t;
+    for (t = 0; t <= 180; t += 5) {
+      var pr = MV.project(sv.Z, rotated(t));
+      ys.push(Math.abs(sep(pr, 'young')));
+      yo.push(Math.abs(sep(pr, 'old')));
+      vv.push(MV.variance(pr));
+    }
+    function curve(rect, arr, ymax, color, width) {
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width || 2;
+      ctx.beginPath();
+      for (var i = 0; i < arr.length; i++) {
+        var X = rect.x + (i * 5) / 180 * rect.w;
+        var Y = rect.y + rect.h - Math.min(ymax, arr[i]) / ymax * rect.h;
+        if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+    curve(rA, ys, 8, CRIM, S.tgt === 'young' ? 2.4 : 1.2);
+    curve(rA, yo, 8, TEAL, S.tgt === 'old' ? 2.4 : 1.2);
+    curve(rB, vv, 1.6, INK, 2);
+
+    [rA, rB].forEach(function (rect) {
+      var X = rect.x + S.rot / 180 * rect.w;
+      ctx.save();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(X, rect.y); ctx.lineTo(X, rect.y + rect.h); ctx.stroke();
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = CRIM;
+    ctx.fillText('younger channel separation', rA.x + 8, rA.y + 16);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('older', rA.x + 210, rA.y + 16);
+    ctx.fillStyle = INK;
+    ctx.fillText('variance held by the direction', rB.x + 8, rB.y + 16);
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText('degrees from component 2 toward component 3 \u2014 one axis, shared',
+      rB.x + rB.w / 2, rB.y + rB.h + 32);
+    ctx.restore();
+  }
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(280, w * 0.45);
+    var ctx = fit('c5', w, size + 56);
+    if (!ctx) return;
+    var P = survey().P;
+    var a = P.scores[S.ca], b = P.scores[S.cb];
+    var sa = MV.std(a) || 1, sb = MV.std(b) || 1;
+    var ma = MV.mean(a), mb = MV.mean(b);
+    var r = { x: 52, y: 22, w: size, h: size };
+    grid(ctx, r, -4, 4, -4, 4, 4, 4, true);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
+    ctx.fillStyle = 'rgba(22,25,28,0.30)';
+    for (var i = 0; i < a.length; i++) {
+      var zx = (a[i] - ma) / sa, zy = (b[i] - mb) / sb;
+      var X = r.x + (zx + 4) / 8 * r.w;
+      var Y = r.y + r.h - (zy + 4) / 8 * r.h;
+      ctx.fillRect(X - 0.9, Y - 0.9, 1.8, 1.8);
+    }
+    ctx.restore();
+
+    // the histogram of the horizontal score, against a Gaussian of equal spread
+    var hx = { x: r.x + size + 46, y: 22, w: Math.max(150, w - (r.x + size + 46) - 24), h: size };
+    grid(ctx, hx, -4, 4, 0, 0.5, 4, 5, true);
+    var H = MV.hist(a, ma - 4 * sa, ma + 4 * sa, 48);
+    var bw = hx.w / 48, k;
+    ctx.save();
+    ctx.fillStyle = CRIM;
+    ctx.globalAlpha = 0.82;
+    for (k = 0; k < 48; k++) {
+      var frac = H.counts[k] / H.n / (8 / 48);          // density per unit of sd
+      var bh = Math.min(1, frac / 0.5) * hx.h;
+      ctx.fillRect(hx.x + k * bw + 0.4, hx.y + hx.h - bh, Math.max(1, bw - 0.8), bh);
+    }
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = TEAL;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (k = 0; k <= 96; k++) {
+      var z = -4 + 8 * k / 96;
+      var g = Math.exp(-z * z / 2) / Math.sqrt(2 * Math.PI);
+      var X2 = hx.x + (z + 4) / 8 * hx.w;
+      var Y2 = hx.y + hx.h - Math.min(1, g / 0.5) * hx.h;
+      if (k === 0) ctx.moveTo(X2, Y2); else ctx.lineTo(X2, Y2);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = INK;
+    ctx.font = '600 10px ui-monospace,Menlo,monospace';
+    ctx.fillText('PC' + (S.ca + 1) + ' against PC' + (S.cb + 1) + ', in standard deviations',
+      r.x, r.y - 6);
+    ctx.fillText('PC' + (S.ca + 1) + ' distribution, with a Gaussian of the same spread',
+      hx.x, hx.y - 6);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function drawStats() {
+    var sv = survey(), P = sv.P;
+    var tname = S.tgt === 'young' ? 'younger' : 'older';
+    if ($('s1')) {
+      var best = 0, i;
+      for (i = 0; i < 6; i++) {
+        if (Math.abs(sep(P.scores[i], S.tgt)) > Math.abs(sep(P.scores[best], S.tgt))) best = i;
+      }
+      $('s1').innerHTML =
+        stat('Target', tname + ' channel', 'axis against its own margins') +
+        stat('Best component', 'PC' + (best + 1), sep(P.scores[best], S.tgt).toFixed(3) +
+          ', holding ' + (P.explained[best] * 100).toFixed(1) + '%') +
+        stat('First component', sep(P.scores[0], S.tgt).toFixed(3), 'holding ' +
+          (P.explained[0] * 100).toFixed(1) + '%') +
+        stat('Same component, other target',
+          sep(P.scores[best], S.tgt === 'young' ? 'old' : 'young').toFixed(3),
+          'it is not holding one alone');
+    }
+    if ($('s2')) {
+      var wsel = fisher(S.tgt), wother = fisher(S.tgt === 'young' ? 'old' : 'young');
+      var prSel = MV.project(sv.Z, wsel);
+      var bestv = 0, j;
+      for (j = 0; j < 6; j++) {
+        if (Math.abs(sep(P.scores[j], S.tgt)) > Math.abs(sep(P.scores[bestv], S.tgt))) bestv = j;
+      }
+      $('s2').innerHTML =
+        stat('Ceiling for the ' + tname, Math.abs(sep(prSel, S.tgt)).toFixed(3),
+          'best direction in these six attributes') +
+        stat('Best component reached', Math.abs(sep(P.scores[bestv], S.tgt)).toFixed(3),
+          'PC' + (bestv + 1)) +
+        stat('Fraction recovered',
+          (100 * Math.abs(sep(P.scores[bestv], S.tgt)) / Math.abs(sep(prSel, S.tgt))).toFixed(0) + '%',
+          'of what was available') +
+        stat('Same direction, other target',
+          Math.abs(sep(prSel, S.tgt === 'young' ? 'old' : 'young')).toFixed(3),
+          'it carries some of that too');
+      void wother;
+    }
+    if ($('s3')) {
+      var wy = fisher('young'), wo = fisher('old');
+      var cl = 0, k;
+      for (k = 0; k < 6; k++) {
+        if (angleBetween(fisher(S.tgt), P.vectors[k]) <
+            angleBetween(fisher(S.tgt), P.vectors[cl])) cl = k;
+      }
+      $('s3').innerHTML =
+        stat('The two targets', angleBetween(wy, wo).toFixed(2) + '\u00b0', 'apart in attribute space') +
+        stat('Components are', '90.00\u00b0', 'apart, always, by construction') +
+        stat('Closest component', 'PC' + (cl + 1),
+          angleBetween(fisher(S.tgt), P.vectors[cl]).toFixed(1) + '\u00b0 from the ' + tname) +
+        stat('Component 1 is', angleBetween(fisher(S.tgt), P.vectors[0]).toFixed(1) + '\u00b0',
+          'away, which is why it shows nothing');
+    }
+    if ($('s4')) {
+      var u = rotated(), pr = MV.project(sv.Z, u);
+      var bestA = 0, bestV = 0, t;
+      for (t = 0; t <= 175; t += 5) {
+        var v2 = Math.abs(sep(MV.project(sv.Z, rotated(t)), S.tgt));
+        if (v2 > bestV) { bestV = v2; bestA = t; }
+      }
+      $('s4').innerHTML =
+        stat('At ' + S.rot + '\u00b0', Math.abs(sep(pr, S.tgt)).toFixed(3),
+          'separation of the ' + tname) +
+        stat('Variance there', MV.variance(pr).toFixed(3), 'what PCA ranks by') +
+        stat('Best in the plane', bestV.toFixed(3), 'at ' + bestA + '\u00b0') +
+        stat('Variance at the best', MV.variance(MV.project(sv.Z, rotated(bestA))).toFixed(3),
+          'lower than at component 2');
+    }
+    if ($('s5')) {
+      $('s5').innerHTML =
+        stat('Kurtosis of PC' + (S.ca + 1), MV.kurtosis(P.scores[S.ca]).toFixed(3),
+          'zero would be shapeless') +
+        stat('Kurtosis of PC' + (S.cb + 1), MV.kurtosis(P.scores[S.cb]).toFixed(3), 'excess') +
+        stat('Correlation between them',
+          MV.corr([P.scores[S.ca], P.scores[S.cb]])[0][1].toExponential(1),
+          'PCA has finished its job') +
+        stat('Negentropy of PC' + (S.ca + 1), MV.negentropy(P.scores[S.ca]).toExponential(2),
+          'distance from shapeless');
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+
+  function fillComponentSelect(id, key) {
+    var el = $(id);
+    if (!el) return;
+    el.innerHTML = '';
+    for (var i = 0; i < 6; i++) {
+      var o = document.createElement('option');
+      o.value = String(i);
+      o.textContent = 'Component ' + (i + 1);
+      el.appendChild(o);
+    }
+    el.value = String(S[key]);
+  }
+
+  function syncLabels() {
+    ['rot', 'rot4'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.rot;
+      var v = $(id + 'V'); if (v) v.textContent = S.rot + '\u00b0';
+    });
+    if ($('ca')) $('ca').value = String(S.ca);
+    if ($('cb')) $('cb').value = String(S.cb);
+    document.querySelectorAll('#segTgt button, #segTgt1 button, #segTgt2 button, #segTgt3 button')
+      .forEach(function (b) {
+        var on = b.dataset.tgt === S.tgt;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', on);
+      });
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    // step 5 is about the scores' own distributions and has its own controls
+    if (lab) lab.hidden = !/^p[1-4]$/.test(id);
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('#segTgt button, #segTgt1 button, #segTgt2 button, #segTgt3 button')
+    .forEach(function (b) {
+      b.addEventListener('click', function () {
+        S.tgt = b.dataset.tgt; syncLabels(); drawAll(); saveState();
+      });
+    });
+
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t) return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    if (t.tagName === 'SELECT') S[key] = parseInt(t.value, 10);
+    else if (t.tagName === 'INPUT') S[key] = parseFloat(t.value);
+    else return;
+    if (key === 'ca' && S.ca === S.cb) S.cb = (S.ca + 1) % 6;
+    if (key === 'cb' && S.cb === S.ca) S.ca = (S.cb + 1) % 6;
+    syncLabels(); drawAll(); saveState();
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawAll, 140);
+  });
+
+  fillComponentSelect('ca', 'ca');
+  fillComponentSelect('cb', 'cb');
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M06 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    perComponent: function () {
+      var P = survey().P;
+      return P.scores.map(function (s, i) {
+        return {
+          pc: i + 1, explained: P.explained[i],
+          young: sep(s, 'young'), old: sep(s, 'old'),
+          kurtosis: MV.kurtosis(s), negentropy: MV.negentropy(s)
+        };
+      });
+    },
+    ceilings: function () {
+      var sv = survey();
+      var wy = fisher('young'), wo = fisher('old');
+      return {
+        angle: angleBetween(wy, wo),
+        young: { w: Array.from(wy), sep: sep(MV.project(sv.Z, wy), 'young'),
+                 cross: sep(MV.project(sv.Z, wy), 'old') },
+        old: { w: Array.from(wo), sep: sep(MV.project(sv.Z, wo), 'old'),
+               cross: sep(MV.project(sv.Z, wo), 'young') },
+        anglesYoung: sv.P.vectors.map(function (v) { return angleBetween(wy, v); }),
+        anglesOld: sv.P.vectors.map(function (v) { return angleBetween(wo, v); })
+      };
+    },
+    sweep: function () {
+      var sv = survey(), out = [], t;
+      for (t = 0; t <= 175; t += 5) {
+        var u = rotated(t), pr = MV.project(sv.Z, u);
+        out.push({ deg: t, young: sep(pr, 'young'), old: sep(pr, 'old'),
+                   variance: MV.variance(pr) });
+      }
+      return out;
+    }
+  };
+})();
+</script>
+</body>
+</html>

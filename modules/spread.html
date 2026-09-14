@@ -1,0 +1,1363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Spread, and the shape of the cloud | How PCA and ICA Actually Work</title>
+<meta name="description" content="Covariance and correlation, built from the products of deviations. Why covariance changes when the units do and correlation does not, what the ellipse is, how to read a correlation matrix for a dozen attributes at once, and the two situations where a single correlation is actively misleading.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="directions.html">← Module 01</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 02 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>Spread, and the shape of the cloud</h1>
+    <p class="sub">Module 01 found the tilt of a cloud by dragging a line through it. That tilt can be written as a single number, and for a dozen attributes as a small square table. These five steps build that number from the points themselves, show what happens to it when the units change, and end on two situations where it describes the data correctly and describes the geology wrongly.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">Any two attributes, one point per trace <span>&mdash; axes in standard deviations</span></p>
+        <canvas id="cHead" aria-label="Crossplot of two chosen seismic attributes with the four quadrants shaded and the correlation ellipse drawn"></canvas>
+      </div>
+      <div>
+        <p class="cap">Choose the two attributes <span>&mdash; every panel updates</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>Horizontal axis</h2>
+            <div class="ctl">
+              <label for="fx">First attribute</label>
+              <select id="fx" data-key="fx"></select>
+            </div>
+            <h2 style="margin-top:12px">Vertical axis</h2>
+            <div class="ctl">
+              <label for="fy">Second attribute</label>
+              <select id="fy" data-key="fy"></select>
+            </div>
+          </div>
+          <div class="ctl-col">
+            <h2>Recording gain</h2>
+            <div class="ctl">
+              <label for="gain">Multiply the second attribute by
+                <span class="val" id="gainV">1.0&times;</span></label>
+              <input type="range" data-key="gain" id="gain" min="-10" max="10" step="1" value="0">
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">A rescaling of one attribute, of the kind that
+              happens when a volume is written out in different units. Step 2 is about what it does to
+              each of the two numbers.</p>
+            <div class="ctl" style="margin-top:12px">
+              <label for="sd">Ellipse size <span class="val" id="sdV">2 sd</span></label>
+              <input type="range" data-key="sd" id="sd" min="1" max="3" step="1" value="2">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Four quadrants</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Change the units</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · The ellipse</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · A dozen at once</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · What it misses</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Where the number comes from</h3>
+      <span class="hint">Four quadrants, two signs</span>
+    </div>
+
+    <p class="qbox"><b>Why this step is here.</b> Covariance is usually introduced as a formula. It is
+      easier to see as a count: how many traces sit on the same side of both averages, against how many
+      sit on opposite sides.</p>
+
+    <p class="lede">Take one trace. Subtract the survey average from its value in the first attribute,
+      and subtract the survey average from its value in the second. Multiply those two deviations
+      together. If the trace is above average in both, the product is positive. If it is below average
+      in both, both deviations are negative and the product is positive again. If it is above average in
+      one and below in the other, the product is negative.</p>
+    <p class="lede">Covariance is the average of that product over every trace. The panel below sorts the
+      traces into the four quadrants and shows what each contributes. A cloud that leans one way has
+      most of its traces in the two positive quadrants; a round cloud has them spread evenly and the
+      positive and negative contributions cancel.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>What each quadrant contributes</h3>
+        <span class="hint">Positive in crimson, negative in teal</span>
+      </div>
+      <canvas id="c1" aria-label="The four quadrants of the crossplot with the trace count and summed product of each"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="fy1">Second attribute</label>
+        <select id="fy1" data-key="fy"></select>
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+    <div class="legend prose">
+      <span>The two quadrant counts do not have to be equal for the covariance to be positive, and the
+        contributions are not shared out evenly between traces. A trace far from both averages
+        contributes far more than a trace near them, because the product of two large deviations is
+        larger than the product of two small ones.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Multiply one attribute by ten</h3>
+      <span class="hint">One number moves, the other does not</span>
+    </div>
+
+    <p class="lede">Covariance carries the units of both attributes multiplied together. Amplitude times
+      amplitude, or amplitude times hertz. That makes its size depend on how the attributes happen to
+      have been written out, and two volumes describing identical rocks in different units give
+      different covariances.</p>
+    <p class="lede">Correlation removes that dependence by dividing the covariance by both standard
+      deviations before reporting it. What is left is a pure number between minus one and one. The two
+      panels below share a single horizontal axis of gain, so the difference between the two behaviors
+      can be read straight down.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Covariance and correlation as the gain changes</h3>
+        <span class="hint">One shared gain axis, both fixed</span>
+      </div>
+      <canvas id="c2" aria-label="Covariance and correlation plotted against a gain applied to the second attribute, sharing one horizontal axis"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="gain2">Multiply the second attribute by
+          <span class="val" id="gain2V">1.0&times;</span></label>
+        <input type="range" data-key="gain" id="gain2" min="-10" max="10" step="1" value="0">
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+    <div class="legend prose">
+      <span>The covariance curve is drawn against its value at a gain of one, because its actual size
+        runs over several decades across this slider and no fixed axis would hold it. The correlation
+        curve is drawn against its own scale, which never needs to move.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>The ellipse is the two numbers, drawn</h3>
+      <span class="hint">Change the pair and watch it thin</span>
+    </div>
+
+    <p class="lede">Two variances and one covariance are three numbers, and three numbers specify an
+      ellipse. Drawn onto the cloud it encloses the traces within a chosen number of standard
+      deviations, and its shape says the same thing the correlation does: a nearly circular ellipse
+      means the two attributes are close to unrelated, and a thin one means they are close to being the
+      same measurement twice.</p>
+    <p class="lede">The ratio of the long axis to the short one is fixed by the correlation alone when
+      both axes are drawn in standard deviations, which is how this panel is scaled. That is a different
+      picture from module 01, where both axes were in the same amplitude units and the angle of the long
+      axis was the quantity being hunted. Neither picture is more correct; they answer different
+      questions, and which one is on screen has to be known before an angle read off it means anything.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Ellipse ratio against correlation</h3>
+        <span class="hint">Every attribute pair in the set, plotted</span>
+      </div>
+      <canvas id="c3" aria-label="The ratio of the ellipse axes plotted against correlation for every pair of attributes, with the chosen pair marked"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 200px;min-width:180px">
+        <label for="sd3">Ellipse size <span class="val" id="sd3V">2 sd</span></label>
+        <input type="range" data-key="sd" id="sd3" min="1" max="3" step="1" value="2">
+      </div>
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="fy3">Second attribute</label>
+        <select id="fy3" data-key="fy"></select>
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Eleven attributes, fifty-five pairs</h3>
+      <span class="hint">Raise the threshold and watch what survives</span>
+    </div>
+
+    <p class="lede">With more than two attributes the same calculation is done for every pair and
+      collected into a square table. The diagonal is each attribute with itself, which is one by
+      construction. Everything off the diagonal is a pair, and the table is symmetric, so half of it
+      repeats the other half.</p>
+    <p class="lede">Read as an image, the table is the fastest way to see redundancy in an attribute set
+      before any method is run on it. Raising the threshold below hides the weak pairs and leaves the
+      groups: attributes that are measuring nearly the same thing cluster into blocks that stay dark
+      while everything around them fades.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The correlation matrix</h3>
+        <span class="hint">Crimson positive, teal negative</span>
+      </div>
+      <canvas id="c4" aria-label="Correlation matrix of eleven seismic attributes drawn as a shaded grid"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:220px">
+        <label for="thr">Hide pairs weaker than
+          <span class="val" id="thrV">0.00</span></label>
+        <input type="range" data-key="thr" id="thr" min="0" max="95" step="5" value="0">
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+    <div class="legend prose">
+      <span>Nothing here is ordered by anything but the list the attributes were computed in. Software
+        that groups a correlation matrix into blocks has reordered the rows and columns to do it, which
+        changes the picture and none of the numbers.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Two ways a correlation misleads</h3>
+      <span class="hint">Switch between them below</span>
+    </div>
+
+    <p class="lede">Correlation measures how well a straight line through the cloud describes it. Where
+      the relationship is not a straight line, or where the cloud is really two clouds, the number comes
+      back looking perfectly respectable and means something other than what it appears to.</p>
+    <p class="lede" id="p5lede">The two cases below are both taken from the same synthetic survey. Use
+      the control under the panel to restrict the data, and watch the correlation readout as you do.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3 id="c5title">A relationship that bends</h3>
+        <span class="hint">Binned means in teal over the points</span>
+      </div>
+      <canvas id="c5" aria-label="Crossplot showing either bed thickness against amplitude, or one attribute pair split by facies"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Which case</h2>
+        <div class="seg" id="segCase" role="group" aria-label="Which demonstration">
+          <button type="button" data-case="bend">A bend</button>
+          <button type="button" data-case="pop">Two populations</button>
+        </div>
+      </div>
+      <div class="ctl" id="ctlBend" style="flex:1 1 240px;min-width:220px">
+        <label for="tlo">Thinnest bed included <span class="val" id="tloV">2 ms</span></label>
+        <input type="range" data-key="tlo" id="tlo" min="2" max="20" step="1" value="2">
+        <label for="thi" style="margin-top:8px">Thickest bed included
+          <span class="val" id="thiV">26 ms</span></label>
+        <input type="range" data-key="thi" id="thi" min="8" max="26" step="1" value="26">
+      </div>
+      <div class="ctl" id="ctlPop" style="flex:1 1 240px;min-width:220px" hidden>
+        <h2 style="margin:0 0 6px">Which traces</h2>
+        <div class="seg" id="segPop" role="group" aria-label="Which traces to include">
+          <button type="button" data-pop="all">All</button>
+          <button type="button" data-pop="bg">Background</button>
+          <button type="button" data-pop="ch">Channel</button>
+        </div>
+        <label for="fy5" style="margin-top:10px">Second attribute</label>
+        <select id="fy5" data-key="fy"></select>
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>Bed thickness is read from the model that built the survey rather than measured from the
+        seismic, because the point of the panel is to compare an attribute against something known
+        exactly. On real data the thickness would itself be an estimate, with its own errors, and the
+        scatter would be wider.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">Where this shows up in real work</span>
+    </div>
+    <p class="lede">The covariance matrix is the input to principal component analysis, and everything
+      PCA can see about a dataset it sees through that matrix. Knowing what the matrix keeps and what it
+      throws away is knowing in advance what the method can and cannot find.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Choosing an attribute set.</b> Adding a tenth attribute that correlates at 0.95 with one
+        already in the set adds a dimension and almost no information. The matrix says so before
+        anything is run.</li>
+      <li><b>Reading someone else's crossplot.</b> A tilt on screen is a tilt in whatever units the axes
+        were drawn in. Two figures of the same two attributes can lean at different angles and both be
+        correct.</li>
+      <li><b>Quoting a correlation in a report.</b> A single number describes a straight line through
+        one population. Where a survey contains two facies, the number can be produced almost entirely
+        by the difference between them.</li>
+      <li><b>Anticipating what PCA will do.</b> Second-order statistics are all that PCA has. Anything
+        that does not show up in a covariance matrix will not show up in a principal
+        component either, which is the opening that module 07 walks through.</li>
+    </ul>
+    <p class="lede"><b>Two points that are commonly confused.</b> The first is treating a low correlation
+      as evidence that two attributes are unrelated. It is evidence that no straight line relates them,
+      and step 5 shows a strong, well understood physical relationship reported at a number that hides
+      its own reversal. The second is treating a high correlation as evidence that one attribute causes
+      or predicts the other. Both may be responding to a third thing neither of them measures.</p>
+    <div class="legend prose">
+      <span>Every number in this module is descriptive. None of it decides anything, and the decisions
+        start in module 03, where the same data give two different answers depending on a choice that is
+        easy to make without noticing.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Take one attribute out of its units.</b>
+          <em class="point">Why: this is the difference that decides whether a method is run on a
+            covariance matrix or a correlation matrix, which is the whole of module 03.</em>
+          With RMS amplitude and peak envelope selected, move the gain slider from 1&times; to 10&times;
+          and read the covariance and the correlation at each stop.
+          <em class="predict">Before starting: if the second attribute is multiplied by ten, by what
+            factor does the covariance change? Commit to a number.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">Covariance goes from 95.6 to
+            956.4, a factor of ten, because it carries one power of the second attribute's units. The
+            variance of that attribute goes from 206.5 to 20645.3, a factor of a hundred, because it
+            carries two. The correlation sits at 0.6502 at every stop, to four figures, because the
+            division by both standard deviations cancels the gain exactly. Nothing about the rocks
+            changed at any point in that slide.</span></details></li>
+
+        <li><b>Read the covariance out of the quadrants.</b>
+          <em class="point">Why: a covariance is an average of products, and seeing which traces
+            dominate it explains why a few extreme values can carry it.</em>
+          In step 1, with RMS amplitude and peak envelope, read the four quadrant contributions and the
+          trace counts.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Above average in both: 1701
+            traces contributing 58.36. Below average in both: 2156 traces contributing 47.90. The two
+            mixed quadrants hold 916 and 411 traces and contribute &minus;1.44 and &minus;9.18. The four
+            add to 95.64, which is the covariance. Notice that the larger of the two positive quadrants
+            by trace count is not the larger by contribution: 2156 traces below average in both
+            contribute less than 1701 traces above average in both, because the bright traces sit
+            further from the averages and a product of two large deviations outweighs a product of two
+            small ones.</span></details></li>
+
+        <li><b>Find the redundant group.</b>
+          <em class="point">Why: this is the check worth running before a dimension reduction, not
+            after it.</em>
+          In step 4, raise the threshold from 0 to 0.70 and note which pairs are still visible, then
+          take it one stop further to 0.75.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Five of the fifty-five pairs
+            survive at 0.70, and only three of them survive at 0.75. The five are:
+            RMS with mean absolute amplitude at 0.963, coherence with the amplitude gradient at
+            &minus;0.793, peak absolute amplitude with peak envelope at 0.787, GLCM contrast with GLCM
+            homogeneity at &minus;0.738, and coherence with GLCM contrast at &minus;0.715. The first is
+            the clearest case for dropping something: RMS and mean absolute amplitude are two summaries
+            of the same window that differ only in whether the values are squared first, and carrying
+            both spends a dimension on almost nothing. Lowering the threshold to 0.60 brings back twelve
+            pairs rather than five, which is the more honest picture of this attribute set: redundancy
+            is a continuum and the threshold is a line drawn across it. The negative pairs are just as redundant as the
+            positive ones — a correlation of &minus;0.79 predicts one attribute from the other exactly as
+            well as +0.79 does, and only the sign of the slope differs.</span></details></li>
+
+        <li><b>Walk a correlation across a tuning thickness.</b>
+          <em class="point">Why: amplitude against bed thickness is the best known non-monotonic
+            relationship in seismic interpretation, and a correlation coefficient cannot represent
+            it.</em>
+          In step 5 with the bend case selected, read the correlation for the whole thickness range, then
+          set the range to 2&ndash;13 ms, then to 13&ndash;26 ms.
+          <em class="predict">Before looking: the physical relationship is the same in all three. Will
+            the three numbers agree?</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">Over the whole range the
+            correlation is &minus;0.667. Below 13 ms it is +0.866 and above 13 ms it is &minus;0.777.
+            The same 556 traces, the same physics, and the sign of the answer depends on where the range
+            was cut. The binned mean rises from 71.4 at the thin end to a maximum of 104.4 at 12.7 ms
+            and falls back to about 74 at 26 ms, which is the tuning curve: below the tuning thickness
+            the top and base reflections reinforce as the bed thickens, and above it they separate. A
+            correlation coefficient fits one straight line through both limbs and reports the average
+            slope, which describes neither.</span></details></li>
+
+        <li><b>Split a correlation by facies.</b>
+          <em class="point">Why: a survey is rarely one population, and a correlation computed across
+            two of them can belong entirely to the difference between them.</em>
+          In step 5 with the two-populations case selected, read the correlation for all traces, for
+          background traces only, and for young-channel traces only. Do it for three pairs: RMS
+          amplitude against coherence, peak envelope against coherence, and RMS amplitude against GLCM
+          contrast.
+          <details class="reveal"><summary>Hint</summary><span class="ans">The three go wrong in three
+            different directions. RMS against coherence reads &minus;0.622 over the whole survey, +0.005
+            in the background alone and &minus;0.607 inside the channel: within the background there is
+            no relationship at all, and the survey-wide number is produced by the channel traces being
+            both brighter and less coherent than everything around them — a statement about where the
+            channel is, not about how two attributes relate. Peak envelope against coherence goes the
+            other way, &minus;0.228 overall understating a real &minus;0.558 inside the channel, because
+            three and a half thousand background traces dilute it. RMS against GLCM contrast changes
+            sign: +0.534 across the survey, +0.254 in the background, &minus;0.102 inside the channel.
+            All three are the same trap. Knowing how many populations are inside the window is a
+            precondition for quoting any correlation computed across it.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>Covariance is the average product of two deviations.</b> Positive when traces sit on the
+          same side of both averages, negative when they sit on opposite sides.</li>
+        <li><b>Covariance carries units and correlation does not.</b> Rescaling an attribute changes
+          every covariance it appears in and changes no correlation.</li>
+        <li><b>The covariance matrix is the whole of what PCA sees.</b> Anything absent from it is
+          absent from every principal component that follows.</li>
+        <li><b>A tilt on a crossplot depends on the axis scaling.</b> In standard deviations the shape is
+          set by the correlation; in matched physical units the angle is what module 01 measured. Know
+          which plot is in front of you.</li>
+        <li><b>Correlation is a straight line fitted to the cloud.</b> Where the relationship bends, the
+          number can take the sign of neither limb, as amplitude against bed thickness does.</li>
+        <li><b>A correlation across two populations can belong to the difference between them.</b> Split
+          by facies before quoting one, or the number describes where the channel is rather than how the
+          attributes relate.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>The survey</b> is the same one module 01 uses, built by
+      <span class="k">assets/attrfield.js</span>: 72 by 72 traces at 2 ms, a younger sinuous channel, an
+      older and thinner channel at a different orientation, a levee wedge, background interbeds, a 30 Hz
+      Ricker wavelet, acquisition footprint on a six-trace period and 12% random noise.</p>
+    <p class="lede"><b>The eleven attributes</b> are all computed over samples 22 to 50 of each trace.
+      RMS amplitude, mean absolute amplitude and peak absolute amplitude are the three obvious summaries
+      of the window. Peak envelope is the largest value of the envelope, from the analytic trace.
+      Sweetness is peak envelope divided by the square root of peak frequency. Peak frequency and
+      spectral bandwidth are the mode and the amplitude-weighted standard deviation of the window's
+      magnitude spectrum. Coherence is the semblance of a three-by-three trace group. The amplitude
+      gradient is a Sobel stencil on the RMS map. GLCM contrast and homogeneity are computed on a
+      sixteen-level quantization of the RMS map in a seven-by-seven window, following Haralick et al.
+      (1973). All amplitude-valued attributes are multiplied by 1000 for display, which cancels out of
+      every correlation.</p>
+    <p class="lede"><b>The crossplot axes</b> are scaled independently, each to four standard deviations
+      of its own attribute, so that any pair can be shown whatever units they are in. That is a
+      different convention from module 01, where both axes carried the same amplitude units into a
+      square box so that the angle on screen was the angle in the data. In this module the angle on
+      screen is not a physical quantity, and the readouts give the correlation rather than an
+      angle.</p>
+    <p class="lede"><b>Covariance and variance</b> are computed dividing by the number of traces rather
+      than by one less than it. The difference is one part in five thousand here and is stated so that a
+      reader checking against their own calculation knows which convention is on screen.</p>
+    <p class="lede"><b>Step 5's bed thickness</b> is the true thickness of the younger channel sand in
+      the model, in two-way time, not a thickness estimated from the seismic. The binned mean peaks at
+      12.7 ms, which is the tuning thickness for a 30 Hz Ricker on this model; the quarter-wavelength
+      rule of thumb would give 8.3 ms, and the two are different conventions rather than a disagreement.
+      Only traces the model marks as young channel are included, which is 556 of the 5184.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> The facies labels in the two-populations case
+      come from the model and would have to be interpreted on real data, which is itself a source of
+      error this panel does not show. The noise is Gaussian and independent from trace to trace. The
+      footprint is perfectly periodic. Nothing here uses dip, so the coherence is a lateral waveform
+      similarity with no structural correction, which on dipping data would read low for reasons that
+      have nothing to do with the channel.</p>
+    <p class="lede"><b>Where this departs from production software.</b> Nowhere. Covariance and
+      correlation are computed identically everywhere, and the only choice a package makes that this
+      module also makes is the divisor. Implementations differ in whether they decimate before
+      computing the matrix on a large volume; this one uses every trace.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Pearson, K., 1895, Notes on regression and inheritance in the case of two parents:
+          <em>Proceedings of the Royal Society of London</em>, <b>58</b>, 240&ndash;242.</li>
+        <li>Haralick, R. M., K. Shanmugam, and I. Dinstein, 1973, Textural features for image
+          classification: <em>IEEE Transactions on Systems, Man, and Cybernetics</em>, <b>3</b>,
+          610&ndash;621.</li>
+        <li>Widess, M. B., 1973, How thin is a thin bed?: <em>Geophysics</em>, <b>38</b>,
+          1176&ndash;1180.</li>
+        <li>Kallweit, R. S., and L. C. Wood, 1982, The limits of resolution of zero-phase wavelets:
+          <em>Geophysics</em>, <b>47</b>, 1035&ndash;1046.</li>
+        <li>Radovich, B. J., and R. B. Oliveros, 1998, 3-D sequence interpretation of seismic
+          instantaneous attributes from the Gorgon field: <em>The Leading Edge</em>, <b>17</b>,
+          1286&ndash;1293 — for sweetness.</li>
+        <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+          Reservoir Characterization</em>: SEG Geophysical Development Series 11.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>03 · Units, and why they decide the answer</h3>
+    <p>Covariance depends on units and correlation does not, which means a method run on one gives a
+      different answer from the same method run on the other. That choice is made at the top of every
+      dimension reduction, often without being noticed.</p>
+    <a class="btn ghost" href="units.html">Module 03 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="directions.html">← Module 01: a direction through a cloud</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="units.html">Module 03: units, and why they decide the answer →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license. If you use it in a course or a talk, a credit line
+        and a link back are all that is asked.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened, so that the university can see these are being used &mdash; no cookie, no
+        account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js. It ' +
+      'expects them one directory up, at ../assets/, and file names are case-sensitive on GitHub Pages.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+  var GAIN = 1000;
+  var SDMAX = 4;                      // crossplot axes, in standard deviations
+  var NB = 44;
+
+  var NAMES = ['rms', 'maxabs', 'meanabs', 'envelope', 'sweetness', 'peakfreq',
+               'bandwidth', 'coherence', 'edge', 'glcmcon', 'glcmhom'];
+  var LABEL = {
+    rms: 'RMS amplitude', maxabs: 'Peak absolute amplitude', meanabs: 'Mean absolute amplitude',
+    envelope: 'Peak envelope', sweetness: 'Sweetness', peakfreq: 'Peak frequency',
+    bandwidth: 'Spectral bandwidth', coherence: 'Coherence', edge: 'Amplitude gradient',
+    glcmcon: 'GLCM contrast', glcmhom: 'GLCM homogeneity'
+  };
+  var SHORT = {
+    rms: 'RMS', maxabs: 'max|a|', meanabs: 'mean|a|', envelope: 'env', sweetness: 'sweet',
+    peakfreq: 'f peak', bandwidth: 'bandw', coherence: 'coher', edge: 'grad',
+    glcmcon: 'contr', glcmhom: 'homog'
+  };
+  // the amplitude-valued attributes, which carry the display gain of 1000
+  var AMP = { rms: 1, maxabs: 1, meanabs: 1, envelope: 1, sweetness: 1 };
+
+  var DEF = { fx: 'rms', fy: 'envelope', gain: 0, sd: 2, thr: 0, tlo: 2, thi: 26,
+              kase: 'bend', pop: 'all', tab: 'p1' };
+  var S = MV.readState(DEF);
+  if (NAMES.indexOf(S.fx) < 0) S.fx = DEF.fx;
+  if (NAMES.indexOf(S.fy) < 0) S.fy = DEF.fy;
+  if (S.kase !== 'bend' && S.kase !== 'pop') S.kase = 'bend';
+  if (['all', 'bg', 'ch'].indexOf(S.pop) < 0) S.pop = 'all';
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  /* The gain slider runs in tenths of a decade so that a factor of ten either
+     way is reachable without the low end being unusable. */
+  function gainOf() { return Math.pow(10, S.gain / 10); }
+
+  /* =====================================================================
+     THE SURVEY
+
+     Built once. Eleven attributes take about a third of a second, which is
+     why nothing in this module rebuilds the slab.
+     ===================================================================== */
+
+  var SURVEY = null;
+  function survey() {
+    if (SURVEY) return SURVEY;
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var raw = AF.attributes(slab, NAMES);
+    var attr = {};
+    NAMES.forEach(function (n) {
+      var g = AMP[n] ? GAIN : 1;
+      var o = new Float64Array(raw[n].length);
+      for (var i = 0; i < o.length; i++) o[i] = raw[n][i] * g;
+      attr[n] = o;
+    });
+    SURVEY = { slab: slab, attr: attr, R: MV.corr(NAMES.map(function (n) { return attr[n]; })) };
+    return SURVEY;
+  }
+
+  /* The chosen pair, with the gain applied to the second one. */
+  function pair() {
+    var sv = survey(), g = gainOf();
+    var x = sv.attr[S.fx], y0 = sv.attr[S.fy];
+    var y = y0;
+    if (g !== 1) {
+      y = new Float64Array(y0.length);
+      for (var i = 0; i < y0.length; i++) y[i] = y0[i] * g;
+    }
+    var C = MV.cov([x, y]);
+    return {
+      x: x, y: y, C: C,
+      r: C[0][1] / (Math.sqrt(C[0][0] * C[1][1]) || 1),
+      mx: MV.mean(x), my: MV.mean(y),
+      sx: Math.sqrt(C[0][0]), sy: Math.sqrt(C[1][1])
+    };
+  }
+
+  /* =====================================================================
+     DRAWING HELPERS
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+
+  function grid(ctx, r, x0, x1, y0, y1, nx, ny, fmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.strokeStyle = '#E4E7EA';
+    ctx.lineWidth = 1;
+    var i, v, X, Y;
+    ctx.textAlign = 'center';
+    for (i = 0; i <= nx; i++) {
+      v = x0 + (x1 - x0) * i / nx;
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+      ctx.fillText(fmt ? fmt(v) : String(Math.round(v)), X, r.y + r.h + 14);
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.fillText(fmt ? fmt(v) : String(Math.round(v)), r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+
+  function axisLabels(ctx, r, xlab, ylab) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    if (xlab) ctx.fillText(xlab, r.x + r.w / 2, r.y + r.h + 30);
+    if (ylab) {
+      ctx.translate(r.x - 42, r.y + r.h / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.fillText(ylab, 0, 0);
+    }
+    ctx.restore();
+  }
+
+  /* Scatter in standard-deviation coordinates, so any pair can be drawn. */
+  function scatter(ctx, r, P, color, alpha) {
+    var n = P.x.length, i;
+    ctx.save();
+    ctx.fillStyle = color || 'rgba(22,25,28,0.30)';
+    if (alpha !== undefined) ctx.globalAlpha = alpha;
+    for (i = 0; i < n; i++) {
+      var zx = (P.x[i] - P.mx) / P.sx, zy = (P.y[i] - P.my) / P.sy;
+      if (Math.abs(zx) > SDMAX || Math.abs(zy) > SDMAX) continue;
+      var X = r.x + (zx + SDMAX) / (2 * SDMAX) * r.w;
+      var Y = r.y + r.h - (zy + SDMAX) / (2 * SDMAX) * r.h;
+      ctx.fillRect(X - 0.9, Y - 0.9, 1.8, 1.8);
+    }
+    ctx.restore();
+  }
+
+  /* The ellipse of the standardized cloud: axes at 45 degrees with half-widths
+     sqrt(1+r) and sqrt(1-r), scaled by the chosen number of standard
+     deviations. In these coordinates the shape depends on r alone, which is
+     the point step 3 makes. */
+  function ellipse(ctx, r, corr, nsd, color, width) {
+    var a = Math.sqrt(Math.max(1e-9, 1 + corr)) * nsd;
+    var b = Math.sqrt(Math.max(1e-9, 1 - corr)) * nsd;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(r.x, r.y, r.w, r.h);
+    ctx.clip();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width || 2;
+    ctx.beginPath();
+    for (var t = 0; t <= 121; t++) {
+      var th = t / 120 * 2 * Math.PI;
+      var u = a * Math.cos(th), v = b * Math.sin(th);
+      var zx = (u - v) / Math.SQRT2, zy = (u + v) / Math.SQRT2;
+      var X = r.x + (zx + SDMAX) / (2 * SDMAX) * r.w;
+      var Y = r.y + r.h - (zy + SDMAX) / (2 * SDMAX) * r.h;
+      if (t === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    }
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     THE HEADER CROSSPLOT
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.max(230, Math.min(340, w - 78));
+    var ctx = fit('cHead', w, size + 58);
+    if (!ctx) return;
+    var P = pair();
+    var r = { x: 58, y: 12, w: size, h: size };
+
+    // quadrant wash, so the sign of each product is visible behind the points
+    var cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+    ctx.save();
+    ctx.globalAlpha = 0.10;
+    ctx.fillStyle = CRIM;
+    ctx.fillRect(cx, r.y, r.w / 2, r.h / 2);
+    ctx.fillRect(r.x, cy, r.w / 2, r.h / 2);
+    ctx.fillStyle = TEAL;
+    ctx.fillRect(r.x, r.y, r.w / 2, r.h / 2);
+    ctx.fillRect(cx, cy, r.w / 2, r.h / 2);
+    ctx.restore();
+
+    grid(ctx, r, -SDMAX, SDMAX, -SDMAX, SDMAX, 4, 4);
+    scatter(ctx, r, P);
+    ellipse(ctx, r, P.r, S.sd, TEAL, 2);
+
+    axisLabels(ctx, r, LABEL[S.fx] + ' (standard deviations)', LABEL[S.fy]);
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.fillText('r = ' + P.r.toFixed(3), r.x + 8, r.y + 16);
+    ctx.fillStyle = TEAL;
+    ctx.fillText(S.sd + ' sd ellipse', r.x + 8, r.y + 32);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     STEP PANELS
+     ===================================================================== */
+
+  function quadrants() {
+    var P = pair(), q = [0, 0, 0, 0], n = [0, 0, 0, 0], i;
+    for (i = 0; i < P.x.length; i++) {
+      var a = P.x[i] - P.mx, b = P.y[i] - P.my;
+      var k = (a >= 0) ? (b >= 0 ? 0 : 3) : (b >= 0 ? 1 : 2);
+      q[k] += a * b; n[k]++;
+    }
+    var N = P.x.length;
+    return { sums: q.map(function (v) { return v / N; }), counts: n, P: P, N: N };
+  }
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 230;
+    var ctx = fit('c1', w, h);
+    if (!ctx) return;
+    var Q = quadrants();
+    var boxW = Math.min(150, (w - 40) / 4), gap = (w - 16 - 4 * boxW) / 3;
+    var names = ['above in both', 'above x, below y', 'below in both', 'below x, above y'];
+    var order = [0, 1, 2, 3];
+    // order the boxes as the quadrants sit on the plot: upper-right first
+    var reorder = [0, 1, 2, 3];
+    reorder.forEach(function (k, idx) {
+      var x = 8 + idx * (boxW + gap);
+      var pos = Q.sums[k] >= 0;
+      ctx.save();
+      ctx.globalAlpha = 0.14;
+      ctx.fillStyle = pos ? CRIM : TEAL;
+      ctx.fillRect(x, 18, boxW, 150);
+      ctx.restore();
+      ctx.save();
+      ctx.strokeStyle = '#C9CDD2';
+      ctx.strokeRect(x + 0.5, 18.5, boxW, 150);
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.fillText(names[k], x + boxW / 2, 38);
+      ctx.fillText(Q.counts[k] + ' traces', x + boxW / 2, 56);
+      ctx.fillStyle = pos ? CRIM : TEAL;
+      ctx.font = '600 20px ui-monospace,Menlo,monospace';
+      ctx.fillText((Q.sums[k] >= 0 ? '+' : '') + Q.sums[k].toFixed(2), x + boxW / 2, 108);
+      ctx.font = '11px ui-monospace,Menlo,monospace';
+      ctx.fillStyle = SLATE;
+      ctx.fillText(pos ? 'adds to the covariance' : 'subtracts from it', x + boxW / 2, 136);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.fillText('the four contributions add to the covariance: ' +
+      Q.sums.reduce(function (a, b) { return a + b; }, 0).toFixed(2), 8, 196);
+    ctx.restore();
+  }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 300;
+    var ctx = fit('c2', w, h);
+    if (!ctx) return;
+    var sv = survey();
+    var x = sv.attr[S.fx], y0 = sv.attr[S.fy];
+    var base = MV.cov([x, y0])[0][1];
+    var rw = w - 62 - 24, rh = 104;
+    var rA = { x: 62, y: 14, w: rw, h: rh };
+    var rB = { x: 62, y: 14 + rh + 34, w: rw, h: rh };
+
+    // curves across the whole slider range
+    var G = [], covN = [], cor = [], k;
+    for (k = -10; k <= 10; k++) {
+      var g = Math.pow(10, k / 10);
+      G.push(k);
+      covN.push(g);                                  // covariance scales exactly with the gain
+      cor.push(MV.corr([x, y0])[0][1]);              // correlation does not move at all
+    }
+
+    grid(ctx, rA, -10, 10, 0, 10, 4, 2, function (v) { return Math.pow(10, v / 10).toFixed(1); });
+    ctx.save();
+    ctx.strokeStyle = CRIM;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (k = 0; k < G.length; k++) {
+      var X = rA.x + (G[k] + 10) / 20 * rA.w;
+      var Y = rA.y + rA.h - Math.min(10, covN[k]) / 10 * rA.h;
+      if (k === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    }
+    ctx.stroke();
+    ctx.fillStyle = CRIM;
+    ctx.textAlign = 'left';
+    ctx.fillText('covariance, as a multiple of its value at a gain of 1', rA.x + 8, rA.y + 16);
+    ctx.restore();
+
+    grid(ctx, rB, -10, 10, -1, 1, 4, 4, function (v) { return v.toFixed(1); });
+    ctx.save();
+    ctx.strokeStyle = TEAL;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    for (k = 0; k < G.length; k++) {
+      var X2 = rB.x + (G[k] + 10) / 20 * rB.w;
+      var Y2 = rB.y + rB.h - (cor[k] + 1) / 2 * rB.h;
+      if (k === 0) ctx.moveTo(X2, Y2); else ctx.lineTo(X2, Y2);
+    }
+    ctx.stroke();
+    ctx.fillStyle = TEAL;
+    ctx.textAlign = 'left';
+    ctx.fillText('correlation', rB.x + 8, rB.y + 16);
+    ctx.restore();
+
+    [rA, rB].forEach(function (r) {
+      var X = r.x + (S.gain + 10) / 20 * r.w;
+      ctx.save();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText('gain applied to ' + LABEL[S.fy] + ' \u2014 one axis, shared',
+      rB.x + rB.w / 2, rB.y + rB.h + 32);
+    ctx.restore();
+    void base;
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 280;
+    var ctx = fit('c3', w, h);
+    if (!ctx) return;
+    var sv = survey();
+    var r = { x: 62, y: 14, w: w - 62 - 24, h: h - 14 - 52 };
+    grid(ctx, r, -1, 1, 1, 9, 4, 4, function (v) { return v.toFixed(1); });
+
+    // the curve: ratio = sqrt((1+|r|)/(1-|r|)), which every pair must lie on
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    for (var t = -99; t <= 99; t++) {
+      var rr = t / 100;
+      var ratio = Math.sqrt((1 + Math.abs(rr)) / (1 - Math.abs(rr)));
+      var X = r.x + (rr + 1) / 2 * r.w;
+      var Y = r.y + r.h - (Math.min(9, ratio) - 1) / 8 * r.h;
+      if (t === -99) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    // every pair of attributes
+    var i, j;
+    ctx.save();
+    ctx.fillStyle = 'rgba(22,25,28,0.55)';
+    for (i = 0; i < NAMES.length; i++) {
+      for (j = i + 1; j < NAMES.length; j++) {
+        var rr2 = sv.R[i][j];
+        var ratio2 = Math.sqrt((1 + Math.abs(rr2)) / (1 - Math.abs(rr2)));
+        var X2 = r.x + (rr2 + 1) / 2 * r.w;
+        var Y2 = r.y + r.h - (Math.min(9, ratio2) - 1) / 8 * r.h;
+        ctx.beginPath(); ctx.arc(X2, Y2, 2.6, 0, 2 * Math.PI); ctx.fill();
+      }
+    }
+    ctx.restore();
+
+    // the chosen pair
+    var P = pair();
+    var rat = Math.sqrt((1 + Math.abs(P.r)) / (1 - Math.abs(P.r)));
+    var XC = r.x + (P.r + 1) / 2 * r.w;
+    var YC = r.y + r.h - (Math.min(9, rat) - 1) / 8 * r.h;
+    ctx.save();
+    ctx.fillStyle = CRIM;
+    ctx.beginPath(); ctx.arc(XC, YC, 5, 0, 2 * Math.PI); ctx.fill();
+    ctx.fillStyle = CRIM;
+    ctx.textAlign = XC > r.x + r.w * 0.6 ? 'right' : 'left';
+    ctx.fillText(SHORT[S.fx] + ' & ' + SHORT[S.fy], XC + (XC > r.x + r.w * 0.6 ? -10 : 10), YC - 8);
+    ctx.restore();
+
+    axisLabels(ctx, r, 'correlation', 'ellipse long axis / short axis');
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var n = NAMES.length;
+    var cell = Math.min(34, Math.floor((w - 150) / n));
+    var side = cell * n;
+    var ctx = fit('c4', w, side + 84);
+    if (!ctx) return;
+    var sv = survey(), thr = S.thr / 100;
+    var x0 = 92, y0 = 56, i, j;
+
+    for (i = 0; i < n; i++) {
+      for (j = 0; j < n; j++) {
+        var v = sv.R[i][j];
+        var shown = (i === j) || Math.abs(v) >= thr;
+        ctx.save();
+        if (!shown) {
+          ctx.fillStyle = '#F4F6F7';
+        } else {
+          ctx.globalAlpha = Math.min(1, Math.abs(v));
+          ctx.fillStyle = v >= 0 ? CRIM : TEAL;
+        }
+        ctx.fillRect(x0 + j * cell, y0 + i * cell, cell - 1, cell - 1);
+        ctx.restore();
+        if (shown && cell >= 26 && i !== j) {
+          ctx.save();
+          ctx.fillStyle = Math.abs(v) > 0.55 ? '#fff' : INK;
+          ctx.textAlign = 'center';
+          ctx.font = '10px ui-monospace,Menlo,monospace';
+          ctx.fillText(v.toFixed(2).replace('0.', '.'), x0 + j * cell + cell / 2 - 0.5,
+            y0 + i * cell + cell / 2 + 3);
+          ctx.restore();
+        }
+      }
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'right';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(SHORT[NAMES[i]], x0 - 6, y0 + i * cell + cell / 2 + 3);
+      ctx.translate(x0 + i * cell + cell / 2, y0 - 6);
+      ctx.rotate(-Math.PI / 4);
+      ctx.textAlign = 'left';
+      ctx.fillText(SHORT[NAMES[i]], 0, 0);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left';
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    ctx.fillText('crimson: the two rise together   \u00b7   teal: one rises as the other falls',
+      x0, y0 + side + 26);
+    ctx.fillText('the diagonal is every attribute with itself, which is 1 by construction',
+      x0, y0 + side + 44);
+    ctx.restore();
+  }
+
+  /* Step 5 needs the model's own labels, so it reads the slab directly. */
+  function bendData() {
+    var sv = survey(), sl = sv.slab, th = [], am = [], i;
+    for (i = 0; i < sl.facies.length; i++) {
+      if (sl.facies[i] !== 1) continue;
+      var t = sl.thickness[i] * 0.5 * sl.dt * 1000;
+      if (t < S.tlo || t > S.thi) continue;
+      th.push(t); am.push(sv.attr.rms[i]);
+    }
+    return { x: th, y: am, xlab: 'bed thickness, two-way time (ms)', ylab: 'RMS amplitude' };
+  }
+
+  function popData() {
+    var sv = survey(), sl = sv.slab, a = [], b = [], i;
+    for (i = 0; i < sl.facies.length; i++) {
+      if (S.pop === 'bg' && sl.facies[i] !== 0) continue;
+      if (S.pop === 'ch' && sl.facies[i] !== 1) continue;
+      a.push(sv.attr[S.fx][i]); b.push(sv.attr[S.fy][i]);
+    }
+    return { x: a, y: b, xlab: LABEL[S.fx], ylab: LABEL[S.fy], facies: sl.facies };
+  }
+
+  /* The same pair over every trace, so a restricted correlation can be read
+     against the number it would have been quoted at. */
+  function WHOLE() {
+    var sv = survey();
+    return MV.corr([sv.attr[S.fx], sv.attr[S.fy]])[0][1];
+  }
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 300;
+    var ctx = fit('c5', w, h);
+    if (!ctx) return;
+    var D = (S.kase === 'bend') ? bendData() : popData();
+    var r = { x: 66, y: 14, w: w - 66 - 24, h: h - 14 - 52 };
+
+    // fixed axes: the thickness case in real units, the population case in sd
+    var x0, x1, y0, y1, fmt;
+    if (S.kase === 'bend') {
+      x0 = 0; x1 = 28; y0 = 30; y1 = 140; fmt = null;
+    } else {
+      x0 = -SDMAX; x1 = SDMAX; y0 = -SDMAX; y1 = SDMAX; fmt = null;
+    }
+    grid(ctx, r, x0, x1, y0, y1, 4, 4, fmt);
+
+    var mx = MV.mean(D.x), my = MV.mean(D.y);
+    var sx = MV.std(D.x, mx) || 1, sy = MV.std(D.y, my) || 1;
+    var i;
+    ctx.save();
+    ctx.fillStyle = 'rgba(22,25,28,0.32)';
+    for (i = 0; i < D.x.length; i++) {
+      var vx = (S.kase === 'bend') ? D.x[i] : (D.x[i] - mx) / sx;
+      var vy = (S.kase === 'bend') ? D.y[i] : (D.y[i] - my) / sy;
+      if (vx < x0 || vx > x1 || vy < y0 || vy > y1) continue;
+      var X = r.x + (vx - x0) / (x1 - x0) * r.w;
+      var Y = r.y + r.h - (vy - y0) / (y1 - y0) * r.h;
+      ctx.fillRect(X - 1, Y - 1, 2, 2);
+    }
+    ctx.restore();
+
+    if (S.kase === 'bend') {
+      // binned means, which is what makes the arch visible through the scatter
+      var B = 12, sum = new Float64Array(B), cnt = new Float64Array(B);
+      for (i = 0; i < D.x.length; i++) {
+        var b = Math.min(B - 1, Math.max(0, Math.floor((D.x[i] - x0) / (x1 - x0) * B)));
+        sum[b] += D.y[i]; cnt[b]++;
+      }
+      ctx.save();
+      ctx.strokeStyle = TEAL;
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      var started = false;
+      for (b = 0; b < B; b++) {
+        if (cnt[b] < 6) { started = false; continue; }
+        var X2 = r.x + ((b + 0.5) / B) * r.w;
+        var Y2 = r.y + r.h - (sum[b] / cnt[b] - y0) / (y1 - y0) * r.h;
+        if (!started) { ctx.moveTo(X2, Y2); started = true; } else ctx.lineTo(X2, Y2);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    // the straight line the correlation represents
+    var rr = MV.corr([D.x, D.y])[0][1];
+    ctx.save();
+    ctx.strokeStyle = CRIM;
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.rect(r.x, r.y, r.w, r.h);
+    ctx.clip();
+    var slope = rr * sy / sx;
+    function at(vx) { return my + slope * (vx - mx); }
+    var lx0 = (S.kase === 'bend') ? x0 : mx - SDMAX * sx;
+    var lx1 = (S.kase === 'bend') ? x1 : mx + SDMAX * sx;
+    function px(vx) {
+      var u = (S.kase === 'bend') ? vx : (vx - mx) / sx;
+      return r.x + (u - x0) / (x1 - x0) * r.w;
+    }
+    function py(vy) {
+      var u = (S.kase === 'bend') ? vy : (vy - my) / sy;
+      return r.y + r.h - (u - y0) / (y1 - y0) * r.h;
+    }
+    ctx.moveTo(px(lx0), py(at(lx0)));
+    ctx.lineTo(px(lx1), py(at(lx1)));
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.fillStyle = CRIM;
+    ctx.textAlign = 'left';
+    ctx.fillText('the straight line the correlation stands for', r.x + 8, r.y + 16);
+    if (S.kase === 'bend') {
+      ctx.fillStyle = TEAL;
+      ctx.fillText('binned mean of the amplitude', r.x + 8, r.y + 32);
+    }
+    ctx.restore();
+    axisLabels(ctx, r, D.xlab + (S.kase === 'pop' ? ' (standard deviations)' : ''), D.ylab);
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function drawStats() {
+    var P = pair(), sv = survey();
+    if ($('s1')) {
+      var Q = quadrants();
+      $('s1').innerHTML =
+        stat('Same side of both', (Q.counts[0] + Q.counts[2]) + ' traces',
+          'contributing +' + (Q.sums[0] + Q.sums[2]).toFixed(2)) +
+        stat('Opposite sides', (Q.counts[1] + Q.counts[3]) + ' traces',
+          'contributing ' + (Q.sums[1] + Q.sums[3]).toFixed(2)) +
+        stat('Covariance', P.C[0][1].toFixed(2), 'the average of all 5184 products') +
+        stat('Correlation', P.r.toFixed(3), 'the same number, made unit-free');
+    }
+    if ($('s2')) {
+      $('s2').innerHTML =
+        stat('Gain', gainOf().toFixed(2) + '\u00d7', 'applied to ' + LABEL[S.fy]) +
+        stat('Covariance', P.C[0][1].toFixed(2), 'carries both attributes\u2019 units') +
+        stat('Variance of the second', P.C[1][1].toFixed(1), 'carries its units squared') +
+        stat('Correlation', P.r.toFixed(4), 'unchanged at every gain');
+    }
+    if ($('s3')) {
+      var rat = Math.sqrt((1 + Math.abs(P.r)) / (1 - Math.abs(P.r)));
+      $('s3').innerHTML =
+        stat('Correlation', P.r.toFixed(3), 'for the chosen pair') +
+        stat('Axis ratio', rat.toFixed(3), 'long over short, in sd units') +
+        stat('Long semi-axis', (Math.sqrt(1 + Math.abs(P.r)) * S.sd).toFixed(2),
+          'standard deviations') +
+        stat('Short semi-axis', (Math.sqrt(1 - Math.abs(P.r)) * S.sd).toFixed(2),
+          'standard deviations');
+    }
+    if ($('s4')) {
+      var n = NAMES.length, i, j, kept = 0, best = 0, bi = 0, bj = 1, worst = 1, wi = 0, wj = 1;
+      for (i = 0; i < n; i++) for (j = i + 1; j < n; j++) {
+        var v = Math.abs(sv.R[i][j]);
+        if (v >= S.thr / 100) kept++;
+        if (v > best) { best = v; bi = i; bj = j; }
+        if (v < worst) { worst = v; wi = i; wj = j; }
+      }
+      $('s4').innerHTML =
+        stat('Pairs', String(n * (n - 1) / 2), 'from ' + n + ' attributes') +
+        stat('Above the threshold', String(kept), 'at ' + (S.thr / 100).toFixed(2)) +
+        stat('Strongest', sv.R[bi][bj].toFixed(3), SHORT[NAMES[bi]] + ' & ' + SHORT[NAMES[bj]]) +
+        stat('Weakest', sv.R[wi][wj].toFixed(3), SHORT[NAMES[wi]] + ' & ' + SHORT[NAMES[wj]]);
+    }
+    if ($('s5')) {
+      var D = (S.kase === 'bend') ? bendData() : popData();
+      var rr = D.x.length > 2 ? MV.corr([D.x, D.y])[0][1] : NaN;
+      if (S.kase === 'bend') {
+        $('s5').innerHTML =
+          stat('Thickness range', S.tlo + '\u2013' + S.thi + ' ms', 'two-way time') +
+          stat('Traces included', String(D.x.length), 'of 556 young-channel traces') +
+          stat('Correlation', isNaN(rr) ? '\u2014' : rr.toFixed(3), 'thickness against amplitude') +
+          stat('Tuning thickness', '12.7 ms', 'where the binned mean peaks');
+      } else {
+        var lab = { all: 'every trace', bg: 'background only', ch: 'young channel only' };
+        $('s5').innerHTML =
+          stat('Traces included', String(D.x.length), lab[S.pop]) +
+          stat('Correlation', isNaN(rr) ? '\u2014' : rr.toFixed(3),
+            SHORT[S.fx] + ' against ' + SHORT[S.fy]) +
+          stat('Whole survey', WHOLE().toFixed(3), 'the same pair, every trace') +
+          stat('Difference', (rr - WHOLE()).toFixed(3), 'what restricting the traces did');
+      }
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+
+  function fillSelect(id, key) {
+    var el = $(id);
+    if (!el) return;
+    el.innerHTML = '';
+    NAMES.forEach(function (n) {
+      var o = document.createElement('option');
+      o.value = n;
+      o.textContent = LABEL[n];
+      el.appendChild(o);
+    });
+    el.value = S[key];
+  }
+
+  function syncLabels() {
+    ['fx'].forEach(function (k) { var e = $(k); if (e) e.value = S[k]; });
+    ['fy', 'fy1', 'fy3', 'fy5'].forEach(function (id) { var e = $(id); if (e) e.value = S.fy; });
+    ['gain', 'gain2'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.gain;
+      var v = $(id + 'V'); if (v) v.textContent = gainOf().toFixed(1) + '\u00d7';
+    });
+    ['sd', 'sd3'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.sd;
+      var v = $(id + 'V'); if (v) v.textContent = S.sd + ' sd';
+    });
+    if ($('thr')) $('thr').value = S.thr;
+    if ($('thrV')) $('thrV').textContent = (S.thr / 100).toFixed(2);
+    if ($('tlo')) $('tlo').value = S.tlo;
+    if ($('tloV')) $('tloV').textContent = S.tlo + ' ms';
+    if ($('thi')) $('thi').value = S.thi;
+    if ($('thiV')) $('thiV').textContent = S.thi + ' ms';
+    document.querySelectorAll('#segCase button').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.case === S.kase);
+      b.setAttribute('aria-pressed', b.dataset.case === S.kase);
+    });
+    document.querySelectorAll('#segPop button').forEach(function (b) {
+      b.classList.toggle('on', b.dataset.pop === S.pop);
+      b.setAttribute('aria-pressed', b.dataset.pop === S.pop);
+    });
+    if ($('ctlBend')) $('ctlBend').hidden = S.kase !== 'bend';
+    if ($('ctlPop')) $('ctlPop').hidden = S.kase !== 'pop';
+    if ($('c5title')) {
+      $('c5title').textContent = S.kase === 'bend'
+        ? 'A relationship that bends' : 'One correlation, two populations';
+    }
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    // step 4 is a matrix of everything and step 5 has its own axes; neither is
+    // driven by the header crossplot, so the sticky panel is stood down there
+    if (lab) lab.hidden = !/^p[1-3]$/.test(id);
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('#segCase button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.kase = b.dataset.case; syncLabels(); drawAll(); saveState();
+    });
+  });
+  document.querySelectorAll('#segPop button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.pop = b.dataset.pop; syncLabels(); drawAll(); saveState();
+    });
+  });
+
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t) return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    if (t.tagName === 'SELECT') S[key] = t.value;
+    else if (t.tagName === 'INPUT') S[key] = parseFloat(t.value);
+    else return;
+    // the thickness range must not cross over itself
+    if (key === 'tlo' && S.tlo > S.thi - 4) S.tlo = S.thi - 4;
+    if (key === 'thi' && S.thi < S.tlo + 4) S.thi = S.tlo + 4;
+    syncLabels(); drawAll(); saveState();
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawAll, 140);
+  });
+
+  fillSelect('fx', 'fx');
+  ['fy', 'fy1', 'fy3', 'fy5'].forEach(function (id) { fillSelect(id, 'fy'); });
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M02 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    read: function () {
+      var P = pair(), Q = quadrants();
+      var D = (S.kase === 'bend') ? bendData() : popData();
+      var rr = D.x.length > 2 ? MV.corr([D.x, D.y])[0][1] : NaN;
+      return {
+        fx: S.fx, fy: S.fy, gain: gainOf(), r: P.r,
+        cov: P.C[0][1], varx: P.C[0][0], vary: P.C[1][1],
+        q: Q.sums, qn: Q.counts,
+        ratio: Math.sqrt((1 + Math.abs(P.r)) / (1 - Math.abs(P.r))),
+        caseR: rr, caseN: D.x.length, kase: S.kase, pop: S.pop,
+        tlo: S.tlo, thi: S.thi
+      };
+    },
+    matrix: function () { return survey().R; },
+    names: NAMES
+  };
+})();
+</script>
+</body>
+</html>

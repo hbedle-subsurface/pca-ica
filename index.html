@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How PCA and ICA Actually Work</title>
+<meta name="description" content="Interactive teaching modules on dimension reduction for geologists: what a feature space is, projection and variance, covariance and correlation, standardization, eigenvectors, how many components to keep, independence versus decorrelation, ICA, and what a component is not. Everything computed live in the browser.">
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="#modules">Modules</a>
+      <a href="#about">About</a>
+      <a href="https://hbedle-subsurface.github.io/spectral-attributes/">Spectral attributes</a>
+      <a href="https://hbedle-subsurface.github.io/geometric-attributes/">Geometric attributes</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">University of Oklahoma</p>
+        <h1 class="title">Twenty attributes. Three color channels. <em>Which three?</em></h1>
+        <p class="lede">Dimension reduction is the answer that machine learning gives to that question,
+          and it arrives wrapped in vocabulary nobody defines: feature, sample, loading, score,
+          whitening, embedding, negentropy. None of it is difficult. Most of it is one operation
+          repeated, and that operation can be drawn.</p>
+        <p class="lede">These modules build principal component analysis and independent component
+          analysis from a crossplot upward, on synthetic seismic that you can change while you watch.
+          <strong>No prior exposure to either method is assumed</strong>, and no matrix appears until
+          after the thing it computes has already been found by hand.</p>
+        <p class="lede">Everything is computed live in your browser from the numbers on screen. Nothing
+          is a stored picture, so the panels can disagree with the textbook version of the same figure
+          &mdash; and in a couple of places, they do.</p>
+        <div class="hero-cta">
+          <a class="btn" href="modules/directions.html">Start with a cloud of points →</a>
+          <a class="btn ghost" href="#modules">See all modules</a>
+        </div>
+      </div>
+      <div class="hero-panel">
+        <svg viewBox="0 0 640 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A tilted cloud of points with the widest direction and its perpendicular marked">
+          <rect width="640" height="400" fill="#0d1014"/>
+          <g id="cloud" fill="rgba(226,230,234,0.55)">
+            <circle cx="318" cy="205" r="1.8"/><circle cx="292" cy="228" r="1.8"/>
+            <circle cx="344" cy="181" r="1.8"/><circle cx="270" cy="252" r="1.8"/>
+            <circle cx="366" cy="163" r="1.8"/><circle cx="246" cy="269" r="1.8"/>
+            <circle cx="392" cy="142" r="1.8"/><circle cx="222" cy="290" r="1.8"/>
+            <circle cx="300" cy="196" r="1.8"/><circle cx="336" cy="214" r="1.8"/>
+            <circle cx="278" cy="219" r="1.8"/><circle cx="360" cy="196" r="1.8"/>
+            <circle cx="256" cy="240" r="1.8"/><circle cx="384" cy="176" r="1.8"/>
+            <circle cx="232" cy="262" r="1.8"/><circle cx="408" cy="158" r="1.8"/>
+            <circle cx="310" cy="232" r="1.8"/><circle cx="286" cy="188" r="1.8"/>
+            <circle cx="330" cy="248" r="1.8"/><circle cx="262" cy="206" r="1.8"/>
+            <circle cx="352" cy="266" r="1.8"/><circle cx="240" cy="184" r="1.8"/>
+            <circle cx="374" cy="286" r="1.8"/><circle cx="216" cy="166" r="1.8"/>
+            <circle cx="326" cy="166" r="1.8"/><circle cx="298" cy="262" r="1.8"/>
+            <circle cx="348" cy="146" r="1.8"/><circle cx="274" cy="284" r="1.8"/>
+            <circle cx="304" cy="216" r="1.8"/><circle cx="322" cy="192" r="1.8"/>
+            <circle cx="288" cy="246" r="1.8"/><circle cx="356" cy="228" r="1.8"/>
+            <circle cx="266" cy="176" r="1.8"/><circle cx="380" cy="208" r="1.8"/>
+            <circle cx="244" cy="300" r="1.8"/><circle cx="404" cy="190" r="1.8"/>
+            <circle cx="314" cy="152" r="1.8"/><circle cx="294" cy="302" r="1.8"/>
+            <circle cx="338" cy="132" r="1.8"/><circle cx="268" cy="322" r="1.8"/>
+          </g>
+          <line x1="150" y1="352" x2="470" y2="112" stroke="#0B7285" stroke-width="2.4"/>
+          <line x1="230" y1="126" x2="398" y2="340" stroke="#5C6670" stroke-width="1.3" stroke-dasharray="6 5"/>
+          <line x1="70" y1="352" x2="70" y2="40" stroke="rgba(255,255,255,.22)"/>
+          <line x1="70" y1="352" x2="590" y2="352" stroke="rgba(255,255,255,.22)"/>
+          <text x="70" y="30" font-family="IBM Plex Mono, monospace" font-size="11" fill="#E2E6EA">peak envelope</text>
+          <text x="470" y="372" font-family="IBM Plex Mono, monospace" font-size="11" fill="#E2E6EA">RMS amplitude</text>
+          <text x="476" y="106" font-family="IBM Plex Mono, monospace" font-size="11" fill="#0B7285">widest: 84.8%</text>
+          <text x="404" y="352" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5C6670">across: 15.2%</text>
+          <text x="70" y="392" font-family="IBM Plex Mono, monospace" font-size="11" fill="#5C6670">one point per trace — every value computed from the model on the page</text>
+          <line x1="70" y1="378" x2="590" y2="378" stroke="#841617" stroke-width="2"/>
+        </svg>
+        <div class="hero-cap"><span>two attributes, one cloud</span><b>5184 traces</b></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="modules">
+    <div class="plot-head" style="margin:28px 0 14px">
+      <h3>The modules</h3>
+      <span class="hint">Each one depends only on those before it</span>
+    </div>
+
+    <p class="lede" style="max-width:62em">The first four build the picture and the vocabulary with no
+      method named. The next three are PCA. The two after that are ICA, set against PCA directly. The
+      last three take all of it into seismic data and then say plainly what it cannot tell you.</p>
+
+    <div class="cards">
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">00</p>
+          <h3>Too many measurements</h3>
+          <p>A channel system seen through a dozen attributes, most of which agree with each other.
+            Sample, feature, dimension, feature space.</p>
+          <p class="q">Twenty volumes and three color channels. Now what?</p>
+          <p class="k">in preparation</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">01</p>
+          <h3><a href="modules/directions.html">A direction through a cloud</a></h3>
+          <p>Two attributes crossplotted, a line pushed through by hand, and the spread of the projection
+            measured at every angle. The first principal component, found before it is named.</p>
+          <p class="q">What is the best single number to replace two attributes with?</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">02</p>
+          <h3><a href="modules/spread.html">Spread, and the shape of the cloud</a></h3>
+          <p>Covariance built from the products of deviations, why correlation survives a change of units
+            when covariance does not, and reading redundancy off a matrix of eleven attributes.</p>
+          <p class="q">Is this attribute adding anything the others did not have?</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">03</p>
+          <h3><a href="modules/units.html">Units, and why they decide the answer</a></h3>
+          <p>The same six attributes give two different first components depending on one checkbox. What
+            the covariance route is really ranking, and what standardizing costs as well as fixes.</p>
+          <p class="q">Why did my first component turn out to be the loudest attribute?</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">04</p>
+          <h3><a href="modules/eigen.html">Eigenvectors, loadings and scores</a></h3>
+          <p>The arithmetic that replaces the sweep, why the second component is the first component of
+            what is left, and the two different things the phrase names.</p>
+          <p class="q">Is "the principal component" the weights or the volume?</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">05</p>
+          <h3><a href="modules/howmany.html">How many components to keep</a></h3>
+          <p>Five standard rules returning five different answers on one attribute set, and the residual
+            looked at as a set of maps rather than as a percentage.</p>
+          <p class="q">Ninety percent of the variance. Is that enough?</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">06</p>
+          <h3><a href="modules/wherepcastops.html">Where PCA stops</a></h3>
+          <p>Two channel systems whose best directions in attribute space sit 37 degrees apart, and a
+            method that insists on 90. Measured against a supervised ceiling.</p>
+          <p class="q">Why does my first component look like two things at once?</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">07</p>
+          <h3><a href="modules/independence.html">Independence is not decorrelation</a></h3>
+          <p>Scores uncorrelated at 10<sup>&minus;15</sup> whose conditional spreads differ fourfold,
+            what whitening leaves behind, and a criterion that finds a channel without being shown one.</p>
+          <p class="q">PCA already removed the correlation. What is left to remove?</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">08</p>
+          <h3>ICA: whiten, then rotate</h3>
+          <p>What the algorithm searches for, why whitening has to come first, and the order, sign and
+            scale ambiguities that never go away.</p>
+          <p class="q">Why did my components come back in a different order?</p>
+          <p class="k">in preparation</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">09</p>
+          <h3>The two, side by side</h3>
+          <p>One dataset, one set of sliders, both methods live. Including the case where PCA appears to
+            work, and what about the data made it appear to.</p>
+          <p class="q">Which one should I be running?</p>
+          <p class="k">in preparation</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">10</p>
+          <h3>What counts as a dimension in seismic data</h3>
+          <p>An attribute vector, a waveform vector and a spectral vector. The same arithmetic, three
+            different meanings for an eigenvector, and eigenvectors that come out as wavelets.</p>
+          <p class="q">Waveform PCA and attribute PCA are the same method. Why do they look nothing alike?</p>
+          <p class="k">in preparation</p>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-body">
+          <p class="card-no">11</p>
+          <h3>Components are not geology</h3>
+          <p>Footprint arriving as a component, a real feature buried below the cut, and where linear
+            dimension reduction sits next to SOM, GTM, t-SNE, UMAP and autoencoders.</p>
+          <p class="q">The algorithm found four components. Which one is the reservoir?</p>
+          <p class="k">in preparation</p>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section id="about">
+    <div class="plot-head" style="margin:34px 0 14px">
+      <h3>About</h3>
+      <span class="hint">Who this is for, and what it costs you</span>
+    </div>
+    <p class="lede" style="max-width:62em">These modules are built for students and for anyone who has
+      been handed a dimension reduction result and asked to interpret it. They assume a geologist's
+      training and no background in statistics or linear algebra. The seismic in them is synthetic and
+      computed in the browser, which means the geology can be changed while a method is running on it.</p>
+    <p class="lede" style="max-width:62em">Nothing you do in a module leaves your browser. There is no
+      server, no account and no upload. A single shared script records that a page was opened, so that
+      the university can see the modules are being used; there is no cookie, no identifier and nothing
+      about you. Every module runs from a local copy with no network at all, and the state of the
+      controls is held in the address bar so that an instructor can send a link that opens an exact
+      configuration.</p>
+    <p class="lede" style="max-width:62em">The arithmetic behind every panel lives in one small file,
+      <span class="k">assets/multivar.js</span>, which is checked against cases with known answers by
+      <span class="k">verify-multivar.js</span> before any teaching text is written on top of it. Twice
+      so far, the measurement has contradicted a draft of the text, and on both occasions the text was
+      what changed.</p>
+
+    <footer>
+      <div class="foot-grid">
+        <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+        <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+          Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+          University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+        <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA
+          4.0</a>. Free to use, adapt and share, including in teaching, provided the source is credited
+          and any adaptation is released under the same license. If you use it in a course or a talk, a
+          credit line and a link back are all that is asked.</p>
+      </div>
+    </footer>
+  </section>
+</div>
+
+<script src="assets/count.js"></script>
+</body>
+</html>

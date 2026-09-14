@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Units, and why they decide the answer | How PCA and ICA Actually Work</title>
+<meta name="description" content="The same attributes give two different first components depending on whether they were standardized first. Why the covariance route is decided by whichever attribute has the largest numbers, what standardizing removes along with the units, and what it costs to give a weak attribute an equal share.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="spread.html">← Module 02</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 03 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>Units, and why they decide the answer</h1>
+    <p class="sub">Coherence runs between zero and one. Spectral bandwidth runs in the tens of hertz. Amplitude runs in whatever the processor wrote out. A method that looks for the direction of greatest spread has to be told whether those are comparable quantities, and the answer it returns depends entirely on what it is told. These five steps run the same six attributes both ways and compare what comes back.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">The first component, computed both ways <span>&mdash; one shared axis</span></p>
+        <canvas id="cHead" aria-label="Loadings of the first principal component under the covariance route and the correlation route, as paired bars"></canvas>
+      </div>
+      <div>
+        <p class="cap">Change the units, or the attribute set <span>&mdash; both routes update</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>Rescale one attribute</h2>
+            <div class="ctl">
+              <label for="gt">Which attribute</label>
+              <select id="gt" data-key="gt"></select>
+            </div>
+            <div class="ctl">
+              <label for="gain">Multiply it by <span class="val" id="gainV">1&times;</span></label>
+              <input type="range" data-key="gain" id="gain" min="-30" max="30" step="5" value="0">
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">A change of units and nothing else. No rock in
+              the survey is different at any setting of this slider.</p>
+          </div>
+          <div class="ctl-col">
+            <h2>The attribute set</h2>
+            <div class="seg" id="segWeak" role="group" aria-label="Include the shallow attribute">
+              <button type="button" data-weak="0">Six attributes</button>
+              <button type="button" data-weak="1">Add one that misses the target</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">The seventh is RMS amplitude measured in a
+              window above the channel system. It is a real attribute, correctly computed, on the wrong
+              interval. Step 5 is about what each route does with it.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Two answers</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · The units test</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · Who wins, and why</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · What it erases</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · An equal share</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>The same six attributes, two first components</h3>
+      <span class="hint">Both maps from the same survey</span>
+    </div>
+
+    <p class="qbox"><b>Why this step is here.</b> Almost every package offers this as a checkbox, often
+      labeled something like "normalize inputs", and it is usually left at whatever it came set to. The
+      two settings do not produce slightly different versions of one answer. They produce two different
+      answers.</p>
+
+    <p class="lede">Six attributes are computed over the same window on the same survey: RMS amplitude,
+      peak envelope, peak frequency, spectral bandwidth, coherence and GLCM contrast. Nothing about them
+      changes between the two routes. What changes is whether each attribute has been divided by its own
+      standard deviation before the covariance matrix is formed.</p>
+    <p class="lede">The bars above the tabs give the loadings of the first component under each route:
+      how much of each attribute went into it. The maps below are the resulting first component drawn
+      back onto the survey, with the two channel axes marked on both so the same feature can be found in
+      each.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The first component, drawn on the survey</h3>
+        <span class="hint">Channel axes marked on both</span>
+      </div>
+      <canvas id="c1" aria-label="The first principal component under each route, drawn as a map of the survey"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">The attribute set</h2>
+        <div class="seg" id="segWeak1" role="group" aria-label="Include the shallow attribute">
+          <button type="button" data-weak="0">Six</button>
+          <button type="button" data-weak="1">Seven</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+    <div class="legend prose">
+      <span>Neither map is wrong. They are the answers to two different questions: which direction
+        carries the most of the original units squared, and which direction carries the most of the
+        shared behavior. The second question is usually the one an interpreter meant to ask, and the
+        first is what a package computes when it is left alone.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Multiply one attribute by a thousand</h3>
+      <span class="hint">Nothing about the rocks changes</span>
+    </div>
+
+    <p class="lede">A volume written out in different units is the same volume. If a method is measuring
+      something about the subsurface, rescaling one input should leave its answer alone. The slider in
+      the header does exactly that rescaling, over three decades either way, and the panel below tracks
+      what each route makes of it.</p>
+    <p class="lede">The upper panel is the loading of the first component on the attribute being
+      rescaled, under the covariance route. The lower panel is the same quantity under the correlation
+      route. They share one horizontal axis of gain so the two behaviors can be read straight down
+      against each other.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>What each route does as one attribute is rescaled</h3>
+        <span class="hint">One shared gain axis, both fixed</span>
+      </div>
+      <canvas id="c2" aria-label="Loading of the first component on the rescaled attribute, under both routes, against gain"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="gt2">Which attribute</label>
+        <select id="gt2" data-key="gt"></select>
+      </div>
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="gain2">Multiply it by <span class="val" id="gain2V">1&times;</span></label>
+        <input type="range" data-key="gain" id="gain2" min="-30" max="30" step="5" value="0">
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+    <div class="legend prose">
+      <span>The correlation route's line is flat because dividing each attribute by its own standard
+        deviation undoes any rescaling exactly, whatever the rescaling was. That is the entire mechanism,
+        and it is the reason the choice is usually described as making the attributes comparable rather
+        than as making them equal.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>The covariance route is an auction</h3>
+      <span class="hint">Note the axis: it runs over seven decades</span>
+    </div>
+
+    <p class="lede">The reason the covariance route behaves the way it does is visible as soon as the
+      variances are put side by side. The upper panel gives the variance of each attribute in its own
+      units, on a logarithmic axis because they are not otherwise comparable on one page. The lower panel
+      gives the size of that attribute's loading on the first component under the covariance route.</p>
+    <p class="lede">The two panels have the same shape. An attribute whose numbers are large has a large
+      variance whatever it is measuring, and the direction of greatest variance runs along it. Attributes
+      recorded as fractions contribute a loading indistinguishable from zero, not because they carry
+      nothing but because their numbers are small.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Variance in native units, and the loading it earns</h3>
+        <span class="hint">Attributes in the same order in both panels</span>
+      </div>
+      <canvas id="c3" aria-label="Variance of each attribute on a logarithmic axis, above the size of its loading on the first covariance-route component"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="gain3">Rescale the chosen attribute by
+          <span class="val" id="gain3V">1&times;</span></label>
+        <input type="range" data-key="gain" id="gain3" min="-30" max="30" step="5" value="0">
+      </div>
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="gt3">Which attribute</label>
+        <select id="gt3" data-key="gt"></select>
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>With two attributes, standardizing erases the angle</h3>
+      <span class="hint">Pick any pair and watch the right-hand panel</span>
+    </div>
+
+    <p class="lede">Take exactly two attributes and standardize them. The matrix that gets decomposed
+      then has ones down its diagonal and the correlation in both off-diagonal positions, and a matrix of
+      that shape has the same two directions regardless of what the correlation is: one at forty-five
+      degrees and one at right angles to it. The correlation sets how long the two axes are and has no
+      say in where they point.</p>
+    <p class="lede">The left panel below draws the chosen pair with both axes on one common numeric
+      scale, so the angle on screen is the angle the covariance route would find in the units as given.
+      The right panel draws the same traces standardized. Change the pair and watch: the left angle moves
+      and the right one does not.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The same two attributes, two coordinate systems</h3>
+        <span class="hint">Left in native units, right standardized</span>
+      </div>
+      <canvas id="c4" aria-label="One attribute pair drawn twice, once in common native units and once standardized, with the first component marked on each"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="px">First attribute</label>
+        <select id="px" data-key="px"></select>
+      </div>
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="py">Second attribute</label>
+        <select id="py" data-key="py"></select>
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+    <div class="legend prose">
+      <span>This is the reason module 01 worked in matched amplitude units rather than standardizing.
+        Standardized, the answer to every two-attribute problem is forty-five degrees, and a student
+        would have learned a rule that holds only because there were two attributes. With three or more
+        the degeneracy is gone and the directions depend on the correlations again.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>What an equal share costs</h3>
+      <span class="hint">Switch the seventh attribute in and out</span>
+    </div>
+
+    <p class="lede">Standardizing gives every attribute a variance of exactly one. That is what makes the
+      attributes comparable, and it is also a statement that each of them deserves the same weight. The
+      seventh attribute in this set is RMS amplitude measured in a window above the channel system, which
+      is a correctly computed attribute on an interval that contains none of the target.</p>
+    <p class="lede">The panels below give the fraction of variance on each component, with and without
+      it, and the loading it carries on each. The covariance route ignores it. The correlation route
+      cannot, because it has already declared it equal.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Variance per component, and where the weak attribute lands</h3>
+        <span class="hint">Same component axis in both panels</span>
+      </div>
+      <canvas id="c5" aria-label="Fraction of variance on each component with and without the weak attribute, above the loading the weak attribute carries on each component"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Which route</h2>
+        <div class="seg" id="segRoute" role="group" aria-label="Which route to show">
+          <button type="button" data-route="z">Standardized</button>
+          <button type="button" data-route="raw">Native units</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>Neither behavior is a defect. The covariance route ignoring a weak attribute is the same
+        mechanism that makes it ignore coherence, and the correlation route promoting one is the same
+        mechanism that lets coherence be heard at all. What the choice cannot do is be made once and
+        forgotten, because it depends on whether the attributes in front of you deserve equal weight.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">Where this shows up in real work</span>
+    </div>
+    <p class="lede">This is the first decision in a dimension reduction and the one most often made by
+      default. Everything downstream — which components come out, how many are worth keeping, what the
+      RGB blend looks like — follows from it.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Reading someone else's components.</b> Two groups can run the same method on the same
+        attributes and publish different first components. Before deciding one of them is wrong, ask
+        which route each took.</li>
+      <li><b>Mixing units in an attribute set.</b> Any set containing both a coherence and an amplitude
+        has a variance spread of several decades in it, and the covariance route on such a set is
+        answering a question about the amplitude alone.</li>
+      <li><b>Attribute selection before clustering.</b> Implementations that Z-score their inputs before
+        whitening, which is the common arrangement for seismic ICA, have made this choice for you. It is
+        worth knowing they have.</li>
+      <li><b>Assembling the input list.</b> Once every attribute is guaranteed an equal share, an
+        attribute that carries nothing about the target still occupies a dimension, and it can occupy a
+        high-ranked one.</li>
+    </ul>
+    <p class="lede"><b>Two points that are commonly confused.</b> The first is that standardizing is the
+      neutral choice. It is a decision that every attribute matters equally, which is a strong claim
+      about an attribute set and is sometimes false. The second is that the covariance route preserves
+      the physics. It preserves the units, which is not the same thing: whichever attribute happens to
+      have been written out with the largest numbers dominates, and that is a property of the file rather
+      than of the rocks.</p>
+    <div class="legend prose">
+      <span>A third route exists and is not covered here: scaling each attribute by something other than
+        its own standard deviation, such as a fixed expected range or a weight chosen by the interpreter.
+        It is uncommon in seismic practice and it is the honest answer when neither of the two standard
+        choices describes what the attributes are worth.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Read the two first components against each other.</b>
+          <em class="point">Why: this is the comparison that shows the choice is not cosmetic.</em>
+          With the six-attribute set and no rescaling, read the loadings of the first component under
+          each route from the bars above the tabs.
+          <em class="predict">Before looking: six attributes, all computed on the same window of the same
+            survey. How different can the two answers be? Commit to an expectation.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">The covariance route returns a
+            first component that is 0.950 spectral bandwidth, &minus;0.274 GLCM contrast and &minus;0.150
+            peak frequency, with loadings of &minus;0.001 on RMS amplitude, &minus;0.001 on peak envelope
+            and 0.006 on coherence. Three of the six attributes are not in it at all. The correlation
+            route returns 0.509 RMS, 0.379 peak envelope, 0.258 peak frequency, &minus;0.439 bandwidth,
+            &minus;0.439 coherence and 0.381 GLCM contrast — all six present, and the largest loading is
+            on an attribute the other route ignored completely. The two components share almost
+            nothing.</span></details></li>
+
+        <li><b>Rescale an attribute and watch which answer survives.</b>
+          <em class="point">Why: a method whose answer depends on the units of its inputs is measuring
+            the file rather than the subsurface.</em>
+          Choose RMS amplitude in the rescale control and take the gain from 1&times; to 1000&times;,
+          reading the covariance-route loading on it at each stop, then the correlation-route loading.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Under the covariance route
+            the loading on RMS amplitude reads &minus;0.001 at 1&times;, &minus;0.008 at 10&times;,
+            &minus;0.083 at 100&times; and 0.768 at 1000&times;. An attribute that was invisible becomes
+            the largest contributor to the first component, and no rock in the survey is different at any
+            point in that slide. The share of variance the first component holds moves too, from 69.55%
+            to 72.84%. Under the correlation route the loading sits at 0.509 and the share at 52.19% at
+            every single stop. Note also where the change happens: nothing much moves until 100&times;,
+            because the loading depends on the variance, which grows as the square of the gain — RMS
+            amplitude has to be scaled up by about three decades before its variance is comparable with
+            spectral bandwidth's.</span></details></li>
+
+        <li><b>Look at the variances that decide it.</b>
+          <em class="point">Why: the covariance route is not arbitrary, it is predictable, and knowing
+            what it will do is enough to know whether to use it.</em>
+          In step 3, read the variance of each attribute in native units off the logarithmic axis.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Spectral bandwidth 74.4,
+            GLCM contrast 23.5, peak frequency 18.1, coherence 0.0101, peak envelope 0.000207, RMS
+            amplitude 0.000105. The largest and the smallest differ by a factor of about seven hundred
+            thousand. The first component under the covariance route loads on those attributes in the
+            same order, which is why it is worth predicting the answer before running it: the covariance
+            route on a mixed-unit set returns the loudest attribute and a small correction.</span></details></li>
+
+        <li><b>Standardize two attributes and look for the angle.</b>
+          <em class="point">Why: a result that is true only for two attributes is worth meeting
+            deliberately rather than generalizing from by accident.</em>
+          In step 4, step through four pairs and record the native angle and the standardized angle for
+          each.
+          <details class="reveal"><summary>Hint</summary><span class="ans">RMS with peak envelope:
+            native 58.99 degrees, standardized 45.00. RMS with coherence: native 93.65, standardized
+            135.00. Peak frequency with bandwidth: native 99.45, standardized 135.00. Coherence with GLCM
+            contrast: native 90.85, standardized 135.00. The standardized answer takes one of two values
+            and which one depends only on the sign of the correlation. The correlation itself, anywhere
+            from &minus;0.72 to +0.65 across those four pairs, has no effect on the direction at all —
+            only on how elongated the cloud is along it. Add a third attribute and the degeneracy
+            disappears.</span></details></li>
+
+        <li><b>Add an attribute that misses the target.</b>
+          <em class="point">Why: an equal share is given to every input, including the ones that should
+            not have been in the list.</em>
+          Switch the seventh attribute in, with the standardized route selected in step 5, and read the
+          variance on each component and the loading the seventh attribute carries.
+          <details class="reveal"><summary>Hint</summary><span class="ans">RMS above the target averages
+            0.04559 inside the young channel and 0.04660 in the background, a difference of two percent,
+            against 0.08126 and 0.05571 for the same attribute measured on the target itself. It carries
+            almost nothing about the channel. Under the covariance route its loading on the first
+            component is 0.000 and the fractions of variance do not move at all. Under the correlation
+            route the first component falls from 52.19% to 44.83%, and the seventh attribute takes over
+            the second component outright, with a loading of 0.528 — larger than any other attribute
+            carries there. The number of components needed to reach ninety percent of the variance goes
+            from four to five. The second most important direction in the analysis is now dominated by a
+            window that does not contain the target.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>There are two routes and they give different answers.</b> Decomposing the covariance
+          matrix and decomposing the correlation matrix are different analyses of the same data.</li>
+        <li><b>The covariance route is decided by whichever attribute has the largest numbers.</b> On
+          this set the variances span a factor of seven hundred thousand and the first component is
+          ninety-five percent one attribute.</li>
+        <li><b>Rescaling an input changes the covariance-route answer and not the correlation-route
+          answer.</b> That is the test worth running on any method before trusting what it returns.</li>
+        <li><b>Standardizing is a decision, not a cleanup.</b> It declares every attribute equally
+          important, which is a claim about the attribute set rather than a property of it.</li>
+        <li><b>With exactly two standardized attributes the first component is always at forty-five
+          degrees.</b> The correlation sets the elongation and nothing else. Three or more attributes
+          remove the degeneracy.</li>
+        <li><b>An equal share goes to attributes that earned nothing.</b> A correctly computed attribute
+          on the wrong interval took over the second component here.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>Native units in this module, deliberately.</b> Modules 01 and 02 multiply the
+      amplitude-valued attributes by 1000 so that their readouts are round numbers. That factor is
+      harmless there, because nothing in either module depends on the relative size of two attributes in
+      unlike units. Here it would not be harmless: applying it to two of the six attributes and not to
+      the other four would change the covariance-route answer, which is precisely the effect this module
+      is about. So every number on this page is in the attribute's own units, and the display gain used
+      elsewhere in the set is itself an example of the choice being examined. Run with a gain of 1000 on
+      RMS amplitude and peak envelope, the covariance route returns a first component of 0.776 peak
+      envelope and 0.507 RMS, a third distinct answer from the same rocks.</p>
+    <p class="lede"><b>The two routes.</b> The covariance route removes the mean of each attribute and
+      decomposes the resulting covariance matrix. The correlation route removes the mean and divides by
+      the standard deviation of each attribute, which makes the covariance matrix of the result the
+      correlation matrix of the original. Both are computed by
+      <span class="k">assets/multivar.js</span> with the same symmetric eigensolver, and the only
+      difference between them is the division.</p>
+    <p class="lede"><b>The survey and the attributes</b> are the same as modules 01 and 02: 72 by 72
+      traces, two channel systems, a levee wedge, a 30 Hz Ricker wavelet, footprint on a six-trace period
+      and 12% noise. The six attributes are computed on samples 22 to 50. The seventh, RMS amplitude
+      above the target, is computed on samples 2 to 16, which sits above the channel system entirely.</p>
+    <p class="lede"><b>Step 4's left panel</b> draws both attributes on one common numeric scale, in
+      their own units, so that the angle on screen is the angle the covariance route works with. For a
+      pair whose typical sizes differ by a factor of ten the cloud is a near-vertical sliver, which is an
+      accurate picture of why one of the two is ignored. The right panel is the same traces standardized,
+      on axes of four standard deviations. Neither panel is a distortion of the other; they are the two
+      coordinate systems the two routes operate in.</p>
+    <p class="lede"><b>Sign conventions.</b> An eigenvector's sign is arbitrary, so
+      <span class="k">multivar.js</span> fixes it by making the largest-magnitude loading positive. Two
+      runs that differ only in sign would otherwise produce maps with the color bar reversed for no
+      reason a reader could see. Comparisons of loadings between the two routes in this module are
+      unaffected, but a sign flip between two published figures of the same component means
+      nothing.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> Nothing here decimates before computing the
+      matrix; every one of the 5184 traces is used, where a production run on a full volume would work
+      from a subset. No attribute here is clipped or percentile-limited before the analysis, which some
+      workflows do and which changes the variances and therefore the covariance-route answer. The
+      standardization used is the ordinary one, subtracting the mean and dividing by the standard
+      deviation; robust alternatives using the median and a percentile range behave differently on
+      attributes with long tails and are not shown.</p>
+    <p class="lede"><b>Where this departs from production software.</b> Packages differ in which route
+      they take by default and in whether they say so. Some standardize silently, some offer it as an
+      option whose label does not make clear which matrix is being decomposed, and some decompose the
+      covariance matrix of data that a previous step already normalized. The test in step 2 settles the
+      question for any of them from the outside: rescale one input by a large factor, run it again, and
+      see whether the answer moved.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Jolliffe, I. T., 2002, <em>Principal Component Analysis</em>, 2nd ed.: Springer — chapter 2
+          on the covariance and correlation routes and why they are not related in any simple way.</li>
+        <li>Hotelling, H., 1933, Analysis of a complex of statistical variables into principal
+          components: <em>Journal of Educational Psychology</em>, <b>24</b>, 417&ndash;441.</li>
+        <li>Hyvärinen, A., and E. Oja, 2000, Independent component analysis: algorithms and applications:
+          <em>Neural Networks</em>, <b>13</b>, 411&ndash;430 — for the Z-score step that precedes
+          whitening in the standard ICA arrangement.</li>
+        <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+          Reservoir Characterization</em>: SEG Geophysical Development Series 11.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>04 · Eigenvectors, loadings and scores</h3>
+    <p>Everything so far has been found by projecting and measuring. The arithmetic that produces the
+      same answer in one step is worth meeting now that there is something for it to be a shortcut
+      to.</p>
+    <a class="btn ghost" href="eigen.html">Module 04 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="spread.html">← Module 02: spread and the shape of the cloud</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="eigen.html">Module 04: eigenvectors, loadings and scores →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license. If you use it in a course or a talk, a credit line
+        and a link back are all that is asked.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened, so that the university can see these are being used &mdash; no cookie, no
+        account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js. It ' +
+      'expects them one directory up, at ../assets/, and file names are case-sensitive on GitHub Pages.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+
+  var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
+  var WEAK = 'shallow';
+  var LABEL = {
+    rms: 'RMS amplitude', envelope: 'Peak envelope', peakfreq: 'Peak frequency',
+    bandwidth: 'Spectral bandwidth', coherence: 'Coherence', glcmcon: 'GLCM contrast',
+    shallow: 'RMS above the target'
+  };
+  var SHORT = {
+    rms: 'RMS', envelope: 'envelope', peakfreq: 'f peak', bandwidth: 'bandwidth',
+    coherence: 'coherence', glcmcon: 'GLCM contrast', shallow: 'shallow RMS'
+  };
+
+  var DEF = { gt: 'rms', gain: 0, weak: 0, px: 'rms', py: 'envelope', route: 'z', tab: 'p1' };
+  var S = MV.readState(DEF);
+  var ALL = CORE.concat([WEAK]);
+  if (ALL.indexOf(S.gt) < 0) S.gt = DEF.gt;
+  if (ALL.indexOf(S.px) < 0) S.px = DEF.px;
+  if (ALL.indexOf(S.py) < 0) S.py = DEF.py;
+  if (S.route !== 'z' && S.route !== 'raw') S.route = 'z';
+  S.weak = S.weak ? 1 : 0;
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  /* The slider runs in tenths of a decade, so it reaches a thousandfold either
+     way in five-step increments. */
+  function gainOf() { return Math.pow(10, S.gain / 10); }
+  function gainLabel() {
+    var g = gainOf();
+    if (g >= 1000) return '1000\u00d7';
+    if (g >= 1) return (g < 10 ? g.toFixed(1) : String(Math.round(g))) + '\u00d7';
+    return '1/' + String(Math.round(1 / g)) + '\u00d7';
+  }
+
+  /* =====================================================================
+     THE SURVEY
+
+     Native units throughout. The x1000 display gain used in modules 01 and
+     02 is exactly the kind of choice this module is about, so applying it
+     here would change the answer being examined. The Method tab says so.
+     ===================================================================== */
+
+  var SURVEY = null;
+  function survey() {
+    if (SURVEY) return SURVEY;
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    SURVEY = { slab: slab, attr: AF.attributes(slab, ALL) };
+    return SURVEY;
+  }
+
+  function names() { return S.weak ? CORE.concat([WEAK]) : CORE.slice(); }
+
+  /* The attribute set with the rescaling applied to whichever one is chosen. */
+  function dataset(overrideGain) {
+    var sv = survey(), g = (overrideGain === undefined) ? gainOf() : overrideGain;
+    return names().map(function (n) {
+      if (n !== S.gt || g === 1) return sv.attr[n];
+      var src = sv.attr[n], o = new Float64Array(src.length);
+      for (var i = 0; i < src.length; i++) o[i] = src[i] * g;
+      return o;
+    });
+  }
+
+  var PCACHE = {};
+  function both(overrideGain) {
+    var key = names().join(',') + '|' + S.gt + '|' +
+      (overrideGain === undefined ? S.gain : 'g' + overrideGain);
+    if (PCACHE[key]) return PCACHE[key];
+    var X = dataset(overrideGain);
+    PCACHE[key] = {
+      X: X,
+      raw: MV.pca(X, {}),
+      z: MV.pca(X, { standardize: true }),
+      names: names()
+    };
+    return PCACHE[key];
+  }
+
+  /* =====================================================================
+     DRAWING HELPERS
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+
+  function grid(ctx, r, x0, x1, y0, y1, nx, ny, fmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.strokeStyle = '#E4E7EA';
+    ctx.lineWidth = 1;
+    var i, v, X, Y;
+    ctx.textAlign = 'center';
+    for (i = 0; i <= nx; i++) {
+      v = x0 + (x1 - x0) * i / nx;
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+      ctx.fillText(fmt ? fmt(v) : String(Math.round(v)), X, r.y + r.h + 14);
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.fillText(fmt ? fmt(v) : String(Math.round(v)), r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var stops = [[26, 47, 63], [61, 109, 125], [166, 196, 198], [244, 240, 227],
+                 [214, 156, 110], [166, 71, 52], [102, 20, 24]];
+    var u = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(u)), f = u - i;
+    var a = stops[i], b = stops[i + 1];
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * f) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * f) + ',' +
+      Math.round(a[2] + (b[2] - a[2]) * f) + ')';
+  }
+
+  function drawMap(ctx, r, m, nx, ny, title) {
+    var lo = AF.percentile(m, 0.01), hi = AF.percentile(m, 0.99);
+    var cw = r.w / nx, ch = r.h / ny, ix, iy;
+    for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
+      ctx.fillStyle = cmap((m[ix * ny + iy] - lo) / (hi - lo || 1));
+      ctx.fillRect(r.x + ix * cw, r.y + (ny - 1 - iy) * ch, cw + 0.6, ch + 0.6);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    if (title) {
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '600 11px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 6);
+      ctx.font = '11px ui-monospace,Menlo,monospace';
+    }
+    ctx.restore();
+  }
+
+  function markChannels(ctx, r, nx, ny) {
+    ctx.save();
+    ctx.lineWidth = 1.2;
+    [[AF.YOUNG, 'rgba(255,255,255,0.85)', []], [AF.OLD, 'rgba(255,255,255,0.55)', [4, 4]]]
+      .forEach(function (p) {
+        ctx.strokeStyle = p[1];
+        ctx.setLineDash(p[2]);
+        ctx.beginPath();
+        for (var ix = 0; ix < nx; ix++) {
+          var yc = AF.centerline(ix, nx, p[0]) * (ny - 1);
+          var X = r.x + (ix + 0.5) * r.w / nx;
+          var Y = r.y + r.h - (yc + 0.5) * r.h / ny;
+          if (ix === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+        }
+        ctx.stroke();
+      });
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     THE HEADER: PAIRED LOADING BARS
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var B = both(), N = B.names;
+    var rowH = 26, h = 40 + N.length * rowH + 30;
+    var ctx = fit('cHead', w, h);
+    if (!ctx) return;
+    var x0 = 108, rw = w - x0 - 22, mid = x0 + rw / 2;
+
+    ctx.save();
+    ctx.strokeStyle = '#E4E7EA';
+    [-1, -0.5, 0, 0.5, 1].forEach(function (v) {
+      var X = mid + v * rw / 2;
+      ctx.beginPath(); ctx.moveTo(X, 30); ctx.lineTo(X, 30 + N.length * rowH); ctx.stroke();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.fillText(v.toFixed(1), X, 24);
+    });
+    ctx.restore();
+
+    N.forEach(function (n, i) {
+      var y = 30 + i * rowH;
+      var vr = B.raw.vectors[0][i], vz = B.z.vectors[0][i];
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'right';
+      ctx.font = (n === S.gt ? '600 ' : '') + '11px ui-monospace,Menlo,monospace';
+      ctx.fillText(SHORT[n], x0 - 8, y + rowH / 2 + 4);
+      ctx.restore();
+      [[vr, CRIM, 2], [vz, TEAL, 13]].forEach(function (q) {
+        var v = q[0], bw = v * rw / 2;
+        ctx.save();
+        ctx.fillStyle = q[1];
+        ctx.globalAlpha = 0.9;
+        ctx.fillRect(Math.min(mid, mid + bw), y + q[2], Math.abs(bw), 9);
+        ctx.restore();
+      });
+    });
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = CRIM;
+    ctx.fillText('native units (covariance route)', x0, 30 + N.length * rowH + 18);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('standardized (correlation route)', x0 + 210, 30 + N.length * rowH + 18);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     STEP PANELS
+     ===================================================================== */
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(290, (w - 80) / 2);
+    var ctx = fit('c1', w, size + 40);
+    if (!ctx) return;
+    var B = both(), sl = survey().slab;
+    [[B.raw.scores[0], 'First component, native units'],
+     [B.z.scores[0], 'First component, standardized']].forEach(function (q, k) {
+      var r = { x: 8 + k * (size + 40), y: 22, w: size, h: size };
+      drawMap(ctx, r, q[0], sl.nx, sl.ny, q[1]);
+      markChannels(ctx, r, sl.nx, sl.ny);
+    });
+  }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 310;
+    var ctx = fit('c2', w, h);
+    if (!ctx) return;
+    var rw = w - 66 - 24, rh = 106;
+    var rA = { x: 66, y: 14, w: rw, h: rh };
+    var rB = { x: 66, y: 14 + rh + 34, w: rw, h: rh };
+    var idx = names().indexOf(S.gt);
+
+    var gs = [], lr = [], lz = [], k;
+    for (k = -30; k <= 30; k += 5) {
+      var P = both(Math.pow(10, k / 10));
+      gs.push(k);
+      lr.push(idx >= 0 ? Math.abs(P.raw.vectors[0][idx]) : 0);
+      lz.push(idx >= 0 ? Math.abs(P.z.vectors[0][idx]) : 0);
+    }
+
+    [[rA, lr, CRIM, 'covariance route: loading on ' + SHORT[S.gt]],
+     [rB, lz, TEAL, 'correlation route: the same loading']].forEach(function (q) {
+      grid(ctx, q[0], -30, 30, 0, 1, 6, 2, function (v) {
+        var g = Math.pow(10, v / 10);
+        return g >= 1 ? (g >= 1000 ? '1000' : String(Math.round(g))) : '1/' + Math.round(1 / g);
+      });
+      ctx.save();
+      ctx.strokeStyle = q[2];
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (var i = 0; i < gs.length; i++) {
+        var X = q[0].x + (gs[i] + 30) / 60 * q[0].w;
+        var Y = q[0].y + q[0].h - Math.min(1, q[1][i]) * q[0].h;
+        if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      }
+      ctx.stroke();
+      ctx.fillStyle = q[2];
+      ctx.textAlign = 'left';
+      ctx.fillText(q[3], q[0].x + 8, q[0].y + 16);
+      ctx.restore();
+      var XC = q[0].x + (S.gain + 30) / 60 * q[0].w;
+      ctx.save();
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 1.4;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath(); ctx.moveTo(XC, q[0].y); ctx.lineTo(XC, q[0].y + q[0].h); ctx.stroke();
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText('gain applied to ' + LABEL[S.gt] + ' \u2014 one axis, shared',
+      rB.x + rB.w / 2, rB.y + rB.h + 32);
+    ctx.restore();
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 330;
+    var ctx = fit('c3', w, h);
+    if (!ctx) return;
+    var B = both(), N = B.names;
+    var rw = w - 74 - 24, rh = 116;
+    var rA = { x: 74, y: 14, w: rw, h: rh };
+    var rB = { x: 74, y: 14 + rh + 40, w: rw, h: rh };
+    var LO = -6, HI = 3;                       // fixed decades on the variance axis
+
+    grid(ctx, rA, 0, N.length, LO, HI, N.length, 3, function (v) { return '1e' + Math.round(v); });
+    grid(ctx, rB, 0, N.length, 0, 1, N.length, 2, function (v) { return v.toFixed(1); });
+
+    N.forEach(function (n, i) {
+      var v = MV.variance(B.X[i]);
+      var lg = Math.max(LO, Math.min(HI, Math.log(v) / Math.LN10));
+      var bw = rA.w / N.length * 0.62, cx = rA.x + (i + 0.5) * rA.w / N.length;
+      ctx.save();
+      ctx.fillStyle = (n === S.gt) ? CRIM : SLATE;
+      ctx.globalAlpha = 0.85;
+      var y = rA.y + rA.h - (lg - LO) / (HI - LO) * rA.h;
+      ctx.fillRect(cx - bw / 2, y, bw, rA.y + rA.h - y);
+      var ld = Math.abs(B.raw.vectors[0][i]);
+      var y2 = rB.y + rB.h - Math.min(1, ld) * rB.h;
+      ctx.fillRect(cx - bw / 2, y2, bw, rB.y + rB.h - y2);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(SHORT[n], cx, rB.y + rB.h + 28);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.fillText('variance in native units', rA.x + 8, rA.y + 16);
+    ctx.fillText('size of the loading on the first covariance-route component',
+      rB.x + 8, rB.y + 16);
+    ctx.restore();
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(280, (w - 96) / 2);
+    var ctx = fit('c4', w, size + 62);
+    if (!ctx) return;
+    var sv = survey();
+    var X = [sv.attr[S.px], sv.attr[S.py]];
+    var mx = MV.mean(X[0]), my = MV.mean(X[1]);
+    var sx = MV.std(X[0], mx), sy = MV.std(X[1], my);
+    var angN = MV.principalAngle(X);
+    var angZ = MV.principalAngle(X, { standardize: true });
+
+    // left: one common numeric scale, so the covariance-route angle is honest
+    var half = 3.6 * Math.max(sx, sy);
+    var rL = { x: 44, y: 22, w: size, h: size };
+    grid(ctx, rL, -half, half, -half, half, 2, 2, function (v) {
+      return Math.abs(v) >= 1 ? v.toFixed(1) : v.toExponential(0);
+    });
+    var i;
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rL.x, rL.y, rL.w, rL.h); ctx.clip();
+    ctx.fillStyle = 'rgba(22,25,28,0.30)';
+    for (i = 0; i < X[0].length; i++) {
+      var ax = X[0][i] - mx, ay = X[1][i] - my;
+      var Xp = rL.x + (ax + half) / (2 * half) * rL.w;
+      var Yp = rL.y + rL.h - (ay + half) / (2 * half) * rL.h;
+      ctx.fillRect(Xp - 0.9, Yp - 0.9, 1.8, 1.8);
+    }
+    var a = angN * Math.PI / 180, L = rL.w;
+    ctx.strokeStyle = CRIM;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(rL.x + rL.w / 2 - Math.cos(a) * L, rL.y + rL.h / 2 + Math.sin(a) * L);
+    ctx.lineTo(rL.x + rL.w / 2 + Math.cos(a) * L, rL.y + rL.h / 2 - Math.sin(a) * L);
+    ctx.stroke();
+    ctx.restore();
+
+    // right: standardized
+    var rR = { x: 44 + size + 52, y: 22, w: size, h: size };
+    grid(ctx, rR, -4, 4, -4, 4, 2, 2);
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rR.x, rR.y, rR.w, rR.h); ctx.clip();
+    ctx.fillStyle = 'rgba(22,25,28,0.30)';
+    for (i = 0; i < X[0].length; i++) {
+      var zx = (X[0][i] - mx) / sx, zy = (X[1][i] - my) / sy;
+      var Xq = rR.x + (zx + 4) / 8 * rR.w;
+      var Yq = rR.y + rR.h - (zy + 4) / 8 * rR.h;
+      ctx.fillRect(Xq - 0.9, Yq - 0.9, 1.8, 1.8);
+    }
+    var b = angZ * Math.PI / 180;
+    ctx.strokeStyle = TEAL;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(rR.x + rR.w / 2 - Math.cos(b) * L, rR.y + rR.h / 2 + Math.sin(b) * L);
+    ctx.lineTo(rR.x + rR.w / 2 + Math.cos(b) * L, rR.y + rR.h / 2 - Math.sin(b) * L);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = CRIM;
+    ctx.fillText('native units \u2014 ' + angN.toFixed(2) + '\u00b0', rL.x, rL.y - 6);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('standardized \u2014 ' + angZ.toFixed(2) + '\u00b0', rR.x, rR.y - 6);
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText(SHORT[S.px] + ' across, ' + SHORT[S.py] + ' up, both panels',
+      rL.x + (rR.x + rR.w - rL.x) / 2, rL.y + rL.h + 36);
+    ctx.restore();
+  }
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 330;
+    var ctx = fit('c5', w, h);
+    if (!ctx) return;
+    var sv = survey();
+    var six = CORE.map(function (n) { return sv.attr[n]; });
+    var seven = ALL.map(function (n) { return sv.attr[n]; });
+    var opt = (S.route === 'z') ? { standardize: true } : {};
+    var P6 = MV.pca(six, opt), P7 = MV.pca(seven, opt);
+
+    var rw = w - 66 - 24, rh = 112;
+    var rA = { x: 66, y: 14, w: rw, h: rh };
+    var rB = { x: 66, y: 14 + rh + 40, w: rw, h: rh };
+    grid(ctx, rA, 0, 7, 0, 70, 7, 7, function (v) { return String(Math.round(v)); });
+    grid(ctx, rB, 0, 7, -1, 1, 7, 4, function (v) { return v.toFixed(1); });
+
+    var cw = rA.w / 7, i;
+    for (i = 0; i < 7; i++) {
+      var cx = rA.x + (i + 0.5) * cw;
+      var e6 = i < P6.explained.length ? P6.explained[i] * 100 : 0;
+      var e7 = P7.explained[i] * 100;
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = SLATE;
+      var y6 = rA.y + rA.h - Math.min(70, e6) / 70 * rA.h;
+      ctx.fillRect(cx - cw * 0.30, y6, cw * 0.26, rA.y + rA.h - y6);
+      ctx.fillStyle = CRIM;
+      var y7 = rA.y + rA.h - Math.min(70, e7) / 70 * rA.h;
+      ctx.fillRect(cx + cw * 0.04, y7, cw * 0.26, rA.y + rA.h - y7);
+      // the weak attribute's loading on this component, in the seven-attribute run
+      var l = P7.vectors[i][ALL.indexOf(WEAK)];
+      ctx.fillStyle = TEAL;
+      var yz = rB.y + rB.h / 2;
+      var hh = -l * rB.h / 2;
+      ctx.fillRect(cx - cw * 0.20, Math.min(yz, yz + hh), cw * 0.40, Math.abs(hh));
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('PC' + (i + 1), cx, rB.y + rB.h + 28);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.fillText('percent of the variance \u2014 grey: six attributes, crimson: seven',
+      rA.x + 8, rA.y + 16);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('loading of the seventh attribute on each component', rB.x + 8, rB.y + 16);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function drawStats() {
+    var B = both(), N = B.names, idx = N.indexOf(S.gt);
+    function biggest(P) {
+      var b = 0, i;
+      for (i = 0; i < N.length; i++) if (Math.abs(P.vectors[0][i]) > Math.abs(P.vectors[0][b])) b = i;
+      return SHORT[N[b]] + ' ' + P.vectors[0][b].toFixed(3);
+    }
+    if ($('s1')) {
+      $('s1').innerHTML =
+        stat('Native PC1', (B.raw.explained[0] * 100).toFixed(2) + '%', 'largest: ' + biggest(B.raw)) +
+        stat('Standardized PC1', (B.z.explained[0] * 100).toFixed(2) + '%', 'largest: ' + biggest(B.z)) +
+        stat('Attributes', String(N.length), S.weak ? 'including the shallow one' : 'on the target') +
+        stat('Traces', String(B.X[0].length), 'one sample each');
+    }
+    if ($('s2')) {
+      $('s2').innerHTML =
+        stat('Gain', gainLabel(), 'on ' + LABEL[S.gt]) +
+        stat('Native loading', idx >= 0 ? B.raw.vectors[0][idx].toFixed(3) : '\u2014',
+          'first component, covariance route') +
+        stat('Standardized loading', idx >= 0 ? B.z.vectors[0][idx].toFixed(3) : '\u2014',
+          'first component, correlation route') +
+        stat('Native PC1 share', (B.raw.explained[0] * 100).toFixed(2) + '%', 'also moves with the gain');
+    }
+    if ($('s3')) {
+      var vs = N.map(function (n, i) { return MV.variance(B.X[i]); });
+      var mx = Math.max.apply(null, vs), mn = Math.min.apply(null, vs);
+      $('s3').innerHTML =
+        stat('Largest variance', mx.toPrecision(3), SHORT[N[vs.indexOf(mx)]]) +
+        stat('Smallest variance', mn.toPrecision(3), SHORT[N[vs.indexOf(mn)]]) +
+        stat('Ratio between them', (mx / mn).toPrecision(3) + '\u00d7', 'in native units') +
+        stat('Native PC1 share', (B.raw.explained[0] * 100).toFixed(2) + '%',
+          'carried by ' + biggest(B.raw));
+    }
+    if ($('s4')) {
+      var sv = survey(), X = [sv.attr[S.px], sv.attr[S.py]];
+      var angN = MV.principalAngle(X), angZ = MV.principalAngle(X, { standardize: true });
+      var Pz = MV.pca(X, { standardize: true });
+      $('s4').innerHTML =
+        stat('Correlation', MV.corr(X)[0][1].toFixed(3), 'between the two') +
+        stat('Native angle', angN.toFixed(2) + '\u00b0', 'in the units as given') +
+        stat('Standardized angle', angZ.toFixed(2) + '\u00b0', 'always 45 or 135') +
+        stat('Standardized PC1', (Pz.explained[0] * 100).toFixed(2) + '%',
+          'the correlation sets this, not the angle');
+    }
+    if ($('s5')) {
+      var sv2 = survey();
+      var opt = (S.route === 'z') ? { standardize: true } : {};
+      var P6 = MV.pca(CORE.map(function (n) { return sv2.attr[n]; }), opt);
+      var P7 = MV.pca(ALL.map(function (n) { return sv2.attr[n]; }), opt);
+      var wi = ALL.indexOf(WEAK), b = 0, i;
+      for (i = 0; i < 7; i++) if (Math.abs(P7.vectors[i][wi]) > Math.abs(P7.vectors[b][wi])) b = i;
+      $('s5').innerHTML =
+        stat('PC1 without it', (P6.explained[0] * 100).toFixed(2) + '%', 'six attributes') +
+        stat('PC1 with it', (P7.explained[0] * 100).toFixed(2) + '%', 'seven attributes') +
+        stat('It dominates', 'PC' + (b + 1), 'loading ' + P7.vectors[b][wi].toFixed(3)) +
+        stat('Components for 90%', MV.componentsFor(P6, 0.9) + ' \u2192 ' + MV.componentsFor(P7, 0.9),
+          'six, then seven');
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+
+  function fillSelect(id, key, list) {
+    var el = $(id);
+    if (!el) return;
+    el.innerHTML = '';
+    list.forEach(function (n) {
+      var o = document.createElement('option');
+      o.value = n;
+      o.textContent = LABEL[n];
+      el.appendChild(o);
+    });
+    el.value = S[key];
+  }
+
+  function syncLabels() {
+    ['gt', 'gt2', 'gt3'].forEach(function (id) { var e = $(id); if (e) e.value = S.gt; });
+    ['gain', 'gain2', 'gain3'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.gain;
+      var v = $(id + 'V'); if (v) v.textContent = gainLabel();
+    });
+    if ($('px')) $('px').value = S.px;
+    if ($('py')) $('py').value = S.py;
+    document.querySelectorAll('#segWeak button, #segWeak1 button').forEach(function (b) {
+      var on = String(S.weak) === b.dataset.weak;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+    document.querySelectorAll('#segRoute button').forEach(function (b) {
+      var on = b.dataset.route === S.route;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    // steps 4 and 5 have their own attribute sets and are not driven by the
+    // header bars, so the sticky panel is stood down on both
+    if (lab) lab.hidden = !/^p[1-3]$/.test(id);
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('#segWeak button, #segWeak1 button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.weak = parseInt(b.dataset.weak, 10);
+      if (names().indexOf(S.gt) < 0) S.gt = 'rms';
+      fillSelect('gt', 'gt', names());
+      fillSelect('gt2', 'gt', names());
+      fillSelect('gt3', 'gt', names());
+      syncLabels(); drawAll(); saveState();
+    });
+  });
+  document.querySelectorAll('#segRoute button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.route = b.dataset.route; syncLabels(); drawAll(); saveState();
+    });
+  });
+
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t) return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    if (t.tagName === 'SELECT') S[key] = t.value;
+    else if (t.tagName === 'INPUT') S[key] = parseFloat(t.value);
+    else return;
+    if (key === 'px' && S.px === S.py) S.py = CORE[(CORE.indexOf(S.px) + 1) % CORE.length];
+    if (key === 'py' && S.py === S.px) S.px = CORE[(CORE.indexOf(S.py) + 1) % CORE.length];
+    syncLabels(); drawAll(); saveState();
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawAll, 140);
+  });
+
+  fillSelect('gt', 'gt', names());
+  fillSelect('gt2', 'gt', names());
+  fillSelect('gt3', 'gt', names());
+  fillSelect('px', 'px', ALL);
+  fillSelect('py', 'py', ALL);
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M03 = {
+    set: function (k, v) {
+      S[k] = v;
+      if (k === 'weak') {
+        fillSelect('gt', 'gt', names());
+        fillSelect('gt2', 'gt', names());
+        fillSelect('gt3', 'gt', names());
+      }
+      syncLabels(); drawAll();
+    },
+    read: function () {
+      var B = both(), N = B.names, idx = N.indexOf(S.gt);
+      return {
+        names: N, gain: gainOf(), gt: S.gt,
+        rawLoad: N.map(function (n, i) { return B.raw.vectors[0][i]; }),
+        zLoad: N.map(function (n, i) { return B.z.vectors[0][i]; }),
+        rawExp: B.raw.explained.slice(), zExp: B.z.explained.slice(),
+        gtRaw: idx >= 0 ? B.raw.vectors[0][idx] : NaN,
+        gtZ: idx >= 0 ? B.z.vectors[0][idx] : NaN,
+        vars: N.map(function (n, i) { return MV.variance(B.X[i]); })
+      };
+    },
+    angles: function (px, py) {
+      var sv = survey(), X = [sv.attr[px], sv.attr[py]];
+      return {
+        r: MV.corr(X)[0][1],
+        native: MV.principalAngle(X),
+        z: MV.principalAngle(X, { standardize: true }),
+        zExp: MV.pca(X, { standardize: true }).explained[0]
+      };
+    },
+    weakCase: function (route) {
+      var sv = survey(), opt = route === 'z' ? { standardize: true } : {};
+      var P6 = MV.pca(CORE.map(function (n) { return sv.attr[n]; }), opt);
+      var P7 = MV.pca(ALL.map(function (n) { return sv.attr[n]; }), opt);
+      var wi = ALL.indexOf(WEAK);
+      return {
+        e6: P6.explained.slice(), e7: P7.explained.slice(),
+        wLoad: P7.vectors.map(function (v) { return v[wi]; }),
+        n6: MV.componentsFor(P6, 0.9), n7: MV.componentsFor(P7, 0.9)
+      };
+    }
+  };
+})();
+</script>
+</body>
+</html>

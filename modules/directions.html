@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A direction through a cloud | How PCA and ICA Actually Work</title>
+<meta name="description" content="Two seismic attributes plotted against each other make a cloud of points. Rotating a line through that cloud and watching the spread of the projection is the whole of what principal component analysis does, before any matrix appears.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="toomany.html">← Module 00</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 01 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>A direction through a cloud</h1>
+    <p class="sub">Two attributes computed over the same survey can be plotted against each other, one point per trace. The cloud that results has a shape, and that shape is the only thing every method in this set works from. These five steps push a line through the cloud by hand and measure what happens, which is the whole of principal component analysis before any matrix is written down.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">Two attributes, one point per trace <span>&mdash; drag the direction through it</span></p>
+        <canvas id="cHead" aria-label="Crossplot of two seismic attributes with a rotatable direction line through the center of the cloud"></canvas>
+      </div>
+      <div>
+        <p class="cap">Choose the pair, then choose a direction <span>&mdash; every panel updates as you drag</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>Which two attributes</h2>
+            <div class="seg" id="segPair" role="group" aria-label="Attribute pair">
+              <button type="button" data-pair="ae">RMS &amp; envelope</button>
+              <button type="button" data-pair="ab">RMS &amp; mean abs</button>
+              <button type="button" data-pair="eb">Envelope &amp; mean abs</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">All three are amplitude measurements on the same
+              window, so both axes can be drawn at the same number of amplitude units per pixel and the
+              angle on screen is the angle in the data.</p>
+          </div>
+          <div class="ctl-col">
+            <h2>The direction</h2>
+            <div class="ctl">
+              <label for="ang">Angle from the horizontal axis <span class="val" id="angV">30&deg;</span></label>
+              <input type="range" data-key="ang" id="ang" min="0" max="179" step="1" value="30">
+            </div>
+            <div class="ctl">
+              <label for="noise">Random noise in the survey <span class="val" id="noiseV">12%</span></label>
+              <input type="range" data-key="noise" id="noise" min="0" max="40" step="8" value="12">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Work through the five steps in order, <b>then try the exercises</b>.
+    Method and references are there when you want them.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Maps to a cloud</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · One direction</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · The widest</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · What is left</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Back to the map</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Two maps, replotted as one cloud</h3>
+      <span class="hint">The same numbers, arranged two ways</span>
+    </div>
+
+    <p class="qbox"><b>Why this step is here.</b> An attribute map is arranged by where each value came
+      from. A crossplot throws that away and arranges the same values by what they are. Almost everything
+      that follows happens in the second arrangement, so it is worth being certain the two hold identical
+      information.</p>
+
+    <p class="lede">Below are the two attribute maps for the pair selected above, computed on a stratal
+      slab through a synthetic survey containing two channel systems of different age. Each map has one
+      value per trace. The crossplot in the panel above the tabs contains exactly the same values: for
+      each trace, its value in the first map gives the horizontal position of a point and its value in
+      the second map gives the vertical position.</p>
+    <p class="lede">The points form a tilted cloud rather than a round blob. The tilt exists because the
+      two attributes are measuring overlapping things: a trace with a strong reflection tends to be
+      strong in both. That overlap is what makes one of the two attributes partly predictable from the
+      other, and it is the reason a dataset of twelve attributes is rarely twelve independent pieces of
+      information.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The two attribute maps</h3>
+        <span class="hint">Channel axes marked in white on both</span>
+      </div>
+      <canvas id="c1" aria-label="Two attribute maps of the same synthetic survey, side by side, with the channel axes marked"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="noise1">Random noise in the survey <span class="val" id="noise1V">12%</span></label>
+        <input type="range" data-key="noise" id="noise1" min="0" max="40" step="8" value="12">
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+    <div class="legend prose">
+      <span>Turning the noise up stretches the cloud, and not evenly. The noise enters both attributes
+        from the same samples on the same trace, so what they inherit is shared rather than independent,
+        and the two inherit it at different rates. Watch which of the two spreads in the readout moves
+        and which one stays where it is.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Pushing one direction through it</h3>
+      <span class="hint">Drag the angle and watch the histogram</span>
+    </div>
+
+    <p class="lede">The line drawn through the cloud above passes through its center and points in the
+      direction set by the angle slider. Every point in the cloud can be dropped onto that line at right
+      angles, which gives each trace a single number: how far along the line it sits. That operation is
+      called a projection, and the number replaces the two the trace started with.</p>
+    <p class="lede">The histogram below counts how many traces land at each position along the line. Its
+      width is the spread of the projection, measured as variance. As the angle changes, the cloud does
+      not move and the histogram does, because the line is being asked a different question of the same
+      points.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Where the traces land along the line</h3>
+        <span class="hint">Fixed axis, so the width is comparable between angles</span>
+      </div>
+      <canvas id="c2" aria-label="Histogram of the projection of every trace onto the chosen direction"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="ang2">Angle from the horizontal axis <span class="val" id="ang2V">30&deg;</span></label>
+        <input type="range" data-key="ang" id="ang2" min="0" max="179" step="1" value="30">
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+    <div class="legend prose">
+      <span>The horizontal axis of this histogram is held fixed whatever the angle. An axis that resized
+        itself to the data would make every projection look the same width, which is the one thing this
+        step is trying to show is untrue.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Finding the widest direction by hand</h3>
+      <span class="hint">Sweep the angle across the whole range</span>
+    </div>
+
+    <p class="lede">Projecting at one angle gives one number for the spread. Doing it at every angle gives
+      the curve below: variance along the horizontal axis of angle, from zero to a hundred and eighty
+      degrees. Beyond a hundred and eighty the curve repeats, because a direction and its opposite give
+      the same line and therefore the same spread.</p>
+    <p class="lede">The curve has one maximum and one minimum, and they are exactly ninety degrees apart.
+      The direction at the maximum is the first principal component of this pair. Nothing has been
+      computed here that a student could not have found by dragging the slider and writing down numbers,
+      which is the point of this step: the eigenvector arithmetic in module 04 is a shortcut to this
+      answer, not a different answer.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Spread as a function of direction</h3>
+        <span class="hint">Your angle in crimson, the widest in teal</span>
+      </div>
+      <canvas id="c3" aria-label="Curve of projected variance against direction angle, with the current angle and the maximum marked"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="ang3">Angle from the horizontal axis <span class="val" id="ang3V">30&deg;</span></label>
+        <input type="range" data-key="ang" id="ang3" min="0" max="179" step="1" value="30">
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+    <div class="legend prose">
+      <span>The curve is a cosine riding on a constant, which is why it is smooth and has exactly one
+        peak. That shape is a property of variance, not of these particular attributes, and it is the
+        reason the widest direction is always unique unless the cloud is perfectly round.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>What is left in the other direction</h3>
+      <span class="hint">Both histograms share one axis</span>
+    </div>
+
+    <p class="lede">A direction has a perpendicular, and the cloud has a spread along that too. The two
+      histograms below are the projections onto the chosen direction and onto the direction at right
+      angles to it, drawn against a single shared horizontal axis so their widths can be compared
+      directly.</p>
+    <p class="lede">The two variances sum to the same total at every angle. Turning the line to gain
+      spread in one direction loses exactly as much in the other, so the question is never how much
+      spread there is in total, only how unevenly it is divided. At the widest direction the division is
+      as uneven as it can be, and that is the sense in which one number then stands in for two.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Along the direction, and across it</h3>
+        <span class="hint">One shared axis, both fixed</span>
+      </div>
+      <canvas id="c4" aria-label="Two histograms sharing one axis: the projection along the chosen direction and the projection perpendicular to it"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="ang4">Angle from the horizontal axis <span class="val" id="ang4V">30&deg;</span></label>
+        <input type="range" data-key="ang" id="ang4" min="0" max="179" step="1" value="30">
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Putting the one number back on the map</h3>
+      <span class="hint">Two attributes in, one map out</span>
+    </div>
+
+    <p class="lede">The projection gives every trace a single number, and every trace has a position in
+      the survey, so the projection can be drawn as a map. That map is what a dimension reduction
+      actually delivers: two input volumes have become one, and the direction chosen is what decides
+      what the one contains.</p>
+    <p class="lede">Three maps are drawn below: the projection along the chosen direction, the projection
+      across it, and the two input attributes for comparison. Guide lines mark the two channel axes on
+      every panel, so a feature can be followed from an input map into the output. At some angles the
+      channels are clearer in the along map, at others they survive only in the across map, and at the
+      widest direction the across map is mostly what the two attributes disagreed about.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Inputs and projections, same survey</h3>
+        <span class="hint">Channel axes marked on all four</span>
+      </div>
+      <canvas id="c5" aria-label="Four maps of the same survey: the two input attributes and the projections along and across the chosen direction"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="ang5">Angle from the horizontal axis <span class="val" id="ang5V">30&deg;</span></label>
+        <input type="range" data-key="ang" id="ang5" min="0" max="179" step="1" value="30">
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>Each map is scaled to its own range so that its structure is visible. The across map is much
+        weaker than the along map at the widest direction, and displaying it at its own scale is the only
+        way to see what is in it &mdash; at the shared scale it would be nearly blank. Module 05 returns
+        to this, because a component displayed at its own scale can look far more important than its
+        eigenvalue says it is.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">Where this shows up in real work</span>
+    </div>
+    <p class="lede">No method is named in this module and no matrix appears in it. What it establishes is
+      the picture that every later module manipulates, and the vocabulary that machine learning papers
+      assume their readers already have.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Reading a crossplot.</b> Interpreters make two-attribute crossplots routinely and read
+        clusters off them. The tilt of the cloud, which is usually ignored, is the quantity every method
+        in this set is built on.</li>
+      <li><b>Knowing what a component is.</b> A component is a weighted sum of the input attributes.
+        The weights are the direction. A component volume is therefore an ordinary attribute arithmetic
+        operation, and can be reproduced in any package that can add two volumes with coefficients.</li>
+      <li><b>Judging whether an attribute is worth adding.</b> If a new attribute lands the cloud in a
+        thin sliver, it is carrying little the existing attributes did not. The correlation matrix in
+        module 02 is the fast version of that check.</li>
+      <li><b>Following the language.</b> Feature, sample, dimension, projection and variance are used
+        throughout the literature without definition. Every one of them is defined here, and clicking a
+        term in the text opens its definition.</li>
+    </ul>
+    <p class="lede"><b>Two points that are commonly confused.</b> The first is that the widest direction
+      is the most useful one. It is the widest, which is a statement about spread and not about geology;
+      module 06 is where that distinction is made carefully, and step 5 already shows angles at which the
+      narrow direction carries the clearer channel. The second is that projecting onto a direction
+      discards the other attribute. It does not: it forms a weighted sum of both, and what is discarded
+      is only whatever was left over in the perpendicular direction.</p>
+    <div class="legend prose">
+      <span>Everything in this module was done with two attributes because two can be drawn. The
+        arithmetic is identical for twelve, and the only thing lost is the picture.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Find the widest direction without using step 3.</b>
+          <em class="point">Why: the answer that eigenvectors deliver is an answer you can also reach by
+            hand, and having reached it once makes the arithmetic in module 04 a shortcut rather than a
+            rule.</em>
+          With RMS &amp; envelope selected, use step 2 alone. Move the angle in tens from 0 to 170 and
+          write down the variance readout each time, then narrow in on the largest.
+          <em class="predict">Before starting: the two attributes have a correlation of 0.65. Will the
+            widest direction be at 45 degrees, above it, or below it? Commit to an answer and a
+            reason.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">The widest direction is at
+            59 degrees, not 45. Variance reads 104.8 at 0 degrees, rises through 213.0 at 30 and 251.3 at
+            45, peaks at 263.9 at 59, and falls back to 206.5 at 90. The reason it is not at 45 is that
+            the two attributes have different spreads of their own: peak envelope has a standard
+            deviation of 14.4 amplitude units against 10.2 for RMS, so the cloud is stretched more
+            vertically than horizontally and the widest direction leans toward the vertical axis. Two
+            things control the tilt, the correlation and the relative spread, and only the second of them
+            is about the units the attributes happen to be reported in. Module 03 is about what to do
+            with that.</span></details></li>
+
+        <li><b>Compare the three pairs.</b>
+          <em class="point">Why: redundancy between two attributes is visible as a shape before it is
+            computed as a number.</em>
+          Step through the three attribute pairs and record, for each, the correlation, the widest angle,
+          and the share of the total spread that the widest direction holds.
+          <details class="reveal"><summary>Hint</summary><span class="ans">RMS &amp; mean absolute
+            amplitude: correlation 0.96, widest at 46 degrees, holding 98.1% of the spread. RMS &amp;
+            envelope: correlation 0.65, widest at 59 degrees, 84.8%. Envelope &amp; mean absolute
+            amplitude: correlation 0.47, widest at 28 degrees, 77.0%. The first pair is nearly a straight
+            line, which says that mean absolute amplitude adds almost nothing to RMS amplitude — the two
+            are different summaries of the same window and they rise and fall together. A pair that plots
+            as a line is a pair where one of the two could be dropped.</span></details></li>
+
+        <li><b>Check that the total spread does not change.</b>
+          <em class="point">Why: this is the conservation statement underneath every scree plot, and it
+            is what makes "percent of variance explained" a meaningful quantity.</em>
+          In step 4, read the along and across variances at 0, 30, 59 and 120 degrees, and add each pair.
+          <details class="reveal"><summary>Hint</summary><span class="ans">For RMS &amp; envelope:
+            104.8 + 206.5, 213.0 + 98.2, 263.9 + 47.3, and 98.2 + 213.0. Every pair sums to 311.3. The
+            total spread belongs to the cloud and not to the direction chosen, so rotating the line
+            redistributes variance without creating or destroying any. That is why the eigenvalues of a
+            covariance matrix always sum to the total variance, and why a component can be quoted as a
+            percentage of it.</span></details></li>
+
+        <li><b>Turn the noise up and watch which of the two attributes moves.</b>
+          <em class="point">Why: noise reaches an attribute set through the seismic rather than through
+            the maps, and two attributes computed on the same window do not inherit it at the same
+            rate.</em>
+          With RMS &amp; envelope, set the noise to 0%, then 24%, then 40%. Read the two spreads in step
+          1 each time, then the correlation, the widest angle and the share.
+          <em class="predict">Before starting: noise has no preferred direction in the survey. Commit to
+            whether that means it will leave the tilt of the cloud alone.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">It does not leave the tilt
+            alone, and it swings it by fifteen degrees. The spread of RMS amplitude hardly moves across
+            the whole range, from 10.23 to 10.37 amplitude units, because RMS averages over twenty-eight
+            samples and independent noise largely cancels in that average. The spread of peak envelope
+            nearly doubles, from 12.97 to 20.52, because it is the largest value in the window and the
+            largest value in a noisy window grows with the noise. The widest direction leans toward the
+            attribute whose spread is growing, swinging from 55 degrees at no noise to 70 degrees at 40%.
+            Two further things are worth reading off. The correlation barely changes, 0.663 to 0.624, so
+            a correlation matrix would not have flagged any of this. And the share held by the widest
+            direction rises, from 84.3% to 88.9% — the noisier data looked more compressible. Both
+            attributes drew their noise from the same samples, so what they gained was shared, and shared
+            variation is exactly what a first component collects.</span></details></li>
+
+        <li><b>Find an angle where the narrow direction is the more useful map.</b>
+          <em class="point">Why: the ranking that dimension reduction produces is a ranking by spread,
+            and the most geologically informative image is not obliged to be at the top of it.</em>
+          In step 5, set the angle to 59 degrees and compare the along map with the across map. Then look
+          at the across map along the younger channel axis in particular.
+          <details class="reveal"><summary>Hint</summary><span class="ans">At 59 degrees the along map
+            holds 84.8% of the spread and is largely a brightness map: both channels appear, and so does
+            the acquisition footprint, because whatever makes a trace strong makes it strong in both
+            attributes. The across map holds 15.2% and carries what the two attributes disagreed about.
+            Measured as the separation between the younger channel axis and its own margins, in pooled
+            standard deviations, the across map reaches 5.39 against 0.28 for the along map — and against
+            2.79 for RMS amplitude on its own and 1.16 for peak envelope on its own. The narrow direction
+            is not merely better than the wide one here, it is about twice as good as either input
+            attribute was. The footprint goes the other way: measured as the part of each map that
+            follows the six-trace acquisition period, the along map carries 0.25 of a standard deviation
+            and the across map 0.11. So the component holding a sixth of the variance carries the better
+            image and less of the artifact, and nothing in the eigenvalues would have said
+            so.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>A dataset is a cloud in a space whose axes are the features.</b> Two attributes give a
+          plane that can be drawn. Twelve give a space that cannot, and behaves the same way.</li>
+        <li><b>A projection is a weighted sum.</b> Choosing a direction and projecting onto it is
+          identical to adding the input volumes with coefficients. A component volume is that
+          sum.</li>
+        <li><b>Rotating the direction redistributes the spread and never changes the total.</b> Along and
+          across always add to the same number, which is what makes a percentage of variance
+          meaningful.</li>
+        <li><b>The widest direction is set by two things.</b> How strongly the attributes are correlated,
+          and how large their individual spreads are. The second depends on the units they are reported
+          in, which is the problem module 03 takes up.</li>
+        <li><b>A tilted cloud means redundancy.</b> The thinner the cloud, the more nearly one attribute
+          is a restatement of the other, and the less the second one is adding.</li>
+        <li><b>Widest is not most useful.</b> The ranking is by spread. Whether a direction corresponds to
+          anything in the ground is a separate question that this arithmetic cannot answer, and step 5
+          shows an angle where the narrow direction carries the clearer image.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>The survey.</b> A synthetic slab of 72 by 72 traces at 2 ms sampling is built in
+      the browser by <span class="k">assets/attrfield.js</span> from an impedance model: background shale
+      with a few interbeds whose depths drift across the survey, a younger sinuous channel filled with
+      sand, an older and thinner channel at a different orientation, and a levee wedge either side of the
+      younger one. Reflection coefficients are convolved with a 30 Hz Ricker wavelet. Acquisition
+      footprint is applied as a multiplicative striping on a six-trace period in both directions, and
+      random noise is added at the level set by the slider. Nothing is a stored image.</p>
+    <p class="lede"><b>The attributes.</b> All three are computed over the same window, samples 22 to 50.
+      RMS amplitude is the root mean square of the window. Mean absolute amplitude is the average of the
+      absolute values. Peak envelope is the largest value in the window of the envelope, computed as the
+      magnitude of the analytic trace by the Fourier method, zeroing the negative frequencies and
+      doubling the positive ones. All three are multiplied by 1000 for display, so that readouts are in
+      round numbers; the factor is arbitrary and cancels out of every correlation and every angle.</p>
+    <p class="lede"><b>The crossplot axes.</b> Both attributes have their means removed before plotting,
+      so the origin is the center of the cloud and the direction line passes through it. Both axes span
+      the same number of amplitude units and are drawn into a square box, which means the angle read off
+      the screen is the angle in the data. This is the reason the three attribute pairs offered are all
+      amplitude measurements: a pair in unlike units could not be drawn this way, and the angle would be
+      an artifact of the axis choice rather than a property of the data. That problem is the subject of
+      module 03.</p>
+    <p class="lede"><b>The variance curve in step 3</b> is computed by projecting all 5184 traces at every
+      degree from 0 to 179 and taking the variance of each projection. It is not fitted or smoothed.
+      Variance is computed dividing by the number of samples rather than by one less than it, which makes
+      no visible difference at this sample count and is stated so that a reader checking the numbers
+      against their own calculation knows which convention is on screen.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> The survey is 2D in the sense that each trace
+      contributes one point; no attribute here uses dip, and the coherence and curvature attributes that
+      would need it are held back to later modules. The mixing of channel and background is geometric
+      rather than physical: there is no compaction, no lateral velocity variation and no multiple energy.
+      The noise is Gaussian and independent from trace to trace, which real noise is not. The footprint
+      is perfectly periodic, which real footprint is not. Each of those simplifications makes the effect
+      under discussion easier to see and none of them changes the arithmetic being taught.</p>
+    <p class="lede"><b>The separation numbers quoted in the exercises</b> compare the traces within
+      half a channel width of the younger channel axis against those between 1.1 and 2.0 channel widths
+      from it, as the difference of the two means divided by the pooled standard deviation. It is a
+      convenient summary for comparing one map against another and it is not a standard seismic
+      measurement. The footprint numbers are the projection of each map onto the six-trace striping that
+      was put into the survey, expressed as a fraction of the map's own standard deviation.</p>
+    <p class="lede"><b>Where this departs from production software.</b> Nowhere yet. Nothing in this
+      module is an algorithm, only projection and variance, which every package computes identically.
+      The departures begin in module 05, where the choice of how many components to keep is made by a
+      convention that differs between implementations, and each module from there carries its own
+      list.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Pearson, K., 1901, On lines and planes of closest fit to systems of points in space:
+          <em>Philosophical Magazine</em>, <b>2</b>, 559&ndash;572.</li>
+        <li>Hotelling, H., 1933, Analysis of a complex of statistical variables into principal
+          components: <em>Journal of Educational Psychology</em>, <b>24</b>, 417&ndash;441.</li>
+        <li>Jolliffe, I. T., 2002, <em>Principal Component Analysis</em>, 2nd ed.: Springer.</li>
+        <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+          Reservoir Characterization</em>: SEG Geophysical Development Series 11.</li>
+        <li>Taner, M. T., F. Koehler, and R. E. Sheriff, 1979, Complex seismic trace analysis:
+          <em>Geophysics</em>, <b>44</b>, 1041&ndash;1063 — for the envelope used as one of the three
+          attributes.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>02 · Spread, and the shape of the cloud</h3>
+    <p>The tilt found by hand in this module is one number in a small square table called the covariance
+      matrix. Filling that table in for a dozen attributes at once is how redundancy is measured before
+      any method is run.</p>
+    <a class="btn ghost" href="spread.html">Module 02 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="toomany.html">← Module 00: too many measurements</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="spread.html">Module 02: spread and the shape of the cloud →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license. If you use it in a course or a talk, a credit line
+        and a link back are all that is asked.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened, so that the university can see these are being used &mdash; no cookie, no
+        account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js. It ' +
+      'expects them one directory up, at ../assets/, and file names are case-sensitive on GitHub Pages.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+
+  /* Attributes are multiplied by this for display only. Correlations and
+     angles are unaffected; the readouts become round numbers. */
+  var GAIN = 1000;
+  /* Half-width of the crossplot axes, in displayed amplitude units, about the
+     mean of each attribute. Both axes use the same number, into a square box,
+     so a screen angle is a data angle. */
+  var HALF = 80;
+  var NBIN = 44;
+
+  var DEF = { pair: 'ae', ang: 30, noise: 12, tab: 'p1' };
+  var S = MV.readState(DEF);
+  if (!/^(ae|ab|eb)$/.test(S.pair)) S.pair = DEF.pair;
+  S.ang = Math.max(0, Math.min(179, Math.round(S.ang)));
+  S.noise = [0, 8, 16, 24, 32, 40].indexOf(S.noise) >= 0 ? S.noise : 12;
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  /* =====================================================================
+     THE SURVEY AND ITS ATTRIBUTES
+
+     Built once per noise setting and cached, because the slider has only six
+     stops and rebuilding takes about a fifth of a second.
+     ===================================================================== */
+
+  var CACHE = {};
+  function survey() {
+    var key = String(S.noise);
+    if (!CACHE[key]) {
+      var slab = AF.build({
+        nx: 72, ny: 72, freq: 30, noise: S.noise / 100, footprint: 0.10, seed: 2026
+      });
+      var a = AF.attributes(slab, ['rms', 'envelope', 'meanabs']);
+      var scaled = {};
+      Object.keys(a).forEach(function (n) {
+        var o = new Float64Array(a[n].length);
+        for (var i = 0; i < o.length; i++) o[i] = a[n][i] * GAIN;
+        scaled[n] = o;
+      });
+      CACHE[key] = { slab: slab, attr: scaled };
+    }
+    return CACHE[key];
+  }
+
+  var PAIRS = {
+    ae: { keys: ['rms', 'envelope'], labels: ['RMS amplitude', 'Peak envelope'] },
+    ab: { keys: ['rms', 'meanabs'], labels: ['RMS amplitude', 'Mean absolute amplitude'] },
+    eb: { keys: ['envelope', 'meanabs'], labels: ['Peak envelope', 'Mean absolute amplitude'] }
+  };
+
+  /* Everything a panel needs, computed once per (pair, noise) and reused
+     across the five steps and every angle. */
+  var DCACHE = {};
+  function dataset() {
+    var key = S.pair + '|' + S.noise;
+    if (DCACHE[key]) return DCACHE[key];
+    var sv = survey(), P = PAIRS[S.pair];
+    var X = [sv.attr[P.keys[0]], sv.attr[P.keys[1]]];
+    var D = MV.center(X);
+    var R = MV.corr(X);
+    var pc = MV.pca(X);
+    var best = MV.principalAngle(X);
+    var curve = new Float64Array(180);
+    for (var a = 0; a < 180; a++) curve[a] = MV.variance(MV.project(D, MV.dirFromAngle(a)));
+    DCACHE[key] = {
+      slab: sv.slab, X: X, D: D, r: R[0][1], pca: pc, best: best, curve: curve,
+      total: pc.values[0] + pc.values[1],
+      sd: [MV.std(X[0]), MV.std(X[1])],
+      labels: P.labels
+    };
+    return DCACHE[key];
+  }
+
+  function alongAcross() {
+    var d = dataset();
+    var pAl = MV.project(d.D, MV.dirFromAngle(S.ang));
+    var pAc = MV.project(d.D, MV.dirFromAngle(S.ang + 90));
+    return { along: pAl, across: pAc, vAl: MV.variance(pAl), vAc: MV.variance(pAc), d: d };
+  }
+
+  /* =====================================================================
+     DRAWING HELPERS
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+
+  function frame(ctx, r, xlab, ylab) {
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.fillStyle = SLATE;
+    if (xlab) {
+      ctx.textAlign = 'center';
+      ctx.fillText(xlab, r.x + r.w / 2, r.y + r.h + 26);
+    }
+    if (ylab) {
+      ctx.save();
+      ctx.translate(r.x - 40, r.y + r.h / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center';
+      ctx.fillText(ylab, 0, 0);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  function ticks(ctx, r, x0, x1, y0, y1, nx, ny, fmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.strokeStyle = '#E4E7EA';
+    ctx.lineWidth = 1;
+    var i, v, X, Y;
+    ctx.textAlign = 'center';
+    for (i = 0; i <= nx; i++) {
+      v = x0 + (x1 - x0) * i / nx;
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+      ctx.fillText(fmt ? fmt(v) : String(Math.round(v)), X, r.y + r.h + 14);
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.fillText(fmt ? fmt(v) : String(Math.round(v)), r.x - 8, Y + 4);
+    }
+    ctx.restore();
+  }
+
+  /* A sequential map running deep slate through cream to crimson. Used for
+     every attribute map, always with a color bar beside it. */
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var stops = [
+      [26, 47, 63], [61, 109, 125], [166, 196, 198], [244, 240, 227],
+      [214, 156, 110], [166, 71, 52], [102, 20, 24]
+    ];
+    var u = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(u)), f = u - i;
+    var a = stops[i], b = stops[i + 1];
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * f) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * f) + ',' +
+      Math.round(a[2] + (b[2] - a[2]) * f) + ')';
+  }
+
+  function drawMap(ctx, r, m, nx, ny, lo, hi, title) {
+    var cw = r.w / nx, ch = r.h / ny, ix, iy;
+    for (ix = 0; ix < nx; ix++) {
+      for (iy = 0; iy < ny; iy++) {
+        ctx.fillStyle = cmap((m[ix * ny + iy] - lo) / (hi - lo || 1));
+        ctx.fillRect(r.x + ix * cw, r.y + (ny - 1 - iy) * ch, cw + 0.6, ch + 0.6);
+      }
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    if (title) {
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '600 11px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 6);
+      ctx.font = '11px ui-monospace,Menlo,monospace';
+    }
+    ctx.restore();
+  }
+
+  /* Guide lines marking the two channel axes, drawn on every map panel so
+     that a feature can be carried from one to the next by eye. */
+  function markChannels(ctx, r, nx, ny) {
+    ctx.save();
+    ctx.lineWidth = 1.2;
+    [[AF.YOUNG, 'rgba(255,255,255,0.85)'], [AF.OLD, 'rgba(255,255,255,0.55)']].forEach(function (p) {
+      ctx.strokeStyle = p[1];
+      ctx.setLineDash(p[0] === AF.OLD ? [4, 4] : []);
+      ctx.beginPath();
+      for (var ix = 0; ix < nx; ix++) {
+        var yc = AF.centerline(ix, nx, p[0]) * (ny - 1);
+        var X = r.x + (ix + 0.5) * r.w / nx;
+        var Y = r.y + r.h - (yc + 0.5) * r.h / ny;
+        if (ix === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      }
+      ctx.stroke();
+    });
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  function colorbar(ctx, x, y, w, h, lo, hi, label) {
+    var i;
+    for (i = 0; i < h; i++) {
+      ctx.fillStyle = cmap(1 - i / h);
+      ctx.fillRect(x, y + i, w, 1.2);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(x + 0.5, y + 0.5, w, h);
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'left';
+    ctx.fillText(hi.toFixed(hi < 10 ? 2 : 0), x + w + 5, y + 9);
+    ctx.fillText(lo.toFixed(lo < 10 ? 2 : 0), x + w + 5, y + h);
+    if (label) {
+      ctx.save();
+      ctx.translate(x + w + 40, y + h / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center';
+      ctx.fillText(label, 0, 0);
+      ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  function histBars(ctx, r, h, color, alpha) {
+    var bw = r.w / h.counts.length, i;
+    ctx.save();
+    ctx.globalAlpha = alpha === undefined ? 0.85 : alpha;
+    ctx.fillStyle = color;
+    for (i = 0; i < h.counts.length; i++) {
+      var frac = h.counts[i] / (h.n * 0.10);         // fixed vertical scale
+      var bh = Math.min(1, frac) * r.h;
+      ctx.fillRect(r.x + i * bw + 0.5, r.y + r.h - bh, Math.max(1, bw - 1), bh);
+    }
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     THE HEADER CROSSPLOT
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.max(240, Math.min(360, w - 70));
+    var h = size + 56;
+    var ctx = fit('cHead', w, h);
+    if (!ctx) return;
+    var d = dataset();
+    var r = { x: 54, y: 12, w: size, h: size };
+
+    ticks(ctx, r, -HALF, HALF, -HALF, HALF, 4, 4);
+
+    // the cloud
+    var n = d.D[0].length, i;
+    ctx.save();
+    ctx.fillStyle = 'rgba(22,25,28,0.30)';
+    for (i = 0; i < n; i++) {
+      var X = r.x + (d.D[0][i] + HALF) / (2 * HALF) * r.w;
+      var Y = r.y + r.h - (d.D[1][i] + HALF) / (2 * HALF) * r.h;
+      if (X < r.x || X > r.x + r.w || Y < r.y || Y > r.y + r.h) continue;
+      ctx.fillRect(X - 0.9, Y - 0.9, 1.8, 1.8);
+    }
+    ctx.restore();
+
+    // the chosen direction, and its perpendicular faintly
+    var cx = r.x + r.w / 2, cy = r.y + r.h / 2;
+    var L = r.w / 2 * 1.41;
+    function ray(deg, color, width, dash) {
+      var a = deg * Math.PI / 180;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash || []);
+      ctx.beginPath();
+      ctx.moveTo(cx - Math.cos(a) * L, cy + Math.sin(a) * L);
+      ctx.lineTo(cx + Math.cos(a) * L, cy - Math.sin(a) * L);
+      ctx.stroke();
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(r.x, r.y, r.w, r.h);
+    ctx.clip();
+    ray(S.ang + 90, SLATE, 1.1, [5, 5]);
+    ray(S.ang, CRIM, 2.2);
+    ray(d.best, TEAL, 1.4, [7, 4]);
+    ctx.restore();
+
+    frame(ctx, r, d.labels[0] + ' \u2212 mean (amplitude units)', d.labels[1] + ' \u2212 mean');
+
+    ctx.save();
+    ctx.fillStyle = CRIM;
+    ctx.textAlign = 'left';
+    ctx.fillText('your direction  ' + S.ang + '\u00b0', r.x + 8, r.y + 16);
+    ctx.fillStyle = TEAL;
+    ctx.fillText('widest  ' + d.best.toFixed(1) + '\u00b0', r.x + 8, r.y + 32);
+    ctx.fillStyle = SLATE;
+    ctx.fillText('dashed grey: at right angles to yours', r.x + 8, r.y + 48);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     STEP PANELS
+     ===================================================================== */
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(300, (w - 130) / 2);
+    var h = size + 40;
+    var ctx = fit('c1', w, h);
+    if (!ctx) return;
+    var d = dataset(), nx = d.slab.nx, ny = d.slab.ny;
+    [0, 1].forEach(function (k) {
+      var m = d.X[k];
+      var lo = AF.percentile(m, 0.01), hi = AF.percentile(m, 0.99);
+      var r = { x: 8 + k * (size + 112), y: 22, w: size, h: size };
+      drawMap(ctx, r, m, nx, ny, lo, hi, d.labels[k]);
+      markChannels(ctx, r, nx, ny);
+      colorbar(ctx, r.x + size + 10, r.y, 12, size, lo, hi, null);
+    });
+  }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 250;
+    var ctx = fit('c2', w, h);
+    if (!ctx) return;
+    var aa = alongAcross();
+    var r = { x: 54, y: 14, w: w - 54 - 24, h: h - 14 - 46 };
+    ticks(ctx, r, -HALF, HALF, 0, 10, 4, 5);
+    histBars(ctx, r, MV.hist(aa.along, -HALF, HALF, NBIN), CRIM, 0.85);
+    frame(ctx, r, 'position along your direction (amplitude units)', 'traces, % of total');
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 260;
+    var ctx = fit('c3', w, h);
+    if (!ctx) return;
+    var d = dataset();
+    var r = { x: 60, y: 14, w: w - 60 - 24, h: h - 14 - 46 };
+    var YMAX = 340;
+    ticks(ctx, r, 0, 180, 0, YMAX, 6, 4);
+
+    ctx.save();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    for (var a = 0; a < 180; a++) {
+      var X = r.x + a / 180 * r.w;
+      var Y = r.y + r.h - d.curve[a] / YMAX * r.h;
+      if (a === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    }
+    ctx.stroke();
+    ctx.restore();
+
+    function vline(deg, color, width, dash) {
+      var X = r.x + (deg % 180) / 180 * r.w;
+      ctx.save();
+      ctx.strokeStyle = color;
+      ctx.lineWidth = width;
+      ctx.setLineDash(dash || []);
+      ctx.beginPath();
+      ctx.moveTo(X, r.y);
+      ctx.lineTo(X, r.y + r.h);
+      ctx.stroke();
+      ctx.restore();
+    }
+    vline(d.best, TEAL, 1.4, [7, 4]);
+    vline((d.best + 90) % 180, SLATE, 1.1, [3, 4]);
+    vline(S.ang, CRIM, 2);
+
+    frame(ctx, r, 'direction, degrees from the horizontal axis', 'variance of the projection');
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 300;
+    var ctx = fit('c4', w, h);
+    if (!ctx) return;
+    var aa = alongAcross();
+    var rw = w - 60 - 24, rh = 104;
+    var rA = { x: 60, y: 14, w: rw, h: rh };
+    var rB = { x: 60, y: 14 + rh + 26, w: rw, h: rh };
+
+    [[rA, aa.along, CRIM, 'along your direction'],
+     [rB, aa.across, SLATE, 'at right angles to it']].forEach(function (q) {
+      ticks(ctx, q[0], -HALF, HALF, 0, 10, 4, 2);
+      histBars(ctx, q[0], MV.hist(q[1], -HALF, HALF, NBIN), q[2], 0.85);
+      ctx.save();
+      ctx.strokeStyle = '#C9CDD2';
+      ctx.strokeRect(q[0].x + 0.5, q[0].y + 0.5, q[0].w, q[0].h);
+      ctx.fillStyle = q[2];
+      ctx.textAlign = 'left';
+      ctx.fillText(q[3], q[0].x + 8, q[0].y + 14);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText('position (amplitude units) \u2014 one axis, shared, so the widths compare directly',
+      rB.x + rB.w / 2, rB.y + rB.h + 30);
+    ctx.restore();
+  }
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(210, (w - 150) / 4);
+    var h = size + 40;
+    var ctx = fit('c5', w, h);
+    if (!ctx) return;
+    var aa = alongAcross(), d = dataset(), nx = d.slab.nx, ny = d.slab.ny;
+    var panels = [
+      [d.X[0], d.labels[0]],
+      [d.X[1], d.labels[1]],
+      [aa.along, 'along ' + S.ang + '\u00b0'],
+      [aa.across, 'across ' + S.ang + '\u00b0']
+    ];
+    var gap = Math.max(14, (w - 16 - 4 * size) / 4);
+    panels.forEach(function (p, k) {
+      var m = p[0];
+      var lo = AF.percentile(m, 0.01), hi = AF.percentile(m, 0.99);
+      var r = { x: 8 + k * (size + gap), y: 22, w: size, h: size };
+      drawMap(ctx, r, m, nx, ny, lo, hi, p[1]);
+      markChannels(ctx, r, nx, ny);
+    });
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function drawStats() {
+    var aa = alongAcross(), d = dataset();
+    var pct = 100 * aa.vAl / d.total;
+    var common =
+      stat('Correlation', d.r.toFixed(3), 'between the two attributes') +
+      stat('Your direction', S.ang + '\u00b0', 'from the horizontal axis') +
+      stat('Widest direction', d.best.toFixed(1) + '\u00b0', 'found by the arithmetic');
+
+    if ($('s1')) {
+      $('s1').innerHTML =
+        stat('Spread of ' + d.labels[0], d.sd[0].toFixed(2), 'standard deviation, amplitude units') +
+        stat('Spread of ' + d.labels[1], d.sd[1].toFixed(2), 'standard deviation, amplitude units') +
+        stat('Correlation', d.r.toFixed(3), 'between the two attributes') +
+        stat('Traces', String(d.D[0].length), 'one point each in the cloud');
+    }
+    if ($('s2')) {
+      $('s2').innerHTML = common +
+        stat('Variance along it', aa.vAl.toFixed(1), 'spread of the projection');
+    }
+    if ($('s3')) {
+      $('s3').innerHTML = common +
+        stat('Variance along it', aa.vAl.toFixed(1), 'spread of the projection') +
+        stat('At the widest', d.pca.values[0].toFixed(1), 'the largest it can be');
+    }
+    if ($('s4')) {
+      $('s4').innerHTML =
+        stat('Along', aa.vAl.toFixed(1), 'variance') +
+        stat('Across', aa.vAc.toFixed(1), 'variance') +
+        stat('Sum', (aa.vAl + aa.vAc).toFixed(1), 'the same at every angle') +
+        stat('Share along', pct.toFixed(1) + '%', 'of the total spread');
+    }
+    if ($('s5')) {
+      $('s5').innerHTML = common +
+        stat('Share along', pct.toFixed(1) + '%', 'of the total spread') +
+        stat('Share across', (100 - pct).toFixed(1) + '%', 'what the along map left behind');
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+
+  function syncLabels() {
+    ['ang', 'ang2', 'ang3', 'ang4', 'ang5'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.value = S.ang;
+      var v = $(id + 'V');
+      if (v) v.textContent = S.ang + '\u00b0';
+    });
+    ['noise', 'noise1'].forEach(function (id) {
+      var el = $(id);
+      if (el) el.value = S.noise;
+      var v = $(id + 'V');
+      if (v) v.textContent = S.noise + '%';
+    });
+    document.querySelectorAll('#segPair button').forEach(function (b) {
+      b.setAttribute('aria-pressed', b.dataset.pair === S.pair);
+      b.classList.toggle('on', b.dataset.pair === S.pair);
+    });
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !/^p[1-5]$/.test(id);
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+
+  document.querySelectorAll('#segPair button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.pair = b.dataset.pair;
+      syncLabels(); drawAll(); saveState();
+    });
+  });
+
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t || t.tagName !== 'INPUT') return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    S[key] = parseFloat(t.value);
+    syncLabels(); drawAll(); saveState();
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawAll, 140);
+  });
+
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  // exposed so the headless harness can drive the module and read it back
+  window.__M01 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    read: function () {
+      var aa = alongAcross(), d = dataset();
+      return {
+        pair: S.pair, ang: S.ang, noise: S.noise,
+        r: d.r, best: d.best, along: aa.vAl, across: aa.vAc,
+        total: aa.vAl + aa.vAc, share: 100 * aa.vAl / d.total,
+        sd0: d.sd[0], sd1: d.sd[1], n: d.D[0].length
+      };
+    }
+  };
+})();
+</script>
+</body>
+</html>
