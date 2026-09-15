@@ -331,14 +331,14 @@
             rule.</em>
           With RMS &amp; envelope selected, use step 2 alone. Move the angle in tens from 0 to 170 and
           write down the variance readout each time, then narrow in on the largest.
-          <em class="predict">Before starting: the two attributes have a correlation of 0.65. Will the
+          <em class="predict">Before starting: the two attributes have a correlation of 0.63. Will the
             widest direction be at 45 degrees, above it, or below it? Commit to an answer and a
             reason.</em>
           <details class="reveal"><summary>Hint</summary><span class="ans">The widest direction is at
-            59 degrees, not 45. Variance reads 104.8 at 0 degrees, rises through 213.0 at 30 and 251.3 at
-            45, peaks at 263.9 at 59, and falls back to 206.5 at 90. The reason it is not at 45 is that
+            57 degrees, not 45. Variance reads 94.4 at 0 degrees, rises through 180.7 at 30 and 209.3 at
+            45, peaks at 217.0 at 57, and falls back to 166.6 at 90. The reason it is not at 45 is that
             the two attributes have different spreads of their own: peak envelope has a standard
-            deviation of 14.4 amplitude units against 10.2 for RMS, so the cloud is stretched more
+            deviation of 12.9 amplitude units against 9.7 for RMS, so the cloud is stretched more
             vertically than horizontally and the widest direction leans toward the vertical axis. Two
             things control the tilt, the correlation and the relative spread, and only the second of them
             is about the units the attributes happen to be reported in. Module 03 is about what to do
@@ -350,9 +350,9 @@
           Step through the three attribute pairs and record, for each, the correlation, the widest angle,
           and the share of the total spread that the widest direction holds.
           <details class="reveal"><summary>Hint</summary><span class="ans">RMS &amp; mean absolute
-            amplitude: correlation 0.96, widest at 46 degrees, holding 98.1% of the spread. RMS &amp;
-            envelope: correlation 0.65, widest at 59 degrees, 84.8%. Envelope &amp; mean absolute
-            amplitude: correlation 0.47, widest at 28 degrees, 77.0%. The first pair is nearly a straight
+            amplitude: correlation 0.97, widest at 46 degrees, holding 98.4% of the spread. RMS &amp;
+            envelope: correlation 0.63, widest at 57 degrees, 83.2%. Envelope &amp; mean absolute
+            amplitude: correlation 0.46, widest at 31 degrees, 75.1%. The first pair is nearly a straight
             line, which says that mean absolute amplitude adds almost nothing to RMS amplitude — the two
             are different summaries of the same window and they rise and fall together. A pair that plots
             as a line is a pair where one of the two could be dropped.</span></details></li>
@@ -360,9 +360,9 @@
         <li><b>Check that the total spread does not change.</b>
           <em class="point">Why: this is the conservation statement underneath every scree plot, and it
             is what makes "percent of variance explained" a meaningful quantity.</em>
-          In step 4, read the along and across variances at 0, 30, 59 and 120 degrees, and add each pair.
+          In step 4, read the along and across variances at 0, 30, 57 and 120 degrees, and add each pair.
           <details class="reveal"><summary>Hint</summary><span class="ans">For RMS &amp; envelope:
-            104.8 + 206.5, 213.0 + 98.2, 263.9 + 47.3, and 98.2 + 213.0. Every pair sums to 311.3. The
+            94.4 + 166.6, 180.7 + 80.3, 217.0 + 44.0, and 80.3 + 180.7. Every pair sums to 261.0. The
             total spread belongs to the cloud and not to the direction chosen, so rotating the line
             redistributes variance without creating or destroying any. That is why the eigenvalues of a
             covariance matrix always sum to the total variance, and why a component can be quoted as a
@@ -378,31 +378,31 @@
             whether that means it will leave the tilt of the cloud alone.</em>
           <details class="reveal"><summary>Hint</summary><span class="ans">It does not leave the tilt
             alone, and it swings it by fifteen degrees. The spread of RMS amplitude hardly moves across
-            the whole range, from 10.23 to 10.37 amplitude units, because RMS averages over twenty-eight
+            the whole range, from 9.71 to 9.88 amplitude units, because RMS averages over twenty-eight
             samples and independent noise largely cancels in that average. The spread of peak envelope
-            nearly doubles, from 12.97 to 20.52, because it is the largest value in the window and the
+            nearly doubles, from 11.36 to 19.40, because it is the largest value in the window and the
             largest value in a noisy window grows with the noise. The widest direction leans toward the
-            attribute whose spread is growing, swinging from 55 degrees at no noise to 70 degrees at 40%.
-            Two further things are worth reading off. The correlation barely changes, 0.663 to 0.624, so
+            attribute whose spread is growing, swinging from 52 degrees at no noise to 70 degrees at 40%.
+            Two further things are worth reading off. The correlation barely changes, 0.647 to 0.597, so
             a correlation matrix would not have flagged any of this. And the share held by the widest
-            direction rises, from 84.3% to 88.9% — the noisier data looked more compressible. Both
+            direction rises, from 82.9% to 88.1% — the noisier data looked more compressible. Both
             attributes drew their noise from the same samples, so what they gained was shared, and shared
             variation is exactly what a first component collects.</span></details></li>
 
         <li><b>Find an angle where the narrow direction is the more useful map.</b>
           <em class="point">Why: the ranking that dimension reduction produces is a ranking by spread,
             and the most geologically informative image is not obliged to be at the top of it.</em>
-          In step 5, set the angle to 59 degrees and compare the along map with the across map. Then look
+          In step 5, set the angle to 57 degrees and compare the along map with the across map. Then look
           at the across map along the younger channel axis in particular.
-          <details class="reveal"><summary>Hint</summary><span class="ans">At 59 degrees the along map
-            holds 84.8% of the spread and is largely a brightness map: both channels appear, and so does
+          <details class="reveal"><summary>Hint</summary><span class="ans">At 57 degrees the along map
+            holds 83.2% of the spread and is largely a brightness map: both channels appear, and so does
             the acquisition footprint, because whatever makes a trace strong makes it strong in both
-            attributes. The across map holds 15.2% and carries what the two attributes disagreed about.
+            attributes. The across map holds 16.8% and carries what the two attributes disagreed about.
             Measured as the separation between the younger channel axis and its own margins, in pooled
-            standard deviations, the across map reaches 5.39 against 0.28 for the along map — and against
-            2.79 for RMS amplitude on its own and 1.16 for peak envelope on its own. The narrow direction here is about twice as good as either input attribute, and roughly twenty times
+            standard deviations, the across map reaches 5.15 against 0.32 for the along map — and against
+            3.38 for RMS amplitude on its own and 1.35 for peak envelope on its own. The narrow direction here is about twice as good as either input attribute, and roughly twenty times
             the wide one. The footprint goes the other way: measured as the part of each map that
-            follows the six-trace acquisition period, the along map carries 0.25 of a standard deviation
+            follows the six-trace acquisition period, the along map carries 0.22 of a standard deviation
             and the across map 0.11. So the component holding a sixth of the variance carries the better
             image and less of the artifact, and nothing in the eigenvalues would have said
             so.</span></details></li>
@@ -591,7 +591,7 @@
     var key = String(S.noise);
     if (!CACHE[key]) {
       var slab = AF.build({
-        nx: 72, ny: 72, freq: 30, noise: S.noise / 100, footprint: 0.10, seed: 2026
+        nx: 72, ny: 72, freq: 30, noise: S.noise / 100, footprint: 0.06, seed: 2026
       });
       var a = AF.attributes(slab, ['rms', 'envelope', 'meanabs']);
       var scaled = {};

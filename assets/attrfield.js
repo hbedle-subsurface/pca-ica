@@ -140,13 +140,44 @@ var AF = (function () {
      opt.seed          which realization of the noise
      ===================================================================== */
 
+  /* The acquisition footprint.
+
+     An earlier version multiplied two cosines together, which is a
+     checkerboard by construction and looked nothing like acquisition
+     footprint. Real footprint is striping that follows the shooting and
+     receiver directions, usually stronger along one of them, so this is a sum
+     of two stripes on different periods rather than a product. It is exported
+     because modules 05 and 11 measure how much of it each component carries,
+     and that measurement has to use the same pattern the survey was built
+     with. */
+  function footprintPattern(ix, iy) {
+    return 0.72 * Math.cos(2 * Math.PI * ix / 6 + 0.4)
+         + 0.40 * Math.cos(2 * Math.PI * iy / 9);
+  }
+
+  /* Put a reflection coefficient at a position that is not a whole sample.
+
+     The reflector depths in this model drift smoothly across the survey.
+     Rounding each one to the nearest sample made a smooth horizon snap to the
+     sample grid, and the one-sample steps that produced showed up in every
+     amplitude map as a fine checkerboard that a reader would reasonably
+     mistake for noise or for geology. Splitting the spike between the two
+     samples either side, in proportion to where it actually falls, is both
+     the physically sensible thing to do and the thing that removes the
+     artifact. */
+  function spike(refl, pos, amp) {
+    var i = Math.floor(pos), f = pos - i;
+    if (i >= 0 && i < refl.length) refl[i] += amp * (1 - f);
+    if (i + 1 >= 0 && i + 1 < refl.length) refl[i + 1] += amp * f;
+  }
+
   function build(opt) {
     opt = opt || {};
     var nx = opt.nx || 72, ny = opt.ny || 72;
     var dt = 0.002, nt = 64;
     var freq = opt.freq || 30;
     var noise = (opt.noise === undefined) ? 0.12 : opt.noise;
-    var foot = (opt.footprint === undefined) ? 0.10 : opt.footprint;
+    var foot = (opt.footprint === undefined) ? 0.06 : opt.footprint;
     var rnd = lcg(opt.seed || 2026);
 
     var wav = ricker(freq, dt, 41);
@@ -164,10 +195,10 @@ var AF = (function () {
         /* Background: a datum reflector plus a few interbeds whose depths
            drift slowly across the survey, so the slab is not layer-cake. */
         var drift = 2.5 * Math.sin(2 * Math.PI * ix / nx) + 1.5 * Math.cos(2 * Math.PI * iy / ny);
-        refl[Math.round(8 + drift)] += rc(ROCKS.shale.z, ROCKS.silt.z) * 2.4;
-        refl[Math.round(20 + drift)] += rc(ROCKS.silt.z, ROCKS.shale.z) * 1.7;
-        refl[Math.round(46 + drift)] += rc(ROCKS.shale.z, ROCKS.tightSand.z) * 1.2;
-        refl[Math.round(54 + drift)] += rc(ROCKS.tightSand.z, ROCKS.shale.z) * 1.2;
+        spike(refl, 8 + drift, rc(ROCKS.shale.z, ROCKS.silt.z) * 2.4);
+        spike(refl, 20 + drift, rc(ROCKS.silt.z, ROCKS.shale.z) * 1.7);
+        spike(refl, 46 + drift, rc(ROCKS.shale.z, ROCKS.tightSand.z) * 1.2);
+        spike(refl, 54 + drift, rc(ROCKS.tightSand.z, ROCKS.shale.z) * 1.2);
 
         var fac = 0, thick = 0;
 
@@ -177,11 +208,11 @@ var AF = (function () {
         var dOld = across(ix, iy, nx, ny, OLD);
         if (dOld !== null) {
           var tOld = OLD.thick * Math.sqrt(Math.max(0, 1 - dOld * dOld));
-          var topO = Math.round(34 + drift);
-          var basO = Math.round(34 + drift + tOld * 0.5);
+          var topO = 34 + drift;
+          var basO = 34 + drift + tOld * 0.5;
           if (tOld > 2) {
-            refl[topO] += rc(ROCKS.shale.z, ROCKS.leveeSand.z) * 1.4;
-            refl[basO] += rc(ROCKS.leveeSand.z, ROCKS.shale.z) * 1.4;
+            spike(refl, topO, rc(ROCKS.shale.z, ROCKS.leveeSand.z) * 1.4);
+            spike(refl, basO, rc(ROCKS.leveeSand.z, ROCKS.shale.z) * 1.4);
             fac = 2; thick = tOld;
           }
         }
@@ -192,20 +223,20 @@ var AF = (function () {
         var dy = Math.abs(iy - ycY) / (YOUNG.halfWidth * (ny - 1));
         if (dy > 1 && dy < 2.3) {
           var lev = (2.3 - dy) / 1.3;
-          var topL = Math.round(28 + drift);
-          refl[topL] += rc(ROCKS.shale.z, ROCKS.leveeSand.z) * 0.85 * lev;
-          refl[topL + 3] += rc(ROCKS.leveeSand.z, ROCKS.shale.z) * 0.85 * lev;
+          var topL = 28 + drift;
+          spike(refl, topL, rc(ROCKS.shale.z, ROCKS.leveeSand.z) * 0.85 * lev);
+          spike(refl, topL + 3, rc(ROCKS.leveeSand.z, ROCKS.shale.z) * 0.85 * lev);
           if (fac === 0) { fac = 3; thick = 6 * lev; }
         }
 
         var dYo = across(ix, iy, nx, ny, YOUNG);
         if (dYo !== null) {
           var tY = YOUNG.thick * Math.sqrt(Math.max(0, 1 - dYo * dYo));
-          var topY = Math.round(28 + drift);
-          var basY = Math.round(28 + drift + tY * 0.5);
+          var topY = 28 + drift;
+          var basY = 28 + drift + tY * 0.5;
           if (tY > 2) {
-            refl[topY] += rc(ROCKS.shale.z, ROCKS.channelSand.z) * 2.0;
-            refl[basY] += rc(ROCKS.channelSand.z, ROCKS.shale.z) * 2.0;
+            spike(refl, topY, rc(ROCKS.shale.z, ROCKS.channelSand.z) * 2.0);
+            spike(refl, basY, rc(ROCKS.channelSand.z, ROCKS.shale.z) * 2.0);
             fac = 1; thick = tY;
           }
         }
@@ -213,9 +244,8 @@ var AF = (function () {
         facies[ix * ny + iy] = fac;
         thickMap[ix * ny + iy] = thick;
 
-        /* Convolve, then add the recording: footprint is a multiplicative
-           striping on a 6-trace period in both directions, noise is added. */
-        var fp = 1 + foot * Math.cos(2 * Math.PI * ix / 6) * Math.cos(2 * Math.PI * iy / 6);
+        /* Convolve, then add the recording. */
+        var fp = 1 + foot * footprintPattern(ix, iy);
         var base = (ix * ny + iy) * nt;
         for (it = 0; it < nt; it++) {
           var s = 0;
@@ -505,6 +535,7 @@ var AF = (function () {
     shallowRMS: shallowRMS,
     envelope: envelope, ricker: ricker, fft: fft,
     range: range, percentile: percentile, WIN: WIN,
+    footprintPattern: footprintPattern,
     centerline: centerline, YOUNG: YOUNG, OLD: OLD
   };
 })();

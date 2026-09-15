@@ -112,19 +112,18 @@
       <span class="hint">Ranked above two real ones</span>
     </div>
 
-    <p class="lede"><b>Component 4 holds 7.5% of the variance and is the acquisition footprint.</b> It
+    <p class="lede"><b>Component 4 holds 7.0% of the variance and is the acquisition footprint.</b> It
       separates neither channel, and it is ranked above components 5 and 6, which do carry some
       geology.</p>
 
     <details class="reveal"><summary>The longer version</summary>
       <p class="lede">The footprint was put into the survey as a regular striping on a six-trace period,
         the kind a marine acquisition geometry leaves behind. It enters the attribute set mainly through
-        peak envelope, which carries 0.27 of it, and RMS amplitude at 0.14.</p>
+        peak envelope, which carries 0.24 of it, and RMS amplitude at 0.12.</p>
       <p class="lede">It is periodic, strong and consistent across the whole survey, which makes it
         exactly the kind of thing a variance-maximizing method collects. Module 07 noted that this
-        component has an excess kurtosis of &minus;0.18, which is almost exactly Gaussian, and module 08
-        noted that the corresponding ICA component converged in two iterations and carries 0.322 of the
-        footprint. Both methods found it, ranked it, and handed it over looking like a result.</p>
+        component has an excess kurtosis of &minus;0.12, which is almost exactly Gaussian, and module 08
+        noted that the corresponding ICA component converged in two iterations and carries 0.293 of the footprint. Both methods found it, ranked it, and handed it over looking like a result.</p>
       <p class="lede">The one thing that would have caught it is knowing the acquisition geometry, which
         is not in the data and is not something either method could have been told.</p></details>
 
@@ -155,14 +154,12 @@
     </div>
 
     <p class="lede"><b>The best anything manages on the older channel is 1.44</b> — and that is a raw
-      attribute, beating both methods. The ceiling is 1.62.</p>
-    <p class="lede">Compare the younger channel in the same six attributes: ceiling 8.97, ICA 6.47.</p>
+      attribute, beating both methods. The best available is 1.73.</p>
+    <p class="lede">Compare the younger channel in the same six attributes: best available 9.34, ICA 6.30.</p>
 
     <details class="reveal"><summary>The longer version</summary>
       <p class="lede">Module 06 computed, with the channel positions in hand, the best direction that
-        exists anywhere in this attribute space for each target. For the younger channel it reaches 8.97.
-        For the older one it reaches 1.615, and the best principal component gets 1.03, the best
-        independent component 1.35, and the best single raw attribute 1.45.</p>
+        exists anywhere in this attribute space for each target. For the younger channel it reaches 9.34. For the older one it reaches 1.73, and the best principal component gets 1.14, the best independent component 1.40, and the best single raw attribute 1.44.</p>
       <p class="lede">Everything is close to the ceiling. That is the important part. When every method
         lands near the best available, the shortfall is not in the methods — the six attributes simply do
         not carry much about that channel. It is thinner, at a different level, and partly overprinted
@@ -198,17 +195,16 @@
     </div>
 
     <p class="lede"><b>Add an attribute computed on a window above the channel system</b> — correct
-      arithmetic, wrong interval — and it becomes the largest loading on component 2, at 0.528.</p>
+      arithmetic, wrong interval — and it becomes the largest loading on component 3, at 0.867.</p>
 
     <details class="reveal"><summary>The longer version</summary>
       <p class="lede">The seventh attribute is RMS amplitude on samples 2 to 16, which sits entirely above
-        the target. It averages 0.04559 inside the younger channel and 0.04660 in the background, a
-        difference of two percent, against 0.08126 and 0.05571 for the same attribute measured on the
+        the target. It averages 0.04510 inside the younger channel and 0.04604 in the background, a difference of two percent, against 0.08002 and 0.05501 for the same attribute measured on the
         target itself. It carries almost nothing about the channel.</p>
       <p class="lede">Module 03 showed why standardizing guarantees it a hearing: every attribute is given
         a variance of one, which is a statement that they all deserve equal weight. Once that is granted,
         an attribute carrying nothing still occupies a full dimension, and it can occupy a high-ranked
-        one. The first component falls from 52.19% to 44.83% and the components needed for ninety percent
+        one. The first component falls from 52.62% to 45.10% and the components needed for ninety percent
         go from four to five.</p>
       <p class="lede">Nothing in the output flags it. The component looks like any other component, and
         the only way to notice is to read the loadings and recognize that the largest one belongs to an
@@ -329,10 +325,8 @@
           In step 1, decide which of the four maps you would present as a result. Write it down. Then
           reveal.
           <details class="reveal"><summary>Hint</summary><span class="ans">Component 2 and component 3
-            are the channel components, separating the younger channel at 2.81 and 2.57. Component 1
-            holds 52.2% of the variance and separates it at 0.33, which is nothing; it is a general
-            brightness map. Component 4 holds 7.5% and is the acquisition footprint, carrying 0.213 of
-            the six-trace striping. All four are clean and coherent. The two that are not geology are the
+            are the channel components, separating the younger channel at 3.11 and 2.41. Component 1 holds 52.6% of the variance and separates it at 0.22, which is nothing; it is a general
+            brightness map. Component 4 holds 7.0% and is the acquisition footprint, carrying 0.213 of the striping. All four are clean and coherent. The two that are not geology are the
             largest and the fourth largest, so neither the rank nor the appearance
             helped.</span></details></li>
 
@@ -340,12 +334,10 @@
           <em class="point">Why: it is not a PCA problem, and it is worth confirming that rather than
             assuming it.</em>
           In step 2, read the footprint carried by each component under PCA, then switch to ICA.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Under PCA it concentrates in
-            component 4 at 0.213, which holds 7.5% of the variance. Under ICA it concentrates in
-            component 6 at 0.322, more strongly still, and module 08 found that component converged in
+          <details class="reveal"><summary>Hint</summary><span class="ans">Under PCA it concentrates in component 4 at 0.213, which holds 7.0% of the variance. Under ICA it concentrates in component 6 at 0.293, more strongly still, and module 08 found that component converged in
             two iterations because it is nearly Gaussian. Both methods found the footprint, ranked it
             among their outputs and handed it over. It entered the attribute set mainly through peak
-            envelope, which carries 0.27 of it, and RMS amplitude at 0.14 — so the place to have caught
+            envelope, which carries 0.24 of it, and RMS amplitude at 0.12 — so the place to have caught
             it was the input attributes. Note that it is only identifiable as footprint here because the
             striping was put into the survey deliberately and its period is known. On a real survey a
             periodic map could be acquisition, or a genuine periodic feature such as a dune field or a
@@ -357,10 +349,8 @@
             another algorithm.</em>
           In step 3, compare the younger and older channels: the ceiling, the best component of each
           method, and the best raw attribute.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Younger channel: ceiling 8.97,
-            best principal component 2.81, best independent component 6.47. There is a large gap between
-            the methods and the ceiling, so method choice matters. Older channel: ceiling 1.62, best
-            principal component 1.03, best independent component 1.35, best raw attribute 1.44. Everything
+          <details class="reveal"><summary>Hint</summary><span class="ans">Younger channel: best available 9.34, best principal component 3.11, best independent component 6.30. There is a large gap between
+            the methods and the ceiling, so method choice matters. Older channel: best available 1.73, best principal component 1.14, best independent component 1.40, best raw attribute 1.44. Everything
             is crowded against a low ceiling, which says the six attributes carry very little about that
             channel. A third method would land in the same place. The useful response is to compute
             attributes that can see a thinner bed at a different level, which is a decision about the
@@ -371,13 +361,8 @@
             available.</em>
           In step 4, switch the seventh attribute in, then try to identify it from the loadings without
           looking at which one you added.
-          <details class="reveal"><summary>Hint</summary><span class="ans">It is the largest loading on
-            component 2, at 0.528, ahead of peak envelope at 0.516 — which is the way module 03 reads it.
-            Its own largest loading is on component 3, at &minus;0.672, where peak frequency at 0.682 is
-            marginally larger still. The two readings answer different questions and both are true. So it is
-            spread across two high-ranked components and dominates one of them. Adding it drops the first
-            component from 52.19% to 44.83% and pushes the components needed for ninety percent from four
-            to five. Nothing about the maps says anything is wrong. Reading the loadings and asking "what
+          <details class="reveal"><summary>Hint</summary><span class="ans">It is the largest loading on component 3, at 0.867 — nearly twice what any other attribute carries there, and its own largest loading as well. Module 03 reads it the same way. So it is
+            spread across two high-ranked components and dominates one of them. Adding it drops the first component from 52.62% to 45.10% and pushes the components needed for ninety percent from four to five. Nothing about the maps says anything is wrong. Reading the loadings and asking "what
             is that attribute doing there" is the whole of the
             defense.</span></details></li>
 
@@ -406,12 +391,9 @@
           separate question no statistic on the page can answer.</li>
         <li><b>An artifact will be ranked.</b> The acquisition footprint came back as component 4 under
           PCA and component 6 under ICA, looking like a clean result in both.</li>
-        <li><b>The largest component is often nothing.</b> Here it holds 52.2% of the variance and
-          separates the channel at 0.33.</li>
-        <li><b>When everything lands near the ceiling, the inputs are the problem.</b> On the older
-          channel: ceiling 1.62, best method 1.35, best raw attribute 1.44.</li>
-        <li><b>An attribute on the wrong interval takes a high rank.</b> 0.528 on component 2, and
-          nothing in the output flags it.</li>
+        <li><b>The largest component is often nothing.</b> Here it holds 52.6% of the variance and separates the channel at 0.22.</li>
+        <li><b>When everything lands near the ceiling, the inputs are the problem.</b> On the older channel: best available 1.73, best method 1.40, best raw attribute 1.44.</li>
+        <li><b>An attribute on the wrong interval takes a high rank.</b> 0.867 on component 3, and nothing in the output flags it.</li>
         <li><b>Every score in this set was computed from the answer.</b> On real data you have a well,
           repeatability, the loadings, and knowledge of the acquisition. Use all four.</li>
       </ul>
@@ -426,7 +408,7 @@
     </div>
     <p class="lede"><b>The survey, the six attributes, the seventh, the standardization, the separation
       statistic and the footprint statistic</b> are all exactly as in modules 03 to 08, so every number
-      here can be set beside the ones there. The ceilings of 8.973 and 1.615 are module 06's supervised
+      here can be set beside the ones there. The references of 9.342 and 1.727 are module 06's supervised
       discriminant and are described in its Method tab.</p>
     <p class="lede"><b>The footprint statistic</b> is the projection of a map onto the six-trace striping
       that was put into the survey, as a fraction of that map's own standard deviation. It is only
@@ -529,7 +511,7 @@
   var ALL = CORE.concat([WEAK]);
   var SHORT = { rms: 'RMS', envelope: 'env', peakfreq: 'f peak', bandwidth: 'bandw',
                 coherence: 'coher', glcmcon: 'GLCM', shallow: 'shallow' };
-  var CEILING = { young: 8.973, old: 1.615 };
+  var CEILING = { young: 9.342, old: 1.727 };
 
   var DEF = { rev: 0, meth: 'pca', tgt: 'young', weak: 0, next: 'lin', tab: 'p1' };
   var S = MV.readState(DEF);
@@ -548,7 +530,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: NX, ny: NY, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: NX, ny: NY, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var attr = AF.attributes(slab, ALL);
     SURVEY = {
       slab: slab, attr: attr,
@@ -585,7 +567,7 @@
   function foot(m) {
     var s = 0, n = 0, ix, iy;
     for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
-      s += m[ix * NY + iy] * Math.cos(2 * Math.PI * ix / 6) * Math.cos(2 * Math.PI * iy / 6);
+      s += m[ix * NY + iy] * AF.footprintPattern(ix, iy);
       n++;
     }
     return Math.abs(s / n) / (MV.std(m) || 1);

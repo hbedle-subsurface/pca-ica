@@ -139,7 +139,7 @@
         present on each trace, which is a map. This is what AASPI's waveform classification programs
         compute, and it is where their documentation calls the eigenvectors the initial training
         waveforms and the projections the principal components.</p>
-      <p class="lede">The first four hold 55.0%, 21.6%, 11.5% and 7.4% of the variance, so four of
+      <p class="lede">The first four hold 55.5%, 21.5%, 11.2% and 7.4% of the variance, so four of
         twenty-eight dimensions reach 95.5% — a much harder compression than six attributes
         managed.</p></details>
 
@@ -168,10 +168,10 @@
 
     <p class="lede"><b>Component 1 is all one sign</b> — a brightness measure, peaking at 39 Hz.
       <b>Component 2 changes sign</b>: low frequencies against high. That one is a frequency shift, and
-      it separates the channel at 7.95.</p>
+      it separates the channel at 8.46.</p>
 
     <details class="reveal"><summary>The longer version</summary>
-      <p class="lede">Two components reach 95.4% here, against four for the waveform space and four for
+      <p class="lede">Two components reach 95.6% here, against four for the waveform space and four for
         the attributes. Magnitude spectra of a band-limited wavelet are smooth and strongly redundant
         between neighbouring frequencies, so there is very little independent information across twelve
         bins.</p>
@@ -211,10 +211,9 @@
       you find against everything the previous nine modules achieved.</p>
 
     <details class="reveal"><summary>The longer version</summary>
-      <p class="lede">On the attribute space, the best principal component separated the channel at
-        2.81 and the best independent component at 6.47 — module 08's headline, and a good argument for
+      <p class="lede">On the attribute space, the best principal component separated the channel at 3.11 and the best independent component at 6.30 — module 08's headline, and a good argument for
         the harder method.</p>
-      <p class="lede">On the spectral space, ordinary PCA reaches 7.95. Changing what counted as a
+      <p class="lede">On the spectral space, ordinary PCA reaches 8.46. Changing what counted as a
         dimension did more than changing the method did, on the same window of the same survey, and it
         cost nothing beyond a different way of writing the data down.</p>
       <p class="lede">That is not an argument that spectra are better than attributes. It is an argument
@@ -334,7 +333,7 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">Three, three, four and four.
             They look like wavelets because the data are wavelets — the direction of greatest spread
             among a set of wavelets is itself a wavelet. The four components hold 55.0%, 21.6%, 11.5%
-            and 7.4%, reaching 95.5% between them, so four of twenty-eight dimensions carry almost
+            and 7.4%, reaching 95.6% between them, so four of twenty-eight dimensions carry almost
             everything. The score of each is a map of how much of that particular waveform sits on each
             trace, which is exactly what a waveform classification is built
             from.</span></details></li>
@@ -346,10 +345,9 @@
           their maps.
           <details class="reveal"><summary>Hint</summary><span class="ans">Component 1 is positive at
             every frequency, peaking at 39 Hz, so it measures how much spectrum there is altogether —
-            a brightness. Component 2 runs 0.46, 0.54, 0.33 at the low end and &minus;0.36, &minus;0.41,
-            &minus;0.27 in the middle, so it measures low frequencies against high, which is a frequency
+            a brightness. Component 2 runs 0.47, 0.54, 0.32 at the low end and &minus;0.37, &minus;0.41, &minus;0.26 in the middle, so it measures low frequencies against high, which is a frequency
             shift. The channel is a tuned thin bed and shifts the spectrum rather than simply
-            brightening it, so component 2 is the one that finds it: 7.95 against 2.08. All-one-sign
+            brightening it, so component 2 is the one that finds it: 8.46 against 2.16. All-one-sign
             means an amount, sign-changing means a balance, and that holds for attribute loadings and
             eigen-wavelets equally.</span></details></li>
 
@@ -358,11 +356,10 @@
             reaches for it.</em>
           In step 4, find the best component of each feature space and set the three against the results marked
           on the panel.
-          <em class="predict">Before starting: module 08 needed ICA to get from 2.81 to 6.47. Commit to
+          <em class="predict">Before starting: module 08 needed ICA to get from 3.11 to 6.30. Commit to
             whether ordinary PCA in a different feature space can do better.</em>
-          <details class="reveal"><summary>Hint</summary><span class="ans">Attributes: 2.81. Time
-            samples: 3.09. Frequencies: 7.95. Plain PCA on the spectral space beats the independent
-            component analysis of module 08, which reached 6.47, and beats every attribute result in the
+          <details class="reveal"><summary>Hint</summary><span class="ans">Attributes: 3.11. Time samples: 3.50. Frequencies: 8.46. Plain PCA on the spectral space beats the independent
+            component analysis of module 08, which reached 6.30, and beats every attribute result in the
             set. Nothing about the method changed — same eigensolver, same covariance matrix, same
             survey, same window. Only the axes were relabelled. Two readings of that are available and the page does not choose between them.
             It may be that spectra suit this target, because a tuned thin bed shifts the spectrum and the
@@ -396,8 +393,7 @@
           eigenvectors that are wavelets, with 3, 3, 4 and 4 zero crossings here.</li>
         <li><b>All-one-sign loadings measure an amount; sign-changing loadings measure a balance.</b>
           That reading names a component in any feature space.</li>
-        <li><b>The feature space can matter more than the method.</b> Plain PCA on spectra reached 7.95 against
-          6.47 for ICA on attributes, on the same window.</li>
+        <li><b>The feature space can matter more than the method.</b> Plain PCA on spectra reached 8.46 against 6.30 for ICA on attributes, on the same window.</li>
         <li><b>More dimensions is not more information.</b> Twelve frequencies needed two components for
           90%; six attributes needed four.</li>
         <li><b>These are not three methods.</b> One method, three descriptions of identical data.</li>
@@ -421,8 +417,8 @@
       twelve bins, which at 2 ms sampling is 7.8 to 93.8 Hz, again with means removed only.</p>
     <p class="lede"><b>The separation statistic</b> is identical to modules 05 to 09 and is described in
       module 06's Method tab, so every number here can be set directly beside the ones there. The
-      comparison figures quoted from earlier modules are 2.81 for the best attribute principal component,
-      6.47 for the best independent component and 8.97 for the best direction module 06 found, all on the attribute
+      comparison figures quoted from earlier modules are 3.11 for the best attribute principal component,
+      6.30 for the best independent component and 9.34 for the best direction module 06 found, all on the attribute
       feature space.</p>
     <p class="lede"><b>What this leaves out of the published methods.</b> AASPI's complex principal
       component spectral analysis decomposes magnitude and phase together as one complex quantity with a
@@ -521,7 +517,7 @@
                 coherence: 'coher', glcmcon: 'GLCM' };
 
   /* Results carried in from earlier modules, for the comparison in step 4. */
-  var PRIOR = { pca: 2.812, ica: 6.473, attr: 5.972, ceiling: 8.973 };
+  var PRIOR = { pca: 3.108, ica: 6.303, attr: 6.395, ceiling: 9.342 };
 
   var DEF = { space: 'attr', pc: 1, trace: 0, cmp: 'what', tab: 'p1' };
   var S = MV.readState(DEF);
@@ -545,7 +541,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: NX, ny: NY, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: NX, ny: NY, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var attr = AF.attributes(slab, CORE);
 
     // waveform: one dimension per time sample in the window

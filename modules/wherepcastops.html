@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Where PCA stops | How PCA and ICA Actually Work</title>
-<meta name="description" content="The components come out perpendicular because of how they were computed, not because anything in the ground is. Measured on two channel systems whose best directions in attribute space sit 37 degrees apart, and what that costs.">
+<meta name="description" content="The components come out perpendicular because of how they were computed, not because anything in the ground is. Measured on two channel systems whose best directions in attribute space sit 36 degrees apart, and what that costs.">
 <link rel="stylesheet" href="../assets/fonts.css">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
@@ -23,7 +23,7 @@
   <div class="mod-head">
     <p class="eyebrow">Module 06 &nbsp;·&nbsp; Dimension reduction</p>
     <h1>Where PCA stops</h1>
-    <p class="sub">Two constraints are built into principal component analysis and neither of them comes from the earth. The components are ranked by spread, and they are forced to be at right angles to each other. This survey contains two channel systems of different age, and the directions in attribute space that best show each of them sit thirty-seven degrees apart. These steps measure what a method that insists on ninety can do with that.</p>
+    <p class="sub">Two constraints are built into principal component analysis and neither of them comes from the earth. The components are ranked by spread, and they are forced to be at right angles to each other. This survey contains two channel systems of different age, and the directions in attribute space that best show each of them sit thirty-six degrees apart. These steps measure what a method that insists on ninety can do with that.</p>
   </div>
 
   <div class="labhead">
@@ -101,8 +101,7 @@
         different orientation. Both are real features of the model, both affect several attributes, and
         both are things an interpreter would want mapped separately.</p>
         <p class="lede">The bars above the tabs give how well each component separates each channel axis from
-        its own margins. The younger channel is best shown by components 2 and 3, at 2.81 and 2.57, and
-        the older one is best shown by component 3 at 1.03. No component holds one of them without holding
+        its own margins. The younger channel is best shown by components 2 and 3, at 3.11 and 2.41, and the older one is best shown by component 3 at 1.14. No component holds one of them without holding
         some of the other, and the first component, which holds more than half the variance, shows
         neither.</p>
             </details>
@@ -149,9 +148,7 @@
         pushes the channel axis furthest from its margins relative to the scatter within each. That is a
         standard discriminant calculation, and it uses information the method does not have. It is done
         here only to establish what the answer would have been.</p>
-        <p class="lede">For the younger channel that direction achieves a separation of 8.97, against 2.81
-        for the best component and 5.97 for the best single attribute. For the older one it achieves 1.62
-        against 1.03. Both directions exist, both are available inside the same six attributes, and
+        <p class="lede">For the younger channel that direction achieves a separation of 9.34, against 3.11 for the best component and 6.40 for the best single attribute. For the older one it achieves 1.73 against 1.14. Both directions exist, both are available inside the same six attributes, and
         neither is any component.</p>
             </details>
 <div class="plot">
@@ -190,16 +187,16 @@
 
     
 
-    <p class="lede"><b>The two targets are 37 degrees apart. Components are 90 degrees apart, always.</b> Nothing can point along both.</p>
+    <p class="lede"><b>The two targets are 36 degrees apart. Components are 90 degrees apart, always.</b> Nothing can point along both.</p>
 
     <details class="reveal"><summary>The longer version</summary>
-        <p class="lede">The two directions from step 2 are 37.14 degrees apart. That is the whole of this
+        <p class="lede">The two directions from step 2 are 35.75 degrees apart. That is the whole of this
         module in one measurement. Principal components are perpendicular to each other by construction,
         because each is taken from the residual of the last; if two features in the ground want directions
-        thirty-seven degrees apart, no pair of perpendicular components can point along both.</p>
+        thirty-six degrees apart, no pair of perpendicular components can point along both.</p>
         <p class="lede">The panel below gives the angle between every component and each of the two target
-        directions. Nothing is close. The nearest approach in the whole set is component 3 at 36.9 degrees
-        from the older channel's direction, and component 2 at 50.4 degrees from the younger one's. A
+        directions. Nothing is close. The nearest approach in the whole set is component 3 at 37.5 degrees
+        from the older channel's direction, and component 2 at 48.6 degrees from the younger one's. A
         direction fifty degrees away from what you wanted still carries some of it, which is why the
         components show the channels at all, and carries the rest of whatever else is in that direction,
         which is why they show them mixed.</p>
@@ -233,7 +230,7 @@
 
     
 
-    <p class="lede"><b>Drag the rotation and fill the bar.</b> The map nearly triples on the way, while
+    <p class="lede"><b>Drag the rotation and fill the bar.</b> The map more than doubles on the way, while
       the quantity PCA ranks by goes <em>down</em>. Both components PCA returned are in this plane, and
       it chose neither of the good directions in it.</p>
 
@@ -242,8 +239,7 @@
         weighted combination of the two, and any of them could be written out as a volume. The slider in
         the header turns a direction through that plane, starting on component 2 at zero degrees and
         reaching component 3 at ninety.</p>
-        <p class="lede">At zero degrees the direction separates the younger channel at 2.81 and holds a
-        variance of 1.286. At forty-five degrees it separates at 7.42 and holds 1.012. The map gets
+        <p class="lede">At zero degrees the direction separates the younger channel at 3.11 and holds a variance of 1.302. At forty degrees it separates at 7.91 and holds 1.062. The map gets
         dramatically better while the quantity the method ranks by gets worse, so the ranking is pointing
         away from the useful direction. Nothing was added to the data to make this happen; the better
         direction was inside the span of the components PCA already returned, and PCA had no reason to
@@ -344,7 +340,7 @@
     <p class="lede"><b>Two points that are commonly confused.</b> The first is that orthogonality is a
       natural property of independent geological effects. Independent causes do not generally produce
       perpendicular directions in an arbitrary attribute space, and the two channel systems here are
-      independent in origin and thirty-seven degrees apart in attributes. The second is that a low
+      independent in origin and thirty-six degrees apart in attributes. The second is that a low
       variance component is a minor one. Step 4 reaches its best map at a direction whose variance is
       lower than the component it started from.</p>
     <div class="legend prose">
@@ -367,12 +363,10 @@
           for each.
           <em class="predict">Before starting: two distinct geological features, six components. How many
             components do you expect to hold one feature and not the other?</em>
-          <details class="reveal"><summary>Hint</summary><span class="ans">For the younger channel the
-            six components give 0.33, &minus;2.81, &minus;2.57, 0.28, &minus;0.42 and 0.99. For the older
-            one they give &minus;0.30, &minus;0.56, &minus;1.03, 0.11, &minus;0.18 and &minus;0.04. No
+          <details class="reveal"><summary>Hint</summary><span class="ans">For the younger channel the six components give 0.22, &minus;3.11, &minus;2.41, 0.66, &minus;0.39 and 0.89. For the older one they give &minus;0.24, &minus;0.48, &minus;1.14, 0.29, &minus;0.23 and 0.01. No
             component holds one and not the other: component 3 is the best available for the older
-            channel at 1.03 and it is also the second best for the younger at 2.57. The first component,
-            with 52.19% of the variance, is the worst in the set for both. Six components, two features,
+            channel at 1.14 and it is also the second best for the younger at 2.41. The first component,
+            with 52.62% of the variance, is the worst in the set for both. Six components, two features,
             and not one clean assignment between them.</span></details></li>
 
         <li><b>Find the ceiling.</b>
@@ -381,11 +375,11 @@
           In step 2, read the separation achieved by the discriminant direction for each target, and compare it
           against the best component and the best single attribute from module 05.
           <details class="reveal"><summary>Hint</summary><span class="ans">For the younger channel the
-            discriminant direction reaches 8.97. The best component reaches 2.81 and the best single
-            attribute, peak frequency, reaches 5.97. For the older channel the ceiling is 1.62 against
-            1.03 from the best component. So on the younger channel the unsupervised result recovered
+            discriminant direction reaches 9.34. The best component reaches 3.11 and the best single
+            attribute, peak frequency, reaches 6.40. For the older channel it reaches 1.73 against
+            1.14 from the best component. So on the younger channel the unsupervised result recovered
             less than a third of what was available, and a single raw attribute did better than it. The
-            older channel is a harder target in every direction, which is itself worth knowing: 1.62 says
+            older channel is a harder target in every direction, which is itself worth knowing: 1.73 says
             the six attributes carry little about it. Why they carry little is not something these
             numbers answer. It is thinner, so it may be below tuning; it sits at a different level in the
             window; and the younger system crosses and overprints it. Any of those would produce the same
@@ -397,11 +391,11 @@
           In step 3, read the angle between the two target directions, and the angle between each
           component and each target.
           <details class="reveal"><summary>Hint</summary><span class="ans">The two target directions are
-            37.14 degrees apart. Principal components are exactly 90 degrees apart, so no two of them can
+            35.75 degrees apart. Principal components are exactly 90 degrees apart, so no two of them can
             sit along two directions that are 37 apart — the geometry forbids it before any data is
-            considered. The closest any component comes to either target is component 3 at 36.9 degrees
+            considered. The closest any component comes to either target is component 3 at 37.5 degrees
             from the older channel's direction; for the younger channel the closest is component 2 at
-            50.4 degrees. Component 1, holding half the variance, sits at 85.4 and 87.9 degrees, which is
+            48.6 degrees. Component 1, holding half the variance, sits at 85.0 and 89.1 degrees, which is
             nearly perpendicular to both and explains why it shows neither.</span></details></li>
 
         <li><b>Turn the direction and watch the ranking point the wrong way.</b>
@@ -410,10 +404,10 @@
           In step 4, take the rotation from 0 to 90 degrees in steps and read the separation and the
           variance at each.
           <details class="reveal"><summary>Hint</summary><span class="ans">At 0 degrees, which is
-            component 2 exactly, the younger channel separates at 2.81 with a variance of 1.286. At 30
-            degrees it is 6.23 with 1.149, at 45 degrees 7.42 with 1.012, at 60 degrees 6.00 with 0.875,
-            and at 90 degrees, which is component 3, it is 2.57 with 0.739. The best map in the plane is
-            at 45 degrees and it holds less variance than the component the rotation started from. PCA
+            component 2 exactly, the younger channel separates at 3.11 with a variance of 1.302. At 30
+            degrees it is 6.85 with 1.157, at 45 degrees 7.91 with 1.012, at 60 degrees 6.01 with 0.867,
+            and at 90 degrees, which is component 3, it is 2.41 with 0.723. The best map in the plane is
+            at 40 degrees and it holds less variance than the component the rotation started from. PCA
             had every one of these directions available and chose the two least useful ones in the plane,
             because the only thing it was ranking by was the quantity that falls as the map
             improves.</span></details></li>
@@ -423,14 +417,12 @@
             story, and the next module would have nothing to work with.</em>
           In step 5, look at the crossplots of the first few scores against each other and read the
           excess kurtosis of each.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The excess kurtosis of the
-            six scores is 5.11, 3.73, 3.85, &minus;0.18, 5.13 and 2.78. A Gaussian would give zero
+          <details class="reveal"><summary>Hint</summary><span class="ans">The excess kurtosis of the six scores is 5.70, 4.06, 3.69, &minus;0.12, 5.16 and 3.46. A Gaussian would give zero
             for all of them. Five of the six are strongly positive, meaning sharply peaked distributions
             with long tails, and the crossplots show clear structure rather than round blobs. The
             covariance matrix has nothing to say about any of it — every pair of scores is uncorrelated
             at about ten to the minus fifteen, which is as decorrelated as anything gets. So the
-            second-order statistics are exhausted and the data is still visibly structured. The fourth
-            score, at &minus;0.18, is the one that is close to Gaussian, and it is also the one carrying
+            second-order statistics are exhausted and the data is still visibly structured. The fourth score, at &minus;0.12, is the one that is close to Gaussian, and it is also the one carrying
             most of the acquisition footprint.</span></details></li>
       </ol>
     </div>
@@ -444,14 +436,14 @@
         <li><b>The components are perpendicular because of the procedure.</b> Each is taken from the
           residual of the last, so orthogonality is guaranteed whatever the geology does.</li>
         <li><b>Geological features do not generally want perpendicular directions.</b> The two channel
-          systems here want directions 37.14 degrees apart, and no perpendicular pair can serve both.</li>
+          systems here want directions 35.75 degrees apart, and no perpendicular pair can serve both.</li>
         <li><b>A mixed component is the expected outcome, not a bad run.</b> No parameter choice
           separates features whose directions are close together.</li>
         <li><b>The variance ranking can point away from the useful direction.</b> Rotating inside the
-          plane of components 2 and 3 nearly triples the channel separation while lowering the
+          plane of components 2 and 3 more than doubles the channel separation while lowering the
           variance.</li>
         <li><b>A supervised reference turns a judgment into a measurement.</b> The discriminant direction
-          reaches 8.97 here; the best component reached 2.81.</li>
+          reaches 9.34 here; the best component reached 3.11.</li>
         <li><b>Decorrelated is not finished.</b> The scores are uncorrelated to machine precision and
           their distributions are still strongly non-Gaussian, which is structure PCA cannot see.</li>
       </ul>
@@ -609,7 +601,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var attr = AF.attributes(slab, CORE);
     var X = CORE.map(function (n) { return attr[n]; });
     SURVEY = { slab: slab, X: X, Z: MV.zscore(X), P: MV.pca(X, { standardize: true }) };

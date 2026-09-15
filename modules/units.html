@@ -365,11 +365,11 @@
           <em class="predict">Before looking: six attributes, all computed on the same window of the same
             survey. How different can the two answers be? Commit to an expectation.</em>
           <details class="reveal"><summary>Hint</summary><span class="ans">The covariance route returns a
-            first component that is 0.950 spectral bandwidth, &minus;0.274 GLCM contrast and &minus;0.150
+            first component that is 0.942 spectral bandwidth, &minus;0.304 GLCM contrast and &minus;0.141
             peak frequency, with loadings of &minus;0.001 on RMS amplitude, &minus;0.001 on peak envelope
             and 0.006 on coherence. Three of the six attributes are not in it at all. The correlation
-            route returns 0.509 RMS, 0.379 peak envelope, 0.258 peak frequency, &minus;0.439 bandwidth,
-            &minus;0.439 coherence and 0.381 GLCM contrast — all six present, and the largest loading is
+            route returns 0.506 RMS, 0.382 peak envelope, 0.260 peak frequency, &minus;0.434 bandwidth,
+            &minus;0.444 coherence and 0.380 GLCM contrast — all six present, and the largest loading is
             on an attribute the other route ignored completely. The two components share almost
             nothing.</span></details></li>
 
@@ -380,10 +380,10 @@
           reading the covariance-route loading on it at each stop, then the correlation-route loading.
           <details class="reveal"><summary>Hint</summary><span class="ans">Under the covariance route
             the loading on RMS amplitude reads &minus;0.001 at 1&times;, &minus;0.008 at 10&times;,
-            &minus;0.083 at 100&times; and 0.768 at 1000&times;. An attribute that was invisible becomes
+            &minus;0.080 at 100&times; and 0.746 at 1000&times;. An attribute that was invisible becomes
             the largest contributor to the first component, and no rock in the survey is different at any
-            point in that slide. The share of variance the first component holds moves too, from 69.55%
-            to 72.84%. Under the correlation route the loading sits at 0.509 and the share at 52.19% at
+            point in that slide. The share of variance the first component holds moves too, from 68.07%
+            to 71.50%. Under the correlation route the loading sits at 0.506 and the share at 52.62% at
             every single stop. Note also where the change happens: nothing much moves until 100&times;,
             because the loading depends on the variance, which grows as the square of the gain — RMS
             amplitude has to be scaled up by about three decades before its variance is comparable with
@@ -393,10 +393,10 @@
           <em class="point">Why: the covariance route behaves predictably, and knowing in advance what it
             will do is enough to decide whether to use it.</em>
           In step 3, read the variance of each attribute in native units off the logarithmic axis.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Spectral bandwidth 74.4,
-            GLCM contrast 23.5, peak frequency 18.1, coherence 0.0101, peak envelope 0.000207, RMS
-            amplitude 0.000105. The largest and the smallest differ by a factor of about seven hundred
-            thousand. The first component under the covariance route loads on those attributes in the
+          <details class="reveal"><summary>Hint</summary><span class="ans">Spectral bandwidth 73.3,
+            GLCM contrast 26.8, peak frequency 17.7, coherence 0.0101, peak envelope 0.000167, RMS
+            amplitude 0.0000944. The largest and the smallest differ by a factor of about seven hundred
+            and seventy thousand. The first component under the covariance route loads on those attributes in the
             same order, which is why it is worth predicting the answer before running it: the covariance
             route on a mixed-unit set returns the loudest attribute and a small correction. Note what a large
             variance can mean: strong geological contrast, a poorly conditioned attribute with outliers,
@@ -409,11 +409,11 @@
           In step 4, step through four pairs and record the native angle and the standardized angle for
           each.
           <details class="reveal"><summary>Hint</summary><span class="ans">RMS with peak envelope:
-            native 58.99 degrees, standardized 45.00. RMS with coherence: native 93.65, standardized
-            135.00. Peak frequency with bandwidth: native 99.45, standardized 135.00. Coherence with GLCM
-            contrast: native 90.85, standardized 135.00. The standardized answer takes one of two values
+            native 57.31 degrees, standardized 45.00. RMS with coherence: native 93.62, standardized
+            135.00. Peak frequency with bandwidth: native 99.04, standardized 135.00. Coherence with GLCM
+            contrast: native 90.80, standardized 135.00. The standardized answer takes one of two values
             and which one depends only on the sign of the correlation. The correlation itself, anywhere
-            from &minus;0.72 to +0.65 across those four pairs, has no effect on the direction at all —
+            from &minus;0.72 to +0.63 across those four pairs, has no effect on the direction at all —
             only on how elongated the cloud is along it. Add a third attribute and the degeneracy
             disappears.</span></details></li>
 
@@ -423,16 +423,13 @@
           Switch the seventh attribute in, with the standardized route selected in step 5, and read the
           variance on each component and the loading the seventh attribute carries.
           <details class="reveal"><summary>Hint</summary><span class="ans">RMS above the target averages
-            0.04559 inside the young channel and 0.04660 in the background, a difference of two percent,
-            against 0.08126 and 0.05571 for the same attribute measured on the target itself. It carries
+            0.04510 inside the young channel and 0.04604 in the background, a difference of two percent,
+            against 0.08002 and 0.05501 for the same attribute measured on the target itself. It carries
             almost nothing about the channel. Under the covariance route its loading on the first
             component is 0.000 and the fractions of variance do not move at all. Under the correlation
-            route the first component falls from 52.19% to 44.83%, and the seventh attribute takes over
-            the second component outright, with a loading of 0.528 — larger than any other attribute
-            carries there. Its own largest loading is elsewhere, on the third component at &minus;0.672,
-            where peak frequency at 0.682 is marginally larger still; module 11 reads it that way round.
-            Both statements are true and they answer different questions: which attribute dominates a
-            given component, and which component a given attribute contributes to most. The number of components needed to reach ninety percent of the variance goes
+            route the first component falls from 52.62% to 45.10%, and the seventh attribute takes over
+            the third component outright, with a loading of 0.867 — nearly twice what any other attribute
+            carries there, and its own largest loading as well. The number of components needed to reach ninety percent of the variance goes
             from four to five. The second most important direction in the analysis is now dominated by a
             window that does not contain the target.</span></details></li>
       </ol>
@@ -447,8 +444,8 @@
         <li><b>There are two routes and they give different answers.</b> Decomposing the covariance
           matrix and decomposing the correlation matrix are different analyses of the same data.</li>
         <li><b>The covariance route is decided by whichever attribute has the largest numbers.</b> On
-          this set the variances span a factor of seven hundred thousand and the first component is
-          ninety-five percent one attribute.</li>
+          this set the variances span a factor of seven hundred and seventy thousand and the first component is
+          ninety-four percent one attribute.</li>
         <li><b>Rescaling an input changes the covariance-route answer and not the correlation-route
           answer.</b> That is the test worth running on any method before trusting what it returns.</li>
         <li><b>Standardizing is a decision, not a cleanup.</b> It declares every attribute equally
@@ -475,8 +472,8 @@
       the other four would change the covariance-route answer, which is precisely the effect this module
       is about. So every number on this page is in the attribute's own units, and the display gain used
       elsewhere in the set is itself an example of the choice being examined. Run with a gain of 1000 on
-      RMS amplitude and peak envelope, the covariance route returns a first component of 0.776 peak
-      envelope and 0.507 RMS, a third distinct answer from the same rocks.</p>
+      RMS amplitude and peak envelope, the covariance route returns a first component of 0.737 peak
+      envelope and 0.523 RMS, a third distinct answer from the same rocks.</p>
     <p class="lede"><b>The two routes.</b> The covariance route removes the mean of each attribute and
       decomposes the resulting covariance matrix. The correlation route removes the mean and divides by
       the standard deviation of each attribute, which makes the covariance matrix of the result the
@@ -632,7 +629,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     SURVEY = { slab: slab, attr: AF.attributes(slab, ALL) };
     return SURVEY;
   }

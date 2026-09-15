@@ -146,11 +146,11 @@
     <details class="reveal"><summary>The longer version</summary>
         <p class="lede">The younger channel has been the test target since module 01, and by now there are
         several numbers to put beside each other. The best single input attribute, peak frequency, reaches
-        a separation of 5.97. The best principal component reaches 2.81. The best direction module 06
-        found with the channel positions in hand reaches 8.97.</p>
+        a separation of 6.40. The best principal component reaches 3.11. The best direction module 06
+        found with the channel positions in hand reaches 9.34.</p>
         <p class="lede">With the log cosh contrast and all six directions retained, the best independent
-        component reaches 6.47. That is more than twice what PCA managed, better than the best raw
-        attribute, and about seventy-two percent of the supervised ceiling — from a method that was never
+        component reaches 6.30. That is more than twice what PCA managed, better than the best raw
+        attribute, and about seventy percent of the best available ceiling — from a method that was never
         shown where the channel is.</p>
             </details>
 <div class="plot">
@@ -172,7 +172,7 @@
     <div class="stats" id="s2"></div>
     <div class="legend prose">
       <span>The older channel is a harder target for every method on the list, because module 06 measured
-        its ceiling at 1.62 — these six attributes simply carry little about it. A method cannot recover
+        its best available at 1.73 — these six attributes simply carry little about it. A method cannot recover
         what the inputs do not contain, and comparing against the ceiling is how that gets said with a
         number rather than an impression.</span>
     </div>
@@ -253,9 +253,8 @@
         distinguish one rotation from another, so the update wanders and the iteration limit is what stops
         it.</p>
         <p class="lede">On this run, component 4 reached the three-hundred-iteration cap and has an excess
-        kurtosis of &minus;0.29 and a negentropy of 2.6&times;10⁻⁵ — nearly Gaussian, as predicted.
-        Component 6 converged in two iterations, has a negentropy of 1.8&times;10⁻⁶, and carries the
-        most acquisition footprint of any component at 0.322. Neither of those is a malfunction. Both are
+        kurtosis of &minus;0.28 and a negentropy of 2.7&times;10⁻⁵ — nearly Gaussian, as predicted.
+        Component 6 converged in two iterations, has a negentropy of 3.9&times;10⁻⁵, and carries the most acquisition footprint of any component at 0.293. Neither of those is a malfunction. Both are
         the method reporting, in its own terms, that the direction it was handed has no structure in it to
         find.</p>
             </details>
@@ -295,20 +294,15 @@
         <p class="lede">Two things are chosen before an ICA run, and on this data they interact rather than
         acting separately. The second one first: how many directions to retain in the whitening step before
         searching. Keeping only two costs almost everything, whichever contrast is used — the best
-        component then reaches 2.72 with log cosh and 2.69 with kurtosis, no better than PCA managed. The
+        component then reaches 2.94 with log cosh and 2.89 with kurtosis, no better than PCA managed. The
         subspace the useful rotation lives in is simply not there to be searched.</p>
-        <p class="lede">Above three retained the two contrasts part company. Log cosh is steady, giving 6.33,
-        6.10, 6.18 and 6.47 at three, four, five and six. Kurtosis starts higher, at 6.60 with three
-        retained, which is the best single figure anywhere on this page, and then falls away: 5.91, 5.48
-        and 4.04. The more near-Gaussian directions are included in the space being searched, the worse it
+        <p class="lede">Above three retained the two contrasts part company. Log cosh is steady, giving 6.62, 6.43, 6.34 and 6.30 at three, four, five and six. Kurtosis starts higher, at 6.99 with three retained, which is the best single figure anywhere on this page, and then falls away: 6.21, 6.07 and 3.67. The more near-Gaussian directions are included in the space being searched, the worse it
         does, which is the outlier sensitivity of a fourth power showing up as instability rather than as a
         uniformly lower number.</p>
         <p class="lede">So the robust contrast is not better everywhere; it is <em>less sensitive to the
-        other choice</em>. Log cosh varies by 0.38 across the retained counts from three up and kurtosis
-        varies by 2.56. Picking kurtosis and getting the retained count right beats everything; picking
+        other choice</em>. Log cosh varies by 0.32 across the retained counts from three up and kurtosis varies by 3.32. Picking kurtosis and getting the retained count right beats everything; picking
         kurtosis and getting it wrong is the worst outcome on the page. The common ninety-percent
-        retained-variance convention selects four here, which costs about six percent with log cosh and
-        about eleven percent with kurtosis against each one's own best.</p>
+        retained-variance convention selects four here, which costs about three percent with log cosh and about eleven percent with kurtosis against each one's own best.</p>
             </details>
 <div class="plot">
       <div class="plot-head">
@@ -386,12 +380,12 @@
           With log cosh and six components retained, read the best independent component's separation on
           the younger channel and compare it against the best principal component, the best single
           attribute and the supervised ceiling.
-          <em class="predict">Before looking: PCA reached 2.81 and one raw attribute reached 5.97. Commit
+          <em class="predict">Before looking: PCA reached 3.11 and one raw attribute reached 6.40. Commit
             to whether ICA will beat the raw attribute.</em>
           <details class="reveal"><summary>Hint</summary><span class="ans">The best independent component
-            reaches 6.47, against 2.81 for the best principal component, 5.97 for peak frequency on its
-            own, and a ceiling of 8.97. So it is 2.3 times better than PCA, it does beat the best single
-            attribute, and it recovers about 72% of the best any direction was found to reach. The comparison to keep is the one
+            reaches 6.30, against 3.11 for the best principal component, 6.40 for peak frequency on its
+            own, and a best-found 9.34. So it is twice as good as PCA, it does beat the best single
+            attribute, and it recovers about 70% of the best any direction was found to reach. The comparison to keep is the one
             against the raw attribute rather than the one against PCA: any multi-attribute method that
             cannot beat the best single input has not earned its place in the
             workflow.</span></details></li>
@@ -401,10 +395,8 @@
             cleanest demonstration of that.</em>
           Read the separation and the negentropy of all six components in the header, and note which is
           largest on each measure.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Component 1 has the highest
-            negentropy at 1.45&times;10⁻² and the highest excess kurtosis at 14.24, and it separates the
-            younger channel at 0.25 — essentially nothing. Component 2 separates it at 6.47 with a
-            negentropy of 1.06&times;10⁻², second on that measure. So even ranking the components by the
+          <details class="reveal"><summary>Hint</summary><span class="ans">Component 1 has the highest negentropy at 1.59&times;10⁻² and the highest excess kurtosis at 15.12, and it separates the younger channel at 0.29 — essentially nothing. Component 2 separates it at 6.30 with a
+            negentropy of 1.09&times;10⁻², second on that measure. So even ranking the components by the
             quantity the algorithm maximized would put the wrong one first. Nothing available to the
             method identifies the useful component, which is why the published workflow sorts them by
             inspection. What component 1 is showing instead is a fair question and not one the numbers
@@ -433,11 +425,11 @@
           In step 4, read how many iterations each component took and set it against its negentropy and
           its footprint.
           <details class="reveal"><summary>Hint</summary><span class="ans">With log cosh the counts are
-            11, 14, 15, the cap, 6 and 2. Component 4 hit the cap of 300 without converging; its excess
-            kurtosis is &minus;0.29 and its negentropy 2.6&times;10⁻⁵, which is nearly Gaussian, and
+            10, 14, 14, the cap, 8 and 2. Component 4 hit the cap of 300 without converging; its excess
+            kurtosis is &minus;0.28 and its negentropy 2.7&times;10⁻⁵, which is nearly Gaussian, and
             module 07 established that a Gaussian direction gives the search nothing to climb. Component
-            6 converged in two iterations, has a negentropy of 1.8&times;10⁻⁶, and carries the most
-            acquisition footprint of the six at 0.322. Both extremes point at the same thing: the
+            6 converged in two iterations, has a negentropy of 3.9&times;10⁻⁵, and carries the most
+            acquisition footprint of the six at 0.293. Both extremes point at the same thing: the
             structure-free directions. The useful component, number 2, took 14 iterations, which is
             unremarkable — convergence speed identifies what is empty, not what is
             good.</span></details></li>
@@ -450,12 +442,12 @@
             Commit to whether that means it gives a better answer than kurtosis at every
             setting.</em>
           <details class="reveal"><summary>Hint</summary><span class="ans">It does not. With all six
-            retained, log cosh gives 6.47 and kurtosis gives 4.04, so log cosh wins by a third. With
-            three retained, kurtosis gives 6.60 and log cosh gives 6.33, and kurtosis has the best figure
-            on the page. The full curves are 2.72, 6.33, 6.10, 6.18, 6.47 for log cosh and 2.69, 6.60,
-            5.91, 5.48, 4.04 for kurtosis, at two through six retained. Both fall off a cliff below
+            retained, log cosh gives 6.30 and kurtosis gives 3.67, so log cosh wins by two thirds. With
+            three retained, kurtosis gives 6.99 and log cosh gives 6.62, and kurtosis has the best figure
+            on the page. The full curves are 2.94, 6.62, 6.43, 6.34, 6.30 for log cosh and 2.89, 6.99,
+            6.21, 6.07, 3.67 for kurtosis, at two through six retained. Both fall off a cliff below
             three, because the subspace holding the useful rotation is not in the search at all. Above
-            three, log cosh varies by 0.38 across the whole range and kurtosis by 2.56. That is what
+            three, log cosh varies by 0.32 across the whole range and kurtosis by 3.32. That is what
             robustness means here: not a better answer, but an answer that depends much less on the other
             choice. Matching the two runs' directions against each other gives correlations from 0.86 to
             0.99, so they mostly find the same things and differ on exactly where to put them. The
@@ -475,8 +467,8 @@
         <li><b>Standardize, whiten, rotate.</b> The first two are settled before the search starts; the
           search itself is only a rotation, which is what whitening buys.</li>
         <li><b>On this survey it worked.</b> The best independent component separates the channel at
-          6.47 against 2.81 for the best principal component and 5.97 for the best single attribute,
-          reaching 72% of the supervised ceiling.</li>
+          6.30 against 3.11 for the best principal component and 6.40 for the best single attribute,
+          reaching 70% of the best available.</li>
         <li><b>There is no ranking.</b> Every component has variance exactly 1, and the component with
           the highest negentropy here is not the one showing the channel.</li>
         <li><b>Order and sign are conventions.</b> Four different starts return the same directions in a
@@ -484,7 +476,7 @@
         <li><b>A component that will not converge is nearly Gaussian.</b> One hit the 300-iteration cap
           here, and one converged in a single iteration carrying the footprint.</li>
         <li><b>The two parameters interact.</b> Retaining two directions instead of six loses nearly
-          everything under either contrast. Above three, log cosh varies by 0.38 and kurtosis by 2.56 —
+          everything under either contrast. Above three, log cosh varies by 0.32 and kurtosis by 3.32 —
           the robust contrast is the one that depends less on the other choice, not the one that always
           wins.</li>
       </ul>
@@ -517,8 +509,8 @@
       instead, to show what is and is not determined by the data.</p>
     <p class="lede"><b>Comparability of the numbers.</b> The separation statistic, the footprint
       statistic and the target masks are identical to modules 05, 06 and 07, so every figure on this page
-      can be set directly beside the ones there. The supervised ceiling of 8.97 for the younger channel
-      and 1.62 for the older one comes from module 06 and is described in its Method tab.</p>
+      can be set directly beside the ones there. The best direction found for the younger channel, 9.34,
+      and 1.73 for the older one comes from module 06 and is described in its Method tab.</p>
     <p class="lede"><b>Simplifications, stated plainly.</b> The search runs on every one of the 5184
       traces; production implementations decimate to build a smaller training set, compute the unmixing
       matrix on that, and apply it to the full volume, which introduces a sampling difference this page
@@ -608,7 +600,7 @@
   var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
 
   /* The ceilings measured in module 06, quoted rather than recomputed. */
-  var CEILING = { young: 8.973, old: 1.615 };
+  var CEILING = { young: 9.342, old: 1.727 };
 
   var DEF = { con: 'logcosh', k: 6, tgt: 'young', seed: 1, tab: 'p1' };
   var S = MV.readState(DEF);
@@ -626,7 +618,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var attr = AF.attributes(slab, CORE);
     var X = CORE.map(function (n) { return attr[n]; });
     SURVEY = { slab: slab, X: X, P: MV.pca(X, { standardize: true }) };
@@ -673,7 +665,7 @@
   function foot(m) {
     var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny, s = 0, n = 0, ix, iy;
     for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
-      s += m[ix * ny + iy] * Math.cos(2 * Math.PI * ix / 6) * Math.cos(2 * Math.PI * iy / 6);
+      s += m[ix * ny + iy] * AF.footprintPattern(ix, iy);
       n++;
     }
     return Math.abs(s / n) / (MV.std(m) || 1);

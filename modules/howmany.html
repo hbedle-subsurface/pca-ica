@@ -93,8 +93,7 @@
     <p class="lede"><b>Drag the cut.</b> The attribute rebuilds itself from whatever bars are left of it.</p>
 
     <details class="reveal"><summary>The longer version</summary>
-        <p class="lede">The eigenvalues of the six standardized attributes, in descending order, are 3.13,
-        1.29, 0.74, 0.45, 0.26 and 0.13. Plotted, they fall away smoothly. There is a step between the
+        <p class="lede">The eigenvalues of the six standardized attributes, in descending order, are 3.16, 1.30, 0.72, 0.42, 0.27 and 0.13. Plotted, they fall away smoothly. There is a step between the
         first and the second, and after that the curve bends without ever clearly stopping, which is what
         most real attribute sets look like.</p>
         <p class="lede">The panel below adds the reconstruction of one attribute alongside the plot, so the
@@ -235,9 +234,7 @@
         nothing about how the shortfall is distributed between them, and it is never distributed evenly.
         The bars below give, for each attribute, how much of its own spread the reconstruction fails to
         account for at the current cut.</p>
-        <p class="lede">Keeping four components reaches 93.40% of the total variance. At that cut peak
-        frequency is reconstructed to within eleven percent of its own spread and spectral bandwidth to
-        within nine, while coherence is still missing thirty-five percent and GLCM contrast thirty-seven.
+        <p class="lede">Keeping four components reaches 93.34% of the total variance. At that cut peak frequency is reconstructed to within eleven percent of its own spread and spectral bandwidth to within eight, while coherence is still missing thirty-five percent and GLCM contrast thirty-seven.
         An attribute can be almost entirely absent from a reconstruction that a headline number describes
         as ninety-three percent complete.</p>
             </details>
@@ -274,13 +271,11 @@
         thing the method knows about them. The panels below add a second ranking: how well each component
         separates the axis of the younger channel from its own margins, measured in pooled standard
         deviations. The two rankings are not the same ranking.</p>
-        <p class="lede">The first component holds 52.19% of the variance and separates the channel at 0.33,
-        which is no separation at all. The second holds 21.43% and separates at 2.81; the third holds
-        12.31% and separates at 2.57. The work is being done by the two components below the top, and a
+        <p class="lede">The first component holds 52.62% of the variance and separates the channel at 0.22, which is no separation at all. The second holds 21.70% and separates at 3.11; the third holds 12.04% and separates at 2.41. The work is being done by the two components below the top, and a
         rule that kept only the first would have discarded both of them.</p>
         <p class="lede">The lower panel is the same measurement on the six input attributes, and it makes a
         point that is easy to leave out of a lecture on dimension reduction. Peak frequency on its own
-        separates the channel at 5.97, twice as well as the best component. For this particular target on
+        separates the channel at 6.40, twice as well as the best component. For this particular target on
         this particular survey, the dimension reduction did not improve on the best single input.</p>
             </details>
 <div class="plot">
@@ -355,10 +350,10 @@
           <em class="predict">Before starting: how far apart do you expect the five answers to be?
             Commit to a range.</em>
           <details class="reveal"><summary>Hint</summary><span class="ans">Broken stick keeps 1 and
-            52.19% of the variance. Kaiser keeps 2 and 73.63%. The 80% rule keeps 3 and 85.94%. The 90%
-            rule keeps 4 and 93.40%. The 95% rule keeps 5 and 97.81%. Five rules, five answers, one
-            through five out of six possible. The eigenvalues they are reading are 3.13, 1.29, 0.74,
-            0.45, 0.26 and 0.13, and nothing in that list is a cliff. The honest summary is that the
+            52.62% of the variance. Kaiser keeps 2 and 74.31%. The 80% rule keeps 3 and 86.36%. The 90%
+            rule keeps 4 and 93.34%. The 95% rule keeps 5 and 97.80%. Five rules, five answers, one
+            through five out of six possible. The eigenvalues they are reading are 3.16, 1.30, 0.72,
+            0.42, 0.27 and 0.13, and nothing in that list is a cliff. The honest summary is that the
             scree plot did not answer the question, and the rules are conventions applied in its
             place.</span></details></li>
 
@@ -385,12 +380,12 @@
           Set the cut to 4, which the 90% rule selects, and read the per-attribute residual bars in step
           4.
           <details class="reveal"><summary>Hint</summary><span class="ans">At four components the total
-            retained is 93.40%, and the residual as a fraction of each attribute's own spread reads 0.289
-            for RMS amplitude, 0.194 for peak envelope, 0.114 for peak frequency, 0.088 for spectral
-            bandwidth, 0.348 for coherence and 0.365 for GLCM contrast. The two texture-related
+            retained is 93.34%, and the residual as a fraction of each attribute's own spread reads 0.291
+            for RMS amplitude, 0.201 for peak envelope, 0.112 for peak frequency, 0.084 for spectral
+            bandwidth, 0.346 for coherence and 0.368 for GLCM contrast. The two texture-related
             attributes are each still missing more than a third of their spread inside a reconstruction
             described as ninety-three percent complete. Going to five components collapses GLCM contrast
-            to 0.005 and coherence to 0.135, because the fifth component is largely those two. A cut
+            to 0.018 and coherence to 0.150, because the fifth component is largely those two. A cut
             chosen on the total would have thrown away almost the whole of the attribute pair a texture
             interpretation depends on.</span></details></li>
 
@@ -400,8 +395,8 @@
           In step 5, compare the fraction of variance each component holds against how well it separates
           the young channel axis from its margins.
           <details class="reveal"><summary>Hint</summary><span class="ans">By variance the order is
-            52.19%, 21.43%, 12.31%, 7.46%, 4.41%, 2.19%. By channel separation the order is 0.33, 2.81,
-            2.57, 0.28, 0.42, 0.99. The largest component is the worst of the six at the job, and the
+            52.62%, 21.70%, 12.04%, 6.99%, 4.46%, 2.20%. By channel separation the order is 0.22, 3.11,
+            2.41, 0.65, 0.39, 0.89. The largest component is the worst of the six at the job, and the
             two that do the work are the second and third. A broken-stick cut at one component keeps only
             the component that separates the channel least well of any of them. The Kaiser cut at two
             keeps the best one and discards the second best.</span></details></li>
@@ -412,13 +407,13 @@
           Still in step 5, read the lower panel, which applies the same separation measurement to the six
           input attributes.
           <details class="reveal"><summary>Hint</summary><span class="ans">Peak frequency separates the
-            channel at 5.97 on its own. The best component manages 2.81. RMS amplitude at 2.79 is also
-            competitive with the best component, and coherence at 0.18 is worse than anything. So for
+            channel at 6.40 on its own. The best component manages 3.11. RMS amplitude at 3.38 is also
+            competitive with the best component, and coherence at 0.15 is worse than anything. So for
             this target the dimension reduction produced nothing better than an attribute that was
             already on the list, and the honest use of the analysis here is as a way of finding out
             which attribute that was. Switch the measurement to acquisition footprint and a different
             picture appears. The artifact enters the set mainly through peak envelope, which carries
-            0.272 of it, and RMS amplitude at 0.140; peak frequency and GLCM contrast carry
+            0.241 of it, and RMS amplitude at 0.122; peak frequency and GLCM contrast carry
             essentially none, at 0.001. Among the components it does not spread evenly: it concentrates
             in the fourth at 0.213, which holds 7.46% of the variance. So a cut at three components
             would have removed most of the footprint along with whatever else the fourth was carrying,
@@ -433,13 +428,13 @@
     <div class="takeaway">
       <h3>If you remember nothing else</h3>
       <ul>
-        <li><b>Real scree plots usually have no cliff.</b> These eigenvalues fall away smoothly from 3.13
+        <li><b>Real scree plots usually have no cliff.</b> These eigenvalues fall away smoothly from 3.16
           to 0.13 with nothing that can be called a break.</li>
         <li><b>The standard rules disagree by a factor of five.</b> Broken stick, Kaiser, 80%, 90% and
           95% return one, two, three, four and five components on the same six attributes.</li>
         <li><b>Look at the residual.</b> If the channels are still visible in what was discarded, the cut
           was too early, and that takes a minute to check.</li>
-        <li><b>A retained-variance figure is a total.</b> At 93.40% retained, two of these six attributes
+        <li><b>A retained-variance figure is a total.</b> At 93.34% retained, two of these six attributes
           are still missing more than a third of their own spread.</li>
         <li><b>The variance ranking is not a usefulness ranking.</b> The component holding half the
           variance separates the channel worst of the six; the second and third do the work.</li>
@@ -592,7 +587,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var attr = AF.attributes(slab, CORE);
     var X = CORE.map(function (n) { return attr[n]; });
     SURVEY = { slab: slab, attr: attr, X: X, P: MV.pca(X, { standardize: true }) };
@@ -684,7 +679,7 @@
   function footprint(m) {
     var sv = survey(), nx = sv.slab.nx, ny = sv.slab.ny, s = 0, n = 0, ix, iy;
     for (ix = 0; ix < nx; ix++) for (iy = 0; iy < ny; iy++) {
-      s += m[ix * ny + iy] * Math.cos(2 * Math.PI * ix / 6) * Math.cos(2 * Math.PI * iy / 6);
+      s += m[ix * ny + iy] * AF.footprintPattern(ix, iy);
       n++;
     }
     return Math.abs(s / n) / (MV.std(m) || 1);

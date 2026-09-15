@@ -104,7 +104,7 @@
         <p class="lede">The second and third component scores are uncorrelated at about ten to the minus
         fifteen, which is as decorrelated as arithmetic gets. Split the traces into bins by their value of
         the first and measure the spread of the second within each bin, as a fraction of its own overall
-        spread, and the answer runs from 0.56 to 2.36 — a factor of more than four. Knowing where a trace sits on one component predicts how far it can stray
+        spread, and the answer runs from 0.55 to 2.31 — a factor of more than four. Knowing where a trace sits on one component predicts how far it can stray
         on the other. That is dependence, and the correlation coefficient is blind to it.</p>
             </details>
 <div class="plot">
@@ -289,13 +289,9 @@
         the channel separation peaked where the variance did not. The same plane is here, whitened, so
         every direction in it carries the same variance and PCA has no preference between any of them.</p>
         <p class="lede">The curves below are negentropy and excess kurtosis as that direction turns.
-        Negentropy peaks at 40 degrees, where the excess kurtosis is 8.37. Nothing about a channel was used
+        Negentropy peaks at 35 degrees, where the excess kurtosis is 7.84. Nothing about a channel was used
         to find it; the criterion is only that the projection should look as un-Gaussian as possible.</p>
-        <p class="lede">The third curve is the channel separation, the same measurement as module 06. At the
-        angle of maximum negentropy it reads 7.33. The supervised best inside this plane, computed in
-        module 06 with the channel positions in hand, was 7.42. An unsupervised criterion that never saw a
-        channel got within about one percent of a direction that was chosen knowing where the channel
-        was.</p>
+        <p class="lede">The third curve is the channel separation, the same measurement as module 06. At the angle of maximum negentropy it reads 7.96 &mdash; slightly <em>better</em> than the 7.91 the discriminant direction reaches inside this plane, which module 06&rsquo;s Method tab warned is a near-best rather than a proven maximum. An unsupervised criterion that never saw a channel matched a direction chosen while looking at the answer.</p>
             </details>
 <div class="plot">
       <div class="plot-head">
@@ -366,7 +362,7 @@
           <em class="predict">Before looking: the correlation is zero to fifteen decimal places. Commit
             to whether you expect the bin spreads to be equal.</em>
           <details class="reveal"><summary>Hint</summary><span class="ans">The correlation reads about
-            &minus;2&times;10⁻¹⁵ and the bin spreads read 1.324, 2.364, 1.331, 0.675, 0.558 and 0.855
+            &minus;2&times;10⁻¹⁵ and the bin spreads read 1.167, 2.306, 1.328, 0.719 and 0.550
             across the populated bins, each as a fraction of that score's own overall spread — a factor
             of 4.24 between the widest and the narrowest.
             Knowing a trace's value on component 2 tells you a great deal about how far it can stray on
@@ -380,8 +376,7 @@
             the answer is nothing.</em>
           In step 2, read the variance along a direction at several angles before whitening, then switch
           the coordinates in the header and read them again.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Before whitening the variance
-            runs 1.2860 at 0 degrees, 1.1491 at 30, 0.8754 at 60 and 0.7386 at 90, and the maximum at
+          <details class="reveal"><summary>Hint</summary><span class="ans">Before whitening the variance runs 1.3018 at 0 degrees, 1.1570 at 30, 0.8674 at 60 and 0.7227 at 90, and the maximum at
             zero degrees is component 2 by definition. After whitening it reads 1.000000 at every angle
             tested. The cloud is a round ball and no rotation of it is distinguishable from any other by
             variance. Note that nothing was thrown away: whitening is a reversible change of coordinates
@@ -398,13 +393,11 @@
             Gaussian at &minus;0.013 against an exact 0, and a Laplace at 2.935 against an exact 3. The
             departures are the sampling error of forty thousand draws, and the Laplace is furthest off
             because a fourth power on a long-tailed distribution is the hardest of the three to
-            estimate. Against that scale the component scores read 5.11, 3.73, 3.85, &minus;0.18,
-            5.13 and 2.78. Five of the six are more peaked than a Laplace, which is what a map holding a
+            estimate. Against that scale the component scores read 5.70, 4.06, 3.69, &minus;0.12, 5.16 and 3.46. Five of the six are more peaked than a Laplace, which is what a map holding a
             quiet background and a few bright features gives. Read backwards it is weaker than it looks:
             a strongly peaked distribution could come from a sparse geological feature, from a handful of
             noisy traces, or from a processing artifact over part of the survey. High kurtosis says the
-            values are concentrated with a long tail. It does not say what made the tail. The fourth, at &minus;0.18, is the only one
-            close to Gaussian, and module 05 found it was also the component carrying most of the
+            values are concentrated with a long tail. It does not say what made the tail. The fourth, at &minus;0.12, is the only one close to Gaussian, and module 05 found it was also the component carrying most of the
             acquisition footprint — a periodic artifact spread evenly over the survey looks a great deal
             more Gaussian than a channel does.</span></details></li>
 
@@ -413,8 +406,7 @@
             Gaussian, and it is worth watching it happen rather than accepting it.</em>
           In step 4, walk the number of sources from 1 to 8 and record the excess kurtosis at each.
           <details class="reveal"><summary>Hint</summary><span class="ans">One source gives
-            &minus;1.2006, two &minus;0.5895, three &minus;0.3937, four &minus;0.2934, five
-            &minus;0.2380, six &minus;0.2025, seven &minus;0.1633 and eight &minus;0.1513. The pattern is &minus;1.2
+            &minus;1.2006, two &minus;0.5895, three &minus;0.3937, four &minus;0.2934, five &minus;0.2380, six &minus;0.2025, seven &minus;0.1633 and eight &minus;0.1513. The pattern is &minus;1.2
             divided by the number of sources, which is the exact result for a sum of independent uniform
             variables, and the measured values sit on it to within the sampling error. The histogram is
             a flat box at one source and is already hard to distinguish from a bell at four. Read
@@ -427,13 +419,11 @@
             checked against the supervised ceiling from module 06.</em>
           In step 5, find the angle of maximum negentropy, then read the channel separation there, and
           compare it against the 7.42 that module 06 obtained with the channel positions in hand.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Negentropy peaks at 40
-            degrees, where the excess kurtosis is 8.37. The channel separation at that angle is 7.33,
-            against a supervised best of 7.42 inside the same plane and against 2.81 for component 2,
+          <details class="reveal"><summary>Hint</summary><span class="ans">Negentropy peaks at 35 degrees, where the excess kurtosis is 7.84. The channel separation at that angle is 7.96, against 7.91 for the discriminant direction inside the same plane and against 3.11 for component 2,
             which is where PCA left the direction. A criterion that was told nothing except "look as
             un-Gaussian as possible" landed within about one percent of a direction chosen while looking
             at the answer, and roughly two and a half times better than the component PCA ranked
-            second. Maximum kurtosis peaks at 45 degrees rather than 40, which is worth noticing: the two
+            second. Maximum kurtosis peaks at 45 degrees rather than 35, which is worth noticing: the two
             criteria mostly agree and do not agree exactly, and module 08 covers which to
             prefer.</span></details></li>
       </ol>
@@ -457,7 +447,7 @@
         <li><b>Sums go Gaussian.</b> The kurtosis of a sum of independent uniform sources is &minus;1.2
           divided by their number, and the shape is gone by four terms.</li>
         <li><b>So the least Gaussian combination is the best candidate for a single effect.</b> In one
-          plane here, maximizing that got within one percent of the supervised optimum without being
+          plane here, maximizing it got within one percent of the supervised optimum without being
           told anything.</li>
       </ul>
     </div>
@@ -505,8 +495,7 @@
       supplies.</p>
     <p class="lede"><b>Where this departs from production software.</b> Nothing here is an algorithm, so
       nowhere. The one thing worth carrying forward is that implementations differ in which contrast they
-      maximize, and the angles of maximum kurtosis and maximum negentropy in step 5 are five degrees
-      apart on this data, which is a real if small disagreement between two defensible
+      maximize, and the angles of maximum kurtosis and maximum negentropy in step 5 are ten degrees apart on this data, which is a real if small disagreement between two defensible
       criteria.</p>
     <details class="reveal">
       <summary>References</summary>
@@ -602,7 +591,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var attr = AF.attributes(slab, CORE);
     var X = CORE.map(function (n) { return attr[n]; });
     var P = MV.pca(X, { standardize: true });

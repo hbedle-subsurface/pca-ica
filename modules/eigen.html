@@ -370,8 +370,8 @@
           the angle the eigenvector gives, then read the eigenvalue and the height of the curve at that
           angle.
           <details class="reveal"><summary>Hint</summary><span class="ans">Both give 135.00 degrees, and
-            the eigenvalue is 1.6225, which is the height of the curve at its maximum. The second
-            eigenvalue is 0.3775, which is the height at the minimum, and the two add to 2 — the number
+            the eigenvalue is 1.6487, which is the height of the curve at its maximum. The second
+            eigenvalue is 0.3513, which is the height at the minimum, and the two add to 2 — the number
             of attributes, because both were standardized. The residual on the eigenvector equation is
             around 10 to the minus sixteen, which is the arithmetic working exactly rather than
             approximately. The angle is 135 rather than 45 because the correlation is negative; module 03
@@ -396,8 +396,8 @@
           In step 3, set the slider to 1 and compare the eigenvalues of the residual against those of the
           original set. Then set it to 2 and 3.
           <details class="reveal"><summary>Hint</summary><span class="ans">The original eigenvalues are
-            3.1317, 1.2860, 0.7386, 0.4476, 0.2649, 0.1313. After removing one component the residual
-            gives 1.2860, 0.7386, 0.4476, 0.2649, 0.1313 and then zero — the same list shifted one place,
+            3.1569, 1.3018, 0.7227, 0.4192, 0.2675, 0.1320. After removing one component the residual
+            gives 1.3018, 0.7227, 0.4192, 0.2675, 0.1320 and then zero — the same list shifted one place,
             with the first component's variance gone and nothing else touched. Removing two shifts it
             twice. The first component of the residual is the second component of the original to within
             a hundredth of a degree, which is the sense in which each component is the widest direction
@@ -408,20 +408,19 @@
             what a volume contains than looking at it.</em>
           For each of components 1, 2 and 3, read the loadings in the header, decide what the map should
           look like, then look at step 4.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Component 1 loads 0.509 on RMS
-            amplitude, 0.379 on peak envelope, 0.381 on GLCM contrast, 0.258 on peak frequency, and
-            &minus;0.439 on both spectral bandwidth and coherence. Everything that makes a trace bright
+          <details class="reveal"><summary>Hint</summary><span class="ans">Component 1 loads 0.506 on RMS
+            amplitude, 0.382 on peak envelope, 0.380 on GLCM contrast, 0.260 on peak frequency,
+            &minus;0.434 on spectral bandwidth and &minus;0.444 on coherence. Everything that makes a trace bright
             and locally variable pushes one way and everything that makes it smooth and broadband pushes
             the other, so the map is essentially a brightness-and-disruption image and both channels
-            appear in it. Component 2 loads 0.555 on peak frequency and 0.525 on peak envelope against
-            &minus;0.537 on GLCM contrast, with almost nothing on RMS amplitude at &minus;0.010 — a
+            appear in it. Component 2 loads 0.582 on peak frequency and 0.521 on peak envelope against &minus;0.524 on GLCM contrast, with almost nothing on RMS amplitude at &minus;0.044 — a
             tuning image rather than a brightness one. Component 3 is dominated by peak frequency at
-            0.694 with bandwidth at 0.407 opposing coherence at &minus;0.390. One caution on reading
+            0.633 with bandwidth at 0.499 opposing coherence at &minus;0.397. One caution on reading
             loadings this way: they say what a component is made of arithmetically, not what it responds
             to in the ground. A component loading heavily on amplitude could be tracking impedance
             contrast, bed thickness near tuning, or fluid, and the loadings are identical in all three
-            cases. The eigenvalues are 3.1317,
-            1.2860 and 0.7386, holding 52.19%, 21.43% and 12.31% of the variance.</span></details></li>
+            cases. The eigenvalues are 3.1569,
+            1.3018 and 0.7227, holding 52.62%, 21.70% and 12.04% of the variance.</span></details></li>
 
         <li><b>Flip a sign and find what changed.</b>
           <em class="point">Why: this is a difference between two published figures that means nothing,
@@ -429,7 +428,7 @@
           In step 5, flip the sign of component 2 and compare every readout before and after.
           <details class="reveal"><summary>Hint</summary><span class="ans">Every loading changes sign and
             every score changes sign, so the map inverts: what was red is blue. The eigenvalue stays at
-            1.2860, the share of variance stays at 21.43%, the variance of the score stays at 1.2860, and
+            1.3018, the share of variance stays at 21.70%, the variance of the score stays at 1.3018, and
             the correlation of the score with any other component's score stays at zero. Nothing
             measurable moved. The practical rule is that two figures of the same component from different
             software should be compared on the shape of their patterns and the relative magnitudes of
@@ -604,7 +603,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var attr = AF.attributes(slab, CORE);
     var X = CORE.map(function (n) { return attr[n]; });
     SURVEY = { slab: slab, attr: attr, X: X, P: MV.pca(X, { standardize: true }) };

@@ -381,10 +381,10 @@
           and read the covariance and the correlation at each stop.
           <em class="predict">Before starting: if the second attribute is multiplied by ten, by what
             factor does the covariance change? Commit to a number.</em>
-          <details class="reveal"><summary>Hint</summary><span class="ans">Covariance goes from 95.6 to
-            956.4, a factor of ten, because it carries one power of the second attribute's units. The
-            variance of that attribute goes from 206.5 to 20645.3, a factor of a hundred, because it
-            carries two. The correlation sits at 0.6502 at every stop, to four figures, because the
+          <details class="reveal"><summary>Hint</summary><span class="ans">Covariance goes from 78.8 to
+            787.7, a factor of ten, because it carries one power of the second attribute's units. The
+            variance of that attribute goes from 166.6 to 16658.3, a factor of a hundred, because it
+            carries two. The correlation sits at 0.6282 at every stop, to four figures, because the
             division by both standard deviations cancels the gain exactly. Nothing about the rocks
             changed at any point in that slide.</span></details></li>
 
@@ -393,12 +393,12 @@
             dominate it explains why a few extreme values can carry it.</em>
           In step 1, with RMS amplitude and peak envelope, read the four quadrant contributions and the
           trace counts.
-          <details class="reveal"><summary>Hint</summary><span class="ans">Above average in both: 1701
-            traces contributing 58.36. Below average in both: 2156 traces contributing 47.90. The two
-            mixed quadrants hold 916 and 411 traces and contribute &minus;1.44 and &minus;9.18. The four
-            add to 95.64, which is the covariance. Notice that the larger of the two positive quadrants
-            by trace count is not the larger by contribution: 2156 traces below average in both
-            contribute less than 1701 traces above average in both, because the bright traces sit
+          <details class="reveal"><summary>Hint</summary><span class="ans">Above average in both: 1476
+            traces contributing 51.27. Below average in both: 2034 traces contributing 38.51. The two
+            mixed quadrants hold 1238 and 436 traces and contribute &minus;1.87 and &minus;9.13. The four
+            add to 78.77, which is the covariance. Notice that the larger of the two positive quadrants
+            by trace count is not the larger by contribution: 2034 traces below average in both
+            contribute less than 1476 traces above average in both, because the bright traces sit
             further from the averages and a product of two large deviations outweighs a product of two
             small ones.</span></details></li>
 
@@ -409,16 +409,16 @@
           take it one stop further to 0.75.
           <details class="reveal"><summary>Hint</summary><span class="ans">Five of the fifty-five pairs
             survive at 0.70, and only three of them survive at 0.75. The five are:
-            RMS with mean absolute amplitude at 0.963, coherence with the amplitude gradient at
-            &minus;0.793, peak absolute amplitude with peak envelope at 0.787, GLCM contrast with GLCM
-            homogeneity at &minus;0.738, and coherence with GLCM contrast at &minus;0.715. The first is
+            RMS with mean absolute amplitude at 0.967, coherence with the amplitude gradient at
+            &minus;0.841, GLCM contrast with GLCM homogeneity at &minus;0.804, peak absolute amplitude
+            with peak envelope at 0.723, and coherence with GLCM contrast at &minus;0.718. The first is
             the clearest case for dropping something: RMS and mean absolute amplitude are two summaries
             of the same window that differ only in whether the values are squared first, and carrying
             both spends a dimension on almost nothing. Lowering the threshold to 0.60 brings back twelve
             pairs rather than five, which is the more honest picture of this attribute set: redundancy
             is a continuum and the threshold is a line drawn across it. The negative pairs are just as redundant as the
-            positive ones — a correlation of &minus;0.79 predicts one attribute from the other exactly as
-            well as +0.79 does, and only the sign of the slope differs.</span></details></li>
+            positive ones — a correlation of &minus;0.84 predicts one attribute from the other exactly as
+            well as +0.84 does, and only the sign of the slope differs.</span></details></li>
 
         <li><b>Walk a correlation across a tuning thickness.</b>
           <em class="point">Why: amplitude against bed thickness is the best known non-monotonic
@@ -429,10 +429,10 @@
           <em class="predict">Before looking: the physical relationship is the same in all three. Will
             the three numbers agree?</em>
           <details class="reveal"><summary>Hint</summary><span class="ans">Over the whole range the
-            correlation is &minus;0.667. Below 13 ms it is +0.866 and above 13 ms it is &minus;0.777.
+            correlation is &minus;0.696. Below 13 ms it is +0.924 and above 13 ms it is &minus;0.839.
             The same 556 traces, the same physics, and the sign of the answer depends on where the range
-            was cut. The binned mean rises from 71.4 at the thin end to a maximum of 104.4 at 12.7 ms
-            and falls back to about 74 at 26 ms, which is the tuning curve: below the tuning thickness
+            was cut. The binned mean rises from 70.4 at the thin end to a maximum of 104.7 at 12.7 ms
+            and falls back toward the thin-end value at 26 ms, which is the tuning curve: below the tuning thickness
             the top and base reflections reinforce as the bed thickens, and above it they separate. A
             correlation coefficient fits one straight line through both limbs and reports the average
             slope, which describes neither. Turn it around and the warning is sharper: a dim amplitude on
@@ -449,14 +449,14 @@
           amplitude against coherence, peak envelope against coherence, and RMS amplitude against GLCM
           contrast.
           <details class="reveal"><summary>Hint</summary><span class="ans">The three go wrong in three
-            different directions. RMS against coherence reads &minus;0.622 over the whole survey, +0.005
-            in the background alone and &minus;0.607 inside the channel: within the background there is
+            different directions. RMS against coherence reads &minus;0.649 over the whole survey, +0.028
+            in the background alone and &minus;0.651 inside the channel: within the background there is
             no relationship at all, and the survey-wide number is produced by the channel traces being
             both brighter and less coherent than everything around them — a statement about where the
             channel is, not about how two attributes relate. Peak envelope against coherence goes the
-            other way, &minus;0.228 overall understating a real &minus;0.558 inside the channel, because
+            other way, &minus;0.255 overall understating a real &minus;0.583 inside the channel, because
             three and a half thousand background traces dilute it. RMS against GLCM contrast changes
-            sign: +0.534 across the survey, +0.254 in the background, &minus;0.102 inside the channel.
+            sign: +0.542 across the survey, +0.283 in the background, &minus;0.101 inside the channel.
             All three are the same trap. Knowing how many populations are inside the window is a
             precondition for quoting any correlation computed across it &mdash; and on a real survey you rarely
             know. A crossplot that separates into two clouds could be two facies, two depositional
@@ -657,7 +657,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var raw = AF.attributes(slab, NAMES);
     var attr = {};
     NAMES.forEach(function (n) {

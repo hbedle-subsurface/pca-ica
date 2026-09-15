@@ -49,16 +49,31 @@ var SHAPE = (function () {
   }
   function spoutRadius(t) { return 0.26 - 0.15 * t; }
 
-  /* The handle centerline: an arc on the opposite side, in the same plane. */
-  function handlePath(t) {
-    var a = Math.PI * (1.15 - 1.55 * t);
+  /* The handle: a curve whose two ends sit on the body surface, so that it
+     reads as attached rather than floating beside the pot. The endpoints are
+     taken from the body profile itself at two heights, and the curve bulges
+     outward between them as a quadratic Bezier. Drawn in the plane opposite
+     the spout. */
+  var H_TOP = 0.88, H_BOT = 0.18;              // where it meets the body
+  function handleEnds() {
     return {
-      x: -0.72 - 0.62 * Math.cos(a) - 0.10,
-      y: 0,
-      z: 0.62 + 0.52 * Math.sin(a) * 1.25
+      top: { x: -bodyRadius(H_TOP) * 0.94, z: 0.10 + 1.18 * H_TOP },
+      bot: { x: -bodyRadius(H_BOT) * 0.94, z: 0.10 + 1.18 * H_BOT }
     };
   }
-  function handleRadius() { return 0.13; }
+  function handlePath(t) {
+    var e = handleEnds();
+    var cx = -1.95, cz = 0.5 * (e.top.z + e.bot.z);   // control point, well outboard
+    var u = 1 - t;
+    return {
+      x: u * u * e.top.x + 2 * u * t * cx + t * t * e.bot.x,
+      y: 0,
+      z: u * u * e.top.z + 2 * u * t * cz + t * t * e.bot.z
+    };
+  }
+  /* Thicker in the middle of the span and thinner where it joins the pot, so
+     the junction does not read as a butt weld. */
+  function handleRadius(t) { return 0.075 + 0.055 * Math.sin(Math.PI * t); }
 
   /* A ring of points around a path point, in the plane perpendicular to the
      path's local direction. */
@@ -147,7 +162,7 @@ var SHAPE = (function () {
     }
 
     tube(pts, spoutPath, spoutRadius, Math.round(22 * d), Math.round(16 * d), rnd, 'spout');
-    tube(pts, handlePath, handleRadius, Math.round(24 * d), Math.round(14 * d), rnd, 'handle');
+    tube(pts, handlePath, handleRadius, Math.round(30 * d), Math.round(14 * d), rnd, 'handle');
 
     /* Tilt the whole teapot inside the coordinate system.
 

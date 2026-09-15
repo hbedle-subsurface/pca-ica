@@ -96,7 +96,7 @@
     <div class="plot">
       <div class="plot-head">
         <h3>The same teapot, three ways</h3>
-        <span class="hint">Spout in crimson, handle in teal</span>
+        <span class="hint">Lid gold, spout crimson, handle teal</span>
       </div>
       <canvas id="c1" aria-label="The teapot point cloud projected along each of the three coordinate axes"></canvas>
     </div>
@@ -161,16 +161,16 @@
     </div>
 
     <p class="lede">Here is the view you were hunting for, written down:</p>
-    <p class="lede" style="font-size:1.05em"><span class="k">across = 0.840&thinsp;x + 0.533&thinsp;y
-      &minus; 0.097&thinsp;z</span><br><span class="k">up&nbsp;&nbsp;&nbsp;&nbsp; = 0.359&thinsp;x
-      &minus; 0.412&thinsp;y + 0.837&thinsp;z</span></p>
+    <p class="lede" style="font-size:1.05em"><span class="k">across = 0.853&thinsp;x + 0.517&thinsp;y
+      &minus; 0.066&thinsp;z</span><br><span class="k">up&nbsp;&nbsp;&nbsp;&nbsp; = 0.327&thinsp;x
+      &minus; 0.432&thinsp;y + 0.840&thinsp;z</span></p>
     <p class="lede"><b>Neither one is x, or y, or z.</b> Each is a bit of all three. That is the whole
       idea of this module set, and everything after here is that sentence with more dimensions in it.</p>
 
     <details class="reveal"><summary>The longer version</summary>
       <p class="lede">There is arithmetic that finds this without any searching, and module 04 builds it.
-        It gives a view from about &minus;61 degrees around and 33 degrees over, with a spread of 0.666
-        against 0.454, 0.573 and 0.618 for the front, side and top.</p>
+        It gives a view from about &minus;61 degrees around and 33 degrees over, with a spread of 0.690
+        against 0.444, 0.591 and 0.650 for the front, side and top.</p>
       <p class="lede">What matters is not that small improvement in the number. It is what the answer is
         made of. The coordinate system a thing arrives in — x, y and z for a teapot, coherence and
         amplitude and frequency for a survey — was not chosen to suit the thing being looked at, so the
@@ -197,8 +197,8 @@
     <div class="stats" id="s3"></div>
     <div class="legend prose">
       <span>There were three directions available and the picture used two of them, so one was thrown
-        away. For this teapot the two kept hold 81.0% of the total spread, and the discarded one holds
-        the remaining 19.0%. Going from three numbers per point to two, and losing a fifth of the spread,
+        away. For this teapot the two kept hold 81.9% of the total spread, and the discarded one holds
+        the remaining 18.1%. Going from three numbers per point to two, and losing a fifth of the spread,
         is a dimension reduction. It is the same trade every module after this one is about.</span>
     </div>
   </section>
@@ -213,8 +213,8 @@
     <p class="lede">Same thing, but each point is now a seismic trace and the three axes are three
       attributes. <b>Drag it. Nothing about the arithmetic changed.</b></p>
     <p class="lede">The best view is a mixture again:
-      <span class="k">0.393&thinsp;RMS + 0.735&thinsp;envelope + 0.553&thinsp;peak</span>, holding 93.9%
-      against 76.9%, 54.4% and 68.7% for the three axis views.</p>
+      <span class="k">0.424&thinsp;RMS + 0.750&thinsp;envelope + 0.508&thinsp;peak</span>, holding 92.9%
+      against 74.2%, 54.5% and 71.2% for the three axis views.</p>
     <p class="lede"><b>One thing is completely different, and it is the important one.</b> You knew when
       the teapot looked right. Nobody knows what this is supposed to look like.</p>
 
@@ -277,8 +277,8 @@
         stand in for the judgment, and choosing that criterion is the difference between the two methods
         in the title of this set.</li>
       <li><b>Getting away with keeping two stops working.</b> The teapot's best two directions held 81%
-        of the spread, and three attributes gave 94%. Twelve attributes here need more: the best three
-        hold 74.3%, and a display has only three color channels.</li>
+        of the spread, and three attributes gave 93%. Twelve attributes here need more: the best three
+        hold 73.6%, and a display has only three color channels.</li>
       <li><b>Everything else keeps working.</b> A direction is still a recipe mixing the originals. A
         projection is still a weighted sum. Spread is still the thing being measured. All the arithmetic
         in this set is the arithmetic on this page, applied where you cannot look.</li>
@@ -350,8 +350,8 @@
           read the spread.
           <details class="reveal"><summary>Hint</summary><span class="ans">Looking almost straight down
             the long direction of the pot collapses the spout into the body and gives spreads near 0.45.
-            The front view, at 0.454, is close to the worst the object offers. The three axis views come
-            out at 0.454, 0.573 and 0.618 and the widest available is 0.666, so the range across every
+            The front view, at 0.444, is close to the worst the object offers. The three axis views come
+            out at 0.444, 0.591 and 0.650 and the widest available is 0.690, so the range across every
             possible view is not enormous — which is worth noticing, because the difference in how
             recognizable the pictures are is much larger than the difference in the
             number.</span></details></li>
@@ -362,8 +362,8 @@
           In step 2, hunt for the widest view with the sliders, write down your two angles and your
           spread, then press "The widest".
           <details class="reveal"><summary>Hint</summary><span class="ans">The arithmetic gives about
-            &minus;61 degrees around and 33 degrees over, with a spread of 0.666. The best axis view, from
-            the top, gives 0.618, so the gain is 7.8%. Most people get within a few hundredths by hand in
+            &minus;61 degrees around and 33 degrees over, with a spread of 0.690. The best axis view, from
+            the top, gives 0.650, so the gain is 6.2%. Most people get within a few hundredths by hand in
             under a minute, which is the point: the arithmetic in module 04 is a shortcut to an answer
             you could have found yourself, not a different kind of answer.</span></details></li>
 
@@ -372,17 +372,17 @@
             to meet them.</em>
           In step 3, read how much of x, y and z goes into each of the two picture axes.
           <details class="reveal"><summary>Hint</summary><span class="ans">Across is
-            0.840x + 0.533y &minus; 0.097z and up is 0.359x &minus; 0.412y + 0.837z. Every one of the
+            0.853x + 0.517y &minus; 0.066z and up is 0.327x &minus; 0.432y + 0.840z. Every one of the
             six numbers is non-zero, so both picture axes are mixtures of all three original ones. Notice
-            also that each recipe's numbers squared add to one — 0.840² + 0.533² + 0.097² = 1.000 — which
+            also that each recipe's numbers squared add to one — 0.853² + 0.517² + 0.066² = 1.000 — which
             is what makes it a direction rather than a direction and a stretch.</span></details></li>
 
         <li><b>Do it again with attributes and see what is missing.</b>
           <em class="point">Why: the arithmetic transfers perfectly and the judgment does not.</em>
           In step 4, turn the attribute cloud with the same sliders, then jump to the widest view.
-          <details class="reveal"><summary>Hint</summary><span class="ans">The widest view holds 93.9% of
-            the spread against 76.9%, 54.4% and 68.7% for the three axis views, so the gain is much larger
-            than it was for the teapot. Its horizontal axis is 0.393 RMS + 0.735 envelope + 0.553 peak
+          <details class="reveal"><summary>Hint</summary><span class="ans">The widest view holds 92.9% of
+            the spread against 74.2%, 54.5% and 71.2% for the three axis views, so the gain is much larger
+            than it was for the teapot. Its horizontal axis is 0.424 RMS + 0.750 envelope + 0.508 peak
             amplitude, a mixture of all three. What is missing is any way to tell whether that view is
             good. With the teapot you could see it. Here the number went up and nothing on the screen
             says whether anything geological came with it. That gap never closes: a direction that
@@ -395,7 +395,7 @@
           In step 5, walk the attribute count from 2 to 12 and watch the correlation matrix.
           <details class="reveal"><summary>Hint</summary><span class="ans">At twelve attributes there are
             sixty-six pairs and five of them are above 0.7 in absolute value, which means several
-            attributes are close to restatements of others. The first three directions hold 74.3% of the
+            attributes are close to restatements of others. The first three directions hold 73.6% of the
             spread between them, so nine of the twelve dimensions are carrying the last quarter. A display
             has three color channels. Those two facts together — twelve inputs, three channels, and a
             great deal of repetition among the twelve — are the practical problem, and every module from
@@ -412,12 +412,12 @@
         <li><b>A view is a projection.</b> Keep two directions, throw the rest away. That is all any
           picture of a higher-dimensional thing ever is.</li>
         <li><b>The good direction is a mixture of the axes you were given.</b> The teapot's best view is
-          0.840x + 0.533y &minus; 0.097z across and 0.359x &minus; 0.412y + 0.837z up. Not x, not y, not
+          0.853x + 0.517y &minus; 0.066z across and 0.327x &minus; 0.432y + 0.840z up. Not x, not y, not
           z.</li>
         <li><b>"How much you can see" is measurable.</b> Project every point and add up how spread out
           the picture is. Turning the teapot to see more of it is maximizing that number.</li>
         <li><b>The arithmetic transfers to attributes exactly.</b> Three attributes behave like three
-          axes, and the best view is again a mixture: 0.393 RMS + 0.735 envelope + 0.553 peak.</li>
+          axes, and the best view is again a mixture: 0.424 RMS + 0.750 envelope + 0.508 peak.</li>
         <li><b>The judgment does not transfer.</b> You know what a teapot should look like. Nobody knows
           what an attribute cloud should look like, so a number has to stand in for the judgment.</li>
         <li><b>Twelve dimensions cannot be turned by hand.</b> Eleven angles, about 6&times;10²⁴
@@ -573,7 +573,7 @@
   var SURVEY = null;
   function survey() {
     if (SURVEY) return SURVEY;
-    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var slab = AF.build({ nx: 72, ny: 72, freq: 30, noise: 0.12, footprint: 0.06, seed: 2026 });
     var attr = AF.attributes(slab, TWELVE);
     var G = 1000;
     var trio = TRIO.map(function (n) {
@@ -645,6 +645,8 @@
         ctx.fillStyle = 'rgba(132,22,23,' + (0.45 + 0.5 * t).toFixed(2) + ')';
       } else if (colored && p.part === 'handle') {
         ctx.fillStyle = 'rgba(11,114,133,' + (0.45 + 0.5 * t).toFixed(2) + ')';
+      } else if (colored && p.part === 'lid') {
+        ctx.fillStyle = 'rgba(176,124,46,' + (0.45 + 0.5 * t).toFixed(2) + ')';
       } else {
         var g = Math.round(150 - 105 * t);
         ctx.fillStyle = 'rgba(' + g + ',' + g + ',' + (g + 6) + ',' +
@@ -942,7 +944,7 @@
         stat('Your spread', SHAPE.spread(P, viewNow()).total.toFixed(4), 'higher is more of it') +
         stat('The widest available', SHAPE.spread(P, b).total.toFixed(4),
           'at ' + a.az.toFixed(0) + '\u00b0, ' + a.el.toFixed(0) + '\u00b0') +
-        stat('Best axis view', '0.6178', 'from above');
+        stat('Best axis view', '0.6495', 'from above');
     }
     if ($('s3')) {
       var tot = b.values[0] + b.values[1] + b.values[2];

@@ -26,51 +26,34 @@
       <div class="hero-copy">
         <p class="eyebrow">University of Oklahoma</p>
         <h1 class="title">Ten attributes over one interval. <em>Now what?</em></h1>
-        <p class="lede">Seismic attribute analysis has become multi-dimensional. An interpreter working
-          one target interval can easily end up with ten or more attribute volumes over it &mdash;
-          amplitude, frequency, texture, discontinuity, a spectral decomposition that produced a dozen
-          more by itself. Any one of them may be ambiguous, and a geological feature is often clear in a
-          combination that no single volume shows.</p>
-        <p class="lede">The problem is that a screen has three colour channels and an interpreter has one
-          pair of eyes. <strong>Dimension reduction is how a set of attributes gets turned into something
-          that can be looked at, classified, or blended</strong> &mdash; and most people meet it as a
-          button in a package rather than as an idea.</p>
-        <p class="lede"><b>What you will learn here.</b> What principal component analysis and independent
-          component analysis actually compute; what decides the answer they give; how many components to
-          keep and why the standard rules disagree; how to read a component and say what it is made of;
-          and what neither method can tell you about the rocks.</p>
-        <p class="lede"><b>Where the teapot comes in.</b> Module 00 starts with one. Look at a teapot from
-          the front and the spout points at you; from the side the handle folds against the body; from
-          above it is a circle. The view showing the most is none of those &mdash; it is tilted a bit each
-          way at once, a mixture of all three directions. That is the whole idea, on an object you can
-          already recognize. Then the three directions become twelve attributes, and the difficulty is
-          that nobody knows what a good view of those looks like.</p>
-        <p class="lede"><b>What you need first.</b> Written for geology and geophysics students and for
-          interpreters who have been handed a set of components and asked what they mean. You should know
-          what a seismic trace is and what an attribute is. No statistics and no linear algebra are
-          assumed; the only piece of it the set needs is built from scratch in module 04, after the thing
-          it computes has already been found by hand. Every seismic term used is defined where it appears
-          &mdash; click any underlined word &mdash; and links out to the module set that teaches it
-          properly.</p>
-        <p class="lede"><b>What you should be able to do afterwards.</b> Say what a component is made of
-          by reading its loadings. Decide whether to standardize, and say what it costs. Choose how many
-          components to keep by looking at the residual rather than at a percentage. Tell whether PCA or
-          ICA suits a problem, and why. Recognize a component that is an acquisition artifact. And say
-          out loud what neither method can tell you.</p>
-        <p class="lede">Everything is computed live in your browser from the numbers on screen. Nothing is
-          a stored picture, so the panels can disagree with the textbook version of the same figure
-          &mdash; and in several places, they do.</p>
-        <p class="hero-cta"><a class="btn" href="modules/toomany.html">Start with the teapot &rarr;</a>
+        <p class="lede">Seismic attribute analysis has become multi-dimensional. One target interval can
+          easily carry ten or more attribute volumes &mdash; amplitude, frequency, texture,
+          discontinuity, and a spectral decomposition that produced a dozen more by itself. A screen has
+          three colour channels.</p>
+        <p class="lede"><strong>Dimension reduction is how a set of attributes gets turned into something
+          that can be looked at, classified or blended.</strong> Most people meet it as a button in a
+          package. These twelve modules build it from the ground up, with every panel computed live from
+          the numbers on screen.</p>
+        <p class="hero-cta"><a class="btn" href="modules/toomany.html">Start at module 00 &rarr;</a>
           <a class="btn ghost" href="#modules">See all modules</a></p>
+        <p class="lede" style="margin-top:22px"><b>Before you start.</b> Written for geology and
+          geophysics students, and for interpreters who have been handed a set of components and asked
+          what they mean. You need to know what a seismic trace is and what an attribute is. No
+          statistics or linear algebra is assumed. Every seismic term is defined where it appears &mdash;
+          click any underlined word &mdash; and links out to the module set that teaches it.</p>
+        <p class="lede"><b>Afterwards you should be able to</b> say what a component is made of by
+          reading its loadings; decide whether to standardize and say what it costs; choose how many
+          components to keep by looking at the residual rather than a percentage; tell whether PCA or ICA
+          suits a problem; recognize a component that is an acquisition artifact; and say what neither
+          method can tell you.</p>
       </div>
 
       <div class="hero-panel">
-        <canvas id="heroPot" aria-label="A teapot drawn as a cloud of points from four directions: front, side, above, and the direction that shows the most of it"></canvas>
-        <p class="hero-cap">One teapot, four directions. The first three look straight down an axis and
-          each one hides something. The fourth is the widest view available, and it is
-          0.84&thinsp;x&nbsp;+&nbsp;0.53&thinsp;y&nbsp;&minus;&nbsp;0.10&thinsp;z across and
-          0.36&thinsp;x&nbsp;&minus;&nbsp;0.41&thinsp;y&nbsp;+&nbsp;0.84&thinsp;z up. Every point is
-          computed from the equations on the page.</p>
+        <canvas id="heroAttr" aria-label="Nine attribute maps of the same interval beside the single component map that summarises them"></canvas>
+        <p class="hero-cap">Nine attributes over one interval on the left, all of the same survey, most
+          of them partly saying the same thing. One component on the right, built from all nine. Which
+          nine, how many components, and whether the one on the right contains any geology are the
+          questions the modules work through. Every map here is computed in your browser.</p>
       </div>
     </div>
   </section>
@@ -95,7 +78,6 @@
           <div class="card-no">00</div>
           <h3>Looking at it from the right direction</h3>
           <p>A teapot seen from three directions that hide it and one that does not. The view showing the most is a mixture of all three axes, which is the whole idea before any of the words arrive.</p>
-          <div class="q">You know what a teapot looks like. What happens when you do not?</div>
         </div>
         <span class="flag next">Start here</span>
       </a>
@@ -106,7 +88,6 @@
           <div class="card-no">01</div>
           <h3>A direction through a cloud</h3>
           <p>Two attributes crossplotted, a line pushed through by hand, and the spread of the projection measured at every angle. The first principal component, found before it is named.</p>
-          <div class="q">What is the best single number to replace two attributes with?</div>
         </div>
       </a>
 
@@ -116,7 +97,6 @@
           <div class="card-no">02</div>
           <h3>Spread, and the shape of the cloud</h3>
           <p>Covariance built from the products of deviations, why correlation survives a change of units when covariance does not, and reading redundancy off a matrix of eleven attributes.</p>
-          <div class="q">Is this attribute adding anything the others did not have?</div>
         </div>
       </a>
 
@@ -126,7 +106,6 @@
           <div class="card-no">03</div>
           <h3>Units, and why they decide the answer</h3>
           <p>The same six attributes give two different first components depending on one checkbox. What the covariance route is really ranking, and what standardizing costs as well as fixes.</p>
-          <div class="q">Why did my first component turn out to be the loudest attribute?</div>
         </div>
       </a>
 
@@ -136,7 +115,6 @@
           <div class="card-no">04</div>
           <h3>Eigenvectors, loadings and scores</h3>
           <p>The arithmetic that replaces the search, why the second component is the first component of what is left, and the two different things the phrase names.</p>
-          <div class="q">Is “the principal component” the weights or the volume?</div>
         </div>
       </a>
 
@@ -146,7 +124,6 @@
           <div class="card-no">05</div>
           <h3>How many components to keep</h3>
           <p>Five standard rules returning five different answers on one attribute set, and the residual looked at as a set of maps rather than as a percentage.</p>
-          <div class="q">Ninety percent of the variance. Is that enough?</div>
         </div>
       </a>
 
@@ -156,7 +133,6 @@
           <div class="card-no">06</div>
           <h3>Where PCA stops</h3>
           <p>Two channel systems whose best directions in attribute space sit thirty-seven degrees apart, and a method that insists on ninety. Measured against a supervised ceiling.</p>
-          <div class="q">Why does my first component look like two things at once?</div>
         </div>
       </a>
 
@@ -166,7 +142,6 @@
           <div class="card-no">07</div>
           <h3>Independence is not decorrelation</h3>
           <p>Scores uncorrelated to fifteen decimal places whose conditional spreads differ fourfold, what whitening leaves behind, and a criterion that finds a channel without being shown one.</p>
-          <div class="q">PCA already removed the correlation. What is left to remove?</div>
         </div>
       </a>
 
@@ -176,7 +151,6 @@
           <div class="card-no">08</div>
           <h3>ICA: whiten, then rotate</h3>
           <p>The algorithm run on the same six attributes and set against the supervised ceiling, plus the four things about its answer that the data does not determine.</p>
-          <div class="q">Why did my components come back in a different order?</div>
         </div>
       </a>
 
@@ -186,7 +160,6 @@
           <div class="card-no">09</div>
           <h3>The two, side by side</h3>
           <p>Two known maps mixed on purpose and put through both methods — including the mixing where PCA looks perfect, and the sources where ICA lies.</p>
-          <div class="q">Which one should I be running?</div>
         </div>
       </a>
 
@@ -196,7 +169,6 @@
           <div class="card-no">10</div>
           <h3>What counts as a dimension in seismic data</h3>
           <p>An attribute is a dimension. So is a time sample, and so is a frequency — with eigenvectors that come back as wavelets, and a result that beat changing the method.</p>
-          <div class="q">Waveform PCA and attribute PCA are the same method. Why do they look nothing alike?</div>
         </div>
       </a>
 
@@ -206,7 +178,6 @@
           <div class="card-no">11</div>
           <h3>Components are not geology</h3>
           <p>An acquisition artifact arriving as a ranked component, a real channel nothing can find, and the admission that every score in the set was computed with the answer in hand.</p>
-          <div class="q">The algorithm found four components. Which one is the reservoir?</div>
         </div>
       </a>
 
@@ -254,29 +225,52 @@
 
 <script src="assets/count.js"></script>
 <script src="assets/multivar.js"></script>
-<script src="assets/shape3d.js"></script>
+<script src="assets/attrfield.js"></script>
 <script>
-/* The banner: the teapot from four directions, the argument the whole set
-   makes, computed rather than drawn. */
+/* The banner: the problem the set exists for, computed rather than drawn.
+   Nine attributes over one interval, and the single component built from all
+   of them. Deliberately not the teapot — the teapot is an analogy that only
+   makes sense once you are inside module 00. */
 (function () {
   'use strict';
-  var cv = document.getElementById('heroPot');
-  if (!cv || typeof SHAPE === 'undefined') return;
-  var pts = SHAPE.teapot({ density: 0.8 });
-  var best = SHAPE.bestView(pts);
-  var VIEWS = [
-    { v: SHAPE.viewFromAngles(0, 0), label: 'from the front' },
-    { v: SHAPE.viewFromAngles(90, 0), label: 'from the side' },
-    { v: SHAPE.viewFromAngles(0, 89.9), label: 'from above' },
-    { v: best, label: 'the widest view' }
-  ];
+  var cv = document.getElementById('heroAttr');
+  if (!cv || typeof AF === 'undefined' || typeof MV === 'undefined') return;
+
+  var NX = 48, NY = 48;
+  var NAMES = ['rms', 'envelope', 'meanabs', 'peakfreq', 'bandwidth',
+               'coherence', 'edge', 'glcmcon', 'glcmhom'];
+  var slab = AF.build({ nx: NX, ny: NY, freq: 30, noise: 0.10, footprint: 0.06, seed: 2026 });
+  var attr = AF.attributes(slab, NAMES);
+  var P = MV.pca(NAMES.map(function (n) { return attr[n]; }), { standardize: true });
+
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var s = [[26,47,63],[61,109,125],[166,196,198],[244,240,227],[214,156,110],[166,71,52],[102,20,24]];
+    var u = t * (s.length - 1), i = Math.min(s.length - 2, Math.floor(u)), f = u - i;
+    var a = s[i], b = s[i + 1];
+    return 'rgb(' + Math.round(a[0]+(b[0]-a[0])*f) + ',' + Math.round(a[1]+(b[1]-a[1])*f) +
+           ',' + Math.round(a[2]+(b[2]-a[2])*f) + ')';
+  }
+  function put(ctx, m, x, y, w, h) {
+    var lo = AF.percentile(m, 0.02), hi = AF.percentile(m, 0.98), rng = (hi - lo) || 1;
+    var cw = w / NX, ch = h / NY, ix, iy;
+    for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+      ctx.fillStyle = cmap((m[ix * NY + iy] - lo) / rng);
+      ctx.fillRect(x + ix * cw, y + (NY - 1 - iy) * ch, cw + 0.7, ch + 0.7);
+    }
+    ctx.strokeStyle = 'rgba(255,255,255,.18)';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x + 0.5, y + 0.5, w, h);
+  }
 
   function draw() {
     var w = cv.parentNode.clientWidth || 520;
-    if (w < 160) return;
-    var COLS = 2, GAP = 6, LABEL = 16;
-    var tw = (w - GAP) / COLS, th = tw;
-    var h = 2 * (th + LABEL + GAP) - GAP;
+    if (w < 200) return;
+    var GAP = 5, COLS = 3;
+    var left = Math.round(w * 0.5);
+    var cell = (left - (COLS - 1) * GAP) / COLS;
+    var big = w - left - 26;
+    var h = Math.max(cell * 3 + GAP * 2, big) + 22;
     var r = window.devicePixelRatio || 1;
     cv.width = Math.round(w * r); cv.height = Math.round(h * r);
     cv.style.width = w + 'px'; cv.style.height = h + 'px';
@@ -284,42 +278,30 @@
     ctx.setTransform(r, 0, 0, r, 0, 0);
     ctx.clearRect(0, 0, w, h);
 
-    VIEWS.forEach(function (q, i) {
-      var cx = (i % COLS) * (tw + GAP);
-      var cy = Math.floor(i / COLS) * (th + LABEL + GAP);
-      var pr = SHAPE.project(pts, q.v).sort(function (a, b) { return b.d - a.d; });
-      var dlo = Infinity, dhi = -Infinity, k;
-      for (k = 0; k < pr.length; k++) {
-        if (pr[k].d < dlo) dlo = pr[k].d;
-        if (pr[k].d > dhi) dhi = pr[k].d;
-      }
-      ctx.save();
-      ctx.beginPath(); ctx.rect(cx, cy, tw, th); ctx.clip();
-      var sc = Math.min(tw, th) / 4.1;
-      for (k = 0; k < pr.length; k++) {
-        var p = pr[k], t = (p.d - dlo) / (dhi - dlo || 1);
-        if (p.part === 'spout') ctx.fillStyle = 'rgba(200,70,70,' + (0.45 + 0.5 * t) + ')';
-        else if (p.part === 'handle') ctx.fillStyle = 'rgba(90,180,195,' + (0.45 + 0.5 * t) + ')';
-        else {
-          var g = Math.round(110 + 120 * t);
-          ctx.fillStyle = 'rgba(' + g + ',' + (g + 4) + ',' + (g + 10) + ',0.9)';
-        }
-        ctx.fillRect(cx + tw / 2 + p.u * sc - 1, cy + th / 2 - p.v * sc - 1, 2, 2);
-      }
-      ctx.restore();
-      ctx.strokeStyle = 'rgba(255,255,255,.14)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(cx + 0.5, cy + 0.5, tw - 1, th - 1);
-      ctx.font = '10px "IBM Plex Mono", ui-monospace, monospace';
-      ctx.fillStyle = (i === 3) ? '#E2E6EA' : '#8A939B';
-      ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-      ctx.fillText(q.label, cx + 1, cy + th + 3);
+    NAMES.forEach(function (n, k) {
+      put(ctx, attr[n], (k % COLS) * (cell + GAP), Math.floor(k / COLS) * (cell + GAP), cell, cell);
     });
+    put(ctx, P.scores[0], w - big, 0, big, big);
+
+    ctx.fillStyle = '#8A939B';
+    ctx.font = '10px "IBM Plex Mono", ui-monospace, monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText('nine attributes', 0, cell * 3 + GAP * 2 + 14);
+    ctx.textAlign = 'right';
+    ctx.fillText('one component', w, big + 14);
+
+    // the arrow between them
+    ctx.strokeStyle = 'rgba(226,230,234,.45)';
+    ctx.lineWidth = 1.4;
+    var ay = Math.min(cell * 3 + GAP * 2, big) / 2;
+    ctx.beginPath();
+    ctx.moveTo(left + 3, ay); ctx.lineTo(w - big - 6, ay);
+    ctx.moveTo(w - big - 12, ay - 4); ctx.lineTo(w - big - 6, ay); ctx.lineTo(w - big - 12, ay + 4);
+    ctx.stroke();
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', draw);
-  } else { draw(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', draw);
+  else draw();
   var t;
   window.addEventListener('resize', function () { clearTimeout(t); t = setTimeout(draw, 160); });
 })();
