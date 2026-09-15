@@ -80,61 +80,64 @@
   <!-- =============================== STEP 1 =============================== -->
   <section class="tabpane" id="p1" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3><span class="stepno">1</span>The search, and the answer that skips it</h3>
-      <span class="hint">The curve is module 01's, the marker is arithmetic</span>
+      <h3><span class="stepno">1</span>An eigenvector is an axis you can spin the thing about</h3>
+      <span class="hint">The teapot from module 00, again</span>
     </div>
 
-    <p class="qbox"><b>Why this step is here.</b> An eigenvector is usually introduced as a definition
-      and then used. It is easier to accept as the answer to a question that has already been asked and
-      answered a slower way.</p>
+    <p class="qbox"><b>Start here if eigenvectors have never made sense.</b> Forget the word for a
+      moment. A teapot has three natural axes: a long one, a middling one and a short one. Those three
+      are its eigenvectors. Nothing more mysterious than that.</p>
 
+    <p class="lede"><b>Pick an axis and spin it.</b> Watch how much of the pot you can see as it turns.</p>
 
-    
+    <details class="reveal"><summary>Why those three axes and not any other three</summary>
+      <p class="lede">Spin a teapot about a randomly chosen axis and it wobbles: the thing lurches
+        about because the axis does not line up with the shape. Spin it about its own long axis and it
+        turns evenly. The three axes it turns evenly about are the three the shape itself picks out, and
+        they are always at right angles to each other.</p>
+      <p class="lede">Those three axes are what comes out of the arithmetic. The <b>eigenvalue</b> that
+        goes with each one is simply how far the pot extends along it &mdash; 0.483 along the long axis,
+        0.207 along the middling one, 0.152 along the short one, in the units this page uses.</p>
+      <p class="lede">The word eigenvector means a direction a matrix leaves pointing the same way,
+        stretching it without turning it. For a rotation that is the axis the rotation turns about. For a
+        covariance matrix, which is what is used here, it is an axis of the cloud. Both are the same
+        idea: the direction the operation does not swing around.</p></details>
 
-    <p class="lede"><b>Pick two attributes.</b> The crimson curve is the hunt from module 01. The teal marker is arithmetic, arriving at the same place in one move.</p>
-
-    <details class="reveal"><summary>The longer version</summary>
-        <p class="lede">The curve below is the one from module 01: the spread of the projection at every
-        angle from zero to a hundred and eighty degrees, for two standardized attributes. Its maximum is
-        the first principal component. Finding it by sweeping takes a hundred and eighty projections of
-        five thousand traces each.</p>
-        <p class="lede">The teal marker is the same direction obtained from the covariance matrix instead.
-        A direction <b>v</b> is an eigenvector of a matrix <b>C</b> when multiplying it by <b>C</b> points
-        the result the same way it already pointed, changing only its length; the factor by which the
-        length changes is the eigenvalue. For a covariance matrix that condition picks out exactly the
-        directions where the spread is at a maximum or a minimum, which is why the two answers below sit
-        on top of each other.</p>
-            </details>
-<div class="plot">
+    <div class="plot">
       <div class="plot-head">
-        <h3>Sweep the angle, or solve for it</h3>
-        <span class="hint">Crimson: the sweep. Teal: the eigenvector</span>
+        <h3>Spinning about each of the three axes</h3>
+        <span class="hint">How much you can see, all the way round</span>
       </div>
-      <canvas id="c1" aria-label="Variance of the projection against angle, with the eigenvector solution marked"></canvas>
+      <canvas id="c1" aria-label="The teapot spun about each of its three axes, with how much of it is visible plotted against the spin angle"></canvas>
     </div>
     <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
-      <div class="ctl" style="flex:1 1 220px;min-width:200px">
-        <label for="ax">First attribute</label>
-        <select id="ax" data-key="ax"></select>
+      <div class="ctl" style="flex:1 1 280px;min-width:260px">
+        <h2 style="margin:0 0 6px">Spin it about</h2>
+        <div class="seg" id="segAxis" role="group" aria-label="Which axis to spin about">
+          <button type="button" data-ax="0">Long axis</button>
+          <button type="button" data-ax="1">Middle axis</button>
+          <button type="button" data-ax="2">Short axis</button>
+        </div>
       </div>
-      <div class="ctl" style="flex:1 1 220px;min-width:200px">
-        <label for="ay">Second attribute</label>
-        <select id="ay" data-key="ay"></select>
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="spin">Turn it <span class="val" id="spinV">0&deg;</span></label>
+        <input type="range" data-key="spin" id="spin" min="0" max="355" step="5" value="0">
       </div>
     </div>
     <div class="stats" id="s1"></div>
     <div class="legend prose">
-      <span>The residual printed in the readout is the largest disagreement between the two sides of the
-        eigenvector equation, component by component. It sits at the limit of what the arithmetic can
-        represent, which is the check worth running on any eigensolver before trusting what it
-        returns.</span>
+      <span><b>The axis you spin about is the one that stays in the picture.</b> Spin about the long
+        axis and it is always there, so the view never gets bad: it stays between 0.635 and 0.690. Spin
+        about the short axis and the long one keeps swinging out of sight, so the view never gets good:
+        0.360 to 0.635. Spinning about the middle axis gives you the whole range, best and worst
+        both.</span>
     </div>
   </section>
 
   <!-- =============================== STEP 2 =============================== -->
   <section class="tabpane" id="p2" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
-      <h3><span class="stepno">2</span>Three attributes, and why the sweep stops being possible</h3>
+      <h3><span class="stepno">2</span>The same three axes, for something you cannot picture</h3>
       <span class="hint">Every direction in space, colored by its spread</span>
     </div>
 
@@ -559,6 +562,7 @@
 <script src="../assets/glossary.js"></script>
 <script src="../assets/multivar.js"></script>
 <script src="../assets/attrfield.js"></script>
+<script src="../assets/shape3d.js"></script>
 <script>
 (function () {
   'use strict';
@@ -578,6 +582,13 @@
   var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
 
   var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
+  var AXNAME = ['long axis', 'middle axis', 'short axis'];
+  var AXCOL = ['#841617', '#0B7285', '#5C6670'];
+  var PARTCOL = { lid: [176, 124, 46], spout: [150, 40, 40], handle: [20, 95, 110] };
+  var BODYCOL = [158, 160, 164];
+  function shadeOf(c, f) {
+    return Math.round(Math.max(0, Math.min(255, c * f + 255 * (1 - f) * 0.20)));
+  }
   var LABEL = {
     rms: 'RMS amplitude', envelope: 'Peak envelope', peakfreq: 'Peak frequency',
     bandwidth: 'Spectral bandwidth', coherence: 'Coherence', glcmcon: 'GLCM contrast'
@@ -587,12 +598,15 @@
     coherence: 'coherence', glcmcon: 'GLCM contrast'
   };
 
-  var DEF = { pc: 0, flip: 0, ax: 'rms', ay: 'coherence', az: 'bandwidth', rem: 1, tab: 'p1' };
+  var DEF = { pc: 0, flip: 0, ax: 'rms', ay: 'coherence', az: 'bandwidth', rem: 1,
+              spinax: 0, spin: 0, tab: 'p1' };
   var S = MV.readState(DEF);
   ['ax', 'ay', 'az'].forEach(function (k) { if (CORE.indexOf(S[k]) < 0) S[k] = DEF[k]; });
   S.pc = Math.max(0, Math.min(5, Math.round(S.pc)));
   S.rem = Math.max(0, Math.min(5, Math.round(S.rem)));
   S.flip = S.flip ? 1 : 0;
+  S.spinax = Math.max(0, Math.min(2, Math.round(S.spinax)));
+  S.spin = Math.max(0, Math.min(355, Math.round(S.spin / 5) * 5));
 
   var CAN_LINK = location.protocol !== 'file:';
   function saveState() {
@@ -618,6 +632,63 @@
     var p = u.length, s = 0, i, j;
     for (i = 0; i < p; i++) for (j = 0; j < p; j++) s += u[i] * C[i][j] * u[j];
     return s;
+  }
+
+  /* =====================================================================
+     THE TEAPOT AND ITS THREE AXES
+
+     Same object as module 00. Its covariance matrix has three eigenvectors,
+     which are the three axes the shape itself picks out, and the eigenvalue
+     of each is how far the pot extends along it.
+     ===================================================================== */
+
+  var POT = null;
+  function pot() {
+    if (POT) return POT;
+    var pts = SHAPE.teapot({ density: 1 });   // same pot as module 00, exactly
+    var C = SHAPE.covariance(pts);
+    var e = MV.jacobi(C);
+    var total = e.values[0] + e.values[1] + e.values[2];
+    POT = { pts: pts, C: C, axes: e.vectors, values: e.values, total: total };
+    return POT;
+  }
+
+  function unit3(v) {
+    var L = Math.hypot(v[0], v[1], v[2]) || 1;
+    return [v[0] / L, v[1] / L, v[2] / L];
+  }
+  function cross3(a, b) {
+    return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+  }
+  /* Variance of the cloud along a direction, straight from the matrix. */
+  function varAlong3(u) {
+    var C = pot().C, s = 0, i, j;
+    for (i = 0; i < 3; i++) for (j = 0; j < 3; j++) s += u[i] * C[i][j] * u[j];
+    return s;
+  }
+
+  /* Spinning the pot about one of its axes sweeps the viewing direction round
+     a circle perpendicular to that axis. How much of the pot you can see is
+     the total spread minus whatever is lost along the direction you are
+     looking. */
+  function lookWhenSpun(axIndex, deg) {
+    var P = pot();
+    var a = unit3([P.axes[axIndex][0], P.axes[axIndex][1], P.axes[axIndex][2]]);
+    var tmp = Math.abs(a[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0];
+    var p = unit3(cross3(a, tmp)), q = cross3(a, p);
+    var th = deg * Math.PI / 180;
+    return [Math.cos(th) * p[0] + Math.sin(th) * q[0],
+            Math.cos(th) * p[1] + Math.sin(th) * q[1],
+            Math.cos(th) * p[2] + Math.sin(th) * q[2]];
+  }
+  function seenWhenSpun(axIndex, deg) {
+    return pot().total - varAlong3(lookWhenSpun(axIndex, deg));
+  }
+  /* The picture axes that go with a viewing direction. */
+  function viewFromLook(look) {
+    var up = Math.abs(look[2]) > 0.98 ? [1, 0, 0] : [0, 0, 1];
+    var right = unit3(cross3(up, look));
+    return { look: look, right: right, up: cross3(look, right) };
   }
 
   var SUB = {};
@@ -799,61 +870,83 @@
   function drawStep1() {
     var host = $('c1');
     if (!host || host.offsetParent === null) return;
-    var w = contentWidth(host), h = 270;
-    var ctx = fit('c1', w, h);
+    var w = contentWidth(host);
+    var P = pot();
+    var size = Math.min(230, w * 0.38);
+    var ctx = fit('c1', w, size + 66);
     if (!ctx) return;
-    var D = subset([S.ax, S.ay]);
-    var r = { x: 62, y: 14, w: w - 62 - 24, h: h - 14 - 52 };
-    grid(ctx, r, 0, 180, 0, 2, 6, 4, function (v) { return v.toFixed(1); });
 
-    ctx.save();
-    ctx.strokeStyle = CRIM;
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    for (var a = 0; a <= 180; a++) {
-      var u = MV.dirFromAngle(a);
-      var v = varAlong(D.C, u);
-      var X = r.x + a / 180 * r.w;
-      var Y = r.y + r.h - Math.min(2, v) / 2 * r.h;
-      if (a === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+    /* the pot as it looks at the current spin */
+    var view = viewFromLook(lookWhenSpun(S.spinax, S.spin));
+    /* Solid, as in module 00: the far side dropped and the rest painted back
+       to front, so that spinning it actually hides things. */
+    var vis = SHAPE.visible(SHAPE.project(P.pts, view));
+    var dlo = Infinity, dhi = -Infinity, i;
+    for (i = 0; i < vis.length; i++) {
+      if (vis[i].d < dlo) dlo = vis[i].d;
+      if (vis[i].d > dhi) dhi = vis[i].d;
     }
-    ctx.stroke();
+    var rP = { x: 8, y: 22, w: size, h: size };
+    ctx.save();
+    ctx.beginPath(); ctx.rect(rP.x, rP.y, rP.w, rP.h); ctx.clip();
+    var sc = size / 4.2, rad = Math.max(1.5, sc * 0.055);
+    for (i = 0; i < vis.length; i++) {
+      var q = vis[i];
+      var near = 1 - (q.d - dlo) / (dhi - dlo || 1);
+      var base = PARTCOL[q.part] || BODYCOL;
+      var f = 0.60 + 0.40 * (1 - near);
+      if (q.pat) f *= 0.58;
+      ctx.fillStyle = 'rgb(' + shadeOf(base[0], f) + ',' + shadeOf(base[1], f) +
+        ',' + shadeOf(base[2], f) + ')';
+      ctx.beginPath();
+      ctx.arc(rP.x + rP.w / 2 + q.u * sc, rP.y + rP.h / 2 - q.v * sc, rad, 0, 2 * Math.PI);
+      ctx.fill();
+    }
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(rP.x + 0.5, rP.y + 0.5, rP.w, rP.h);
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.font = '600 10px ui-monospace,Menlo,monospace';
+    ctx.fillText(AXNAME[S.spinax] + ', turned ' + S.spin + '\u00b0', rP.x, rP.y - 6);
     ctx.restore();
 
-    var ang = MV.principalAngle(D.X, { standardize: true });
-    var lam = D.P.values[0];
-    var XM = r.x + (ang % 180) / 180 * r.w;
-    var YM = r.y + r.h - Math.min(2, lam) / 2 * r.h;
+    /* how much of it is visible, all the way round, for all three axes */
+    var r = { x: rP.x + size + 54, y: 22, w: w - (rP.x + size + 54) - 24, h: size };
+    grid(ctx, r, 0, 360, 0.30, 0.75, 6, 3, function (v) { return v.toFixed(2); });
+    [0, 1, 2].forEach(function (k) {
+      ctx.save();
+      ctx.strokeStyle = AXCOL[k];
+      ctx.lineWidth = (k === S.spinax) ? 2.6 : 1.2;
+      ctx.globalAlpha = (k === S.spinax) ? 1 : 0.42;
+      ctx.beginPath();
+      for (var d = 0; d <= 360; d += 5) {
+        var s = seenWhenSpun(k, d);
+        var X = r.x + d / 360 * r.w;
+        var Y = r.y + r.h - (Math.max(0.30, Math.min(0.75, s)) - 0.30) / 0.45 * r.h;
+        if (d === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    });
+    var XC = r.x + S.spin / 360 * r.w;
     ctx.save();
-    ctx.strokeStyle = TEAL;
-    ctx.lineWidth = 1.6;
-    ctx.setLineDash([6, 4]);
-    ctx.beginPath(); ctx.moveTo(XM, r.y); ctx.lineTo(XM, r.y + r.h); ctx.stroke();
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.4; ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(XC, r.y); ctx.lineTo(XC, r.y + r.h); ctx.stroke();
     ctx.setLineDash([]);
-    ctx.fillStyle = TEAL;
-    ctx.beginPath(); ctx.arc(XM, YM, 6, 0, 2 * Math.PI); ctx.fill();
-    ctx.textAlign = XM > r.x + r.w * 0.65 ? 'right' : 'left';
-    ctx.fillText('eigenvector: ' + ang.toFixed(2) + '\u00b0, eigenvalue ' + lam.toFixed(4),
-      XM + (XM > r.x + r.w * 0.65 ? -12 : 12), YM - 12);
-    ctx.restore();
-
-    // the minimum too, which is the second eigenvector
-    var ang2 = (ang + 90) % 180, lam2 = D.P.values[1];
-    var XN = r.x + ang2 / 180 * r.w;
-    var YN = r.y + r.h - Math.min(2, lam2) / 2 * r.h;
-    ctx.save();
-    ctx.fillStyle = SLATE;
-    ctx.beginPath(); ctx.arc(XN, YN, 4.5, 0, 2 * Math.PI); ctx.fill();
-    ctx.textAlign = 'center';
-    ctx.fillText('second: ' + lam2.toFixed(4), XN, YN + 20);
-    ctx.restore();
-
-    ctx.save();
     ctx.fillStyle = SLATE;
     ctx.textAlign = 'center';
-    ctx.fillText('direction, degrees', r.x + r.w / 2, r.y + r.h + 32);
+    ctx.fillText('spin angle, degrees', r.x + r.w / 2, r.y + r.h + 32);
+    ctx.textAlign = 'left';
+    [0, 1, 2].forEach(function (k) {
+      ctx.fillStyle = AXCOL[k];
+      ctx.fillText(AXNAME[k], r.x + 8 + k * 96, r.y + 14);
+    });
     ctx.restore();
+    void subset;
   }
+
 
   function drawStep2() {
     var host = $('c2');
@@ -1062,15 +1155,23 @@
   function drawStats() {
     var sv = survey(), P = sv.P;
     if ($('s1')) {
-      var D = subset([S.ax, S.ay]);
-      var ang = MV.principalAngle(D.X, { standardize: true });
+      // named apart from the attribute PCA above, which the later blocks use
+      var TP = pot();
+      var here = seenWhenSpun(S.spinax, S.spin);
+      var lo = 9, hi = -9, d;
+      for (d = 0; d < 360; d += 2) {
+        var s = seenWhenSpun(S.spinax, d);
+        if (s < lo) lo = s;
+        if (s > hi) hi = s;
+      }
+      var bestPossible = TP.values[0] + TP.values[1];
       $('s1').innerHTML =
-        stat('Swept maximum', ang.toFixed(2) + '\u00b0', 'the top of the crimson curve') +
-        stat('Eigenvector', ang.toFixed(2) + '\u00b0', 'the same direction, solved for') +
-        stat('Eigenvalue', D.P.values[0].toFixed(4), 'and the second is ' +
-          D.P.values[1].toFixed(4)) +
-        stat('Equation residual', eigResidual(D, 0).toExponential(1),
-          'largest element of Cv \u2212 \u03bbv');
+        stat('Spinning about the', AXNAME[S.spinax],
+          'eigenvalue ' + TP.values[S.spinax].toFixed(3)) +
+        stat('Seen right now', here.toFixed(3), 'at ' + S.spin + '\u00b0') +
+        stat('Range as it turns', lo.toFixed(3) + ' to ' + hi.toFixed(3),
+          hi >= bestPossible - 2e-3 ? 'passes through the best view' : 'never reaches it') +
+        stat('Best there is', bestPossible.toFixed(3), 'the two longest axes kept');
     }
     if ($('s2')) {
       var list = [S.ax, S.ay, S.az];
@@ -1151,7 +1252,12 @@
       b.classList.toggle('on', on);
       b.setAttribute('aria-pressed', on);
     });
-    document.querySelectorAll('#segFlip button').forEach(function (b) {
+    document.querySelectorAll('#segAxis button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.spinax = parseInt(b.dataset.ax, 10); syncLabels(); drawAll(); saveState();
+    });
+  });
+  document.querySelectorAll('#segFlip button').forEach(function (b) {
       var on = String(S.flip) === b.dataset.flip;
       b.classList.toggle('on', on);
       b.setAttribute('aria-pressed', on);
@@ -1220,6 +1326,20 @@
 
   window.__M04 = {
     set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    spin: function () {
+      var P = pot(), out = [];
+      [0, 1, 2].forEach(function (k) {
+        var lo = 9, hi = -9, d;
+        for (d = 0; d < 360; d += 2) {
+          var s = seenWhenSpun(k, d);
+          if (s < lo) lo = s;
+          if (s > hi) hi = s;
+        }
+        out.push({ axis: AXNAME[k], eigenvalue: P.values[k], lo: lo, hi: hi });
+      });
+      return { axes: out, best: P.values[0] + P.values[1],
+               worst: P.values[1] + P.values[2], total: P.total };
+    },
     six: function () {
       var P = survey().P;
       return {
@@ -1253,4 +1373,20 @@
 })();
 </script>
 </body>
-</html>
+</html>        <li><b>Spin the teapot about each of its three axes.</b>
+          <em class="point">Why: an eigenvector is an axis, and this is the least abstract way to
+            meet one.</em>
+          In step 1, spin about each axis in turn and read how much of the pot you can see as it goes
+          round.
+          <em class="predict">Before starting: commit to which axis you think gives the best view of the
+            pot.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">Spinning about the long axis,
+            the view stays between 0.635 and 0.690 and passes through the best there is. Spinning about
+            the short axis it runs between 0.360 and 0.635 and never reaches the best. Spinning about the
+            middle axis covers the whole range, 0.360 to 0.690. The reason is simple once seen: the axis
+            you spin about is the one that stays in the picture. Keep the long axis and you always see a
+            lot; keep only the short one and the long axis spends half its time pointing at you, which is
+            the one direction that shows you nothing. The eigenvalues are 0.483, 0.207 and 0.152, and
+            those three numbers are just how far the pot extends along each of its own
+            axes.</span></details></li>
+

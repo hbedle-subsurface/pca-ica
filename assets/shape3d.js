@@ -96,7 +96,8 @@ var SHAPE = (function () {
           x: p.x + jr * ca * px,
           y: p.y + jr * sa,
           z: p.z + jr * ca * pz,
-          part: tag
+          nx: ca * px, ny: sa, nz: ca * pz,
+          part: tag, pat: 0
         });
       }
     }
@@ -121,10 +122,29 @@ var SHAPE = (function () {
       var u = i / (nu - 1);
       var r = bodyRadius(u);
       var z = 0.10 + 1.18 * u;
+      /* Outward normal of a surface of revolution: radial, tilted by how fast
+         the radius is changing with height. Needed so that points on the far
+         side can be dropped rather than drawn through the pot. */
+      var dr = (bodyRadius(Math.min(1, u + 0.01)) - bodyRadius(Math.max(0, u - 0.01)));
+      var dz = 1.18 * (Math.min(1, u + 0.01) - Math.max(0, u - 0.01));
+      var slope = dr / (dz || 1);
       for (j = 0; j < nv; j++) {
         var a = 2 * Math.PI * (j + 0.5 * (i % 2)) / nv;
         var jr = r * (1 + 0.015 * (rnd() - 0.5));
-        pts.push({ x: jr * Math.cos(a), y: jr * Math.sin(a), z: z, part: 'body' });
+        var nL = Math.hypot(1, slope) || 1;
+        /* Two different markings on the two sides of the pot, so that turning
+           it changes which pattern you are looking at and a student can see
+           directly that one side has gone. Bands on one side, stripes on the
+           other. */
+        var side = Math.cos(a) >= 0 ? 0 : 1;
+        var pat = side === 0
+          ? (Math.sin(z * 5.2) > 0 ? 1 : 0)      // bands round the pot
+          : (Math.sin(a * 6) > 0 ? 1 : 0);       // stripes up and down it
+        pts.push({
+          x: jr * Math.cos(a), y: jr * Math.sin(a), z: z,
+          nx: Math.cos(a) / nL, ny: Math.sin(a) / nL, nz: -slope / nL,
+          part: 'body', side: side, pat: pat
+        });
       }
     }
 
@@ -136,7 +156,13 @@ var SHAPE = (function () {
       var zl = 1.28 + 0.24 * Math.sin(ul * Math.PI / 2.1);
       for (j = 0; j < nv; j++) {
         var al = 2 * Math.PI * j / nv;
-        pts.push({ x: rl * Math.cos(al), y: rl * Math.sin(al), z: zl, part: 'lid' });
+        // a dome: the normal leans outward at the rim and upward at the top
+        var lean = Math.cos(ul * Math.PI / 2.35);
+        // named dnorm, not nl: nl is the dome's point count in the loop above
+        var dnorm = Math.hypot(lean, 1 - lean + 0.35) || 1;
+        pts.push({ x: rl * Math.cos(al), y: rl * Math.sin(al), z: zl,
+          nx: lean * Math.cos(al) / dnorm, ny: lean * Math.sin(al) / dnorm,
+          nz: (1 - lean + 0.35) / dnorm, part: 'lid', pat: 0 });
       }
     }
     var nk = Math.round(8 * d);
@@ -146,7 +172,9 @@ var SHAPE = (function () {
       for (j = 0; j < Math.round(14 * d); j++) {
         var ak = 2 * Math.PI * j / Math.round(14 * d);
         pts.push({ x: rk * Math.cos(ak), y: rk * Math.sin(ak),
-                   z: 1.50 + 0.22 * uk, part: 'lid' });
+                   z: 1.50 + 0.22 * uk,
+                   nx: Math.cos(ak) * 0.7, ny: Math.sin(ak) * 0.7, nz: 0.7,
+                   part: 'lid', pat: 0 });
       }
     }
 
@@ -157,7 +185,8 @@ var SHAPE = (function () {
       var around = Math.max(6, Math.round(nv * i / (nb - 1)));
       for (j = 0; j < around; j++) {
         var ab = 2 * Math.PI * j / around;
-        pts.push({ x: rb * Math.cos(ab), y: rb * Math.sin(ab), z: 0.10, part: 'body' });
+        pts.push({ x: rb * Math.cos(ab), y: rb * Math.sin(ab), z: 0.10,
+                   nx: 0, ny: 0, nz: -1, part: 'body', side: 2, pat: 0 });
       }
     }
 
@@ -180,14 +209,18 @@ var SHAPE = (function () {
     (function () {
       var rz = TILT[0] * Math.PI / 180, rx = TILT[1] * Math.PI / 180,
           ry = TILT[2] * Math.PI / 180, q;
-      for (q = 0; q < pts.length; q++) {
-        var p = pts[q], c, s, X, Y, Z;
+      function turn(o, kx, ky, kz) {
+        var c, s, X, Y, Z;
         c = Math.cos(rz); s = Math.sin(rz);
-        X = p.x * c - p.y * s; Y = p.x * s + p.y * c; p.x = X; p.y = Y;
+        X = o[kx] * c - o[ky] * s; Y = o[kx] * s + o[ky] * c; o[kx] = X; o[ky] = Y;
         c = Math.cos(rx); s = Math.sin(rx);
-        Y = p.y * c - p.z * s; Z = p.y * s + p.z * c; p.y = Y; p.z = Z;
+        Y = o[ky] * c - o[kz] * s; Z = o[ky] * s + o[kz] * c; o[ky] = Y; o[kz] = Z;
         c = Math.cos(ry); s = Math.sin(ry);
-        Z = p.z * c - p.x * s; X = p.z * s + p.x * c; p.z = Z; p.x = X;
+        Z = o[kz] * c - o[kx] * s; X = o[kz] * s + o[kx] * c; o[kz] = Z; o[kx] = X;
+      }
+      for (q = 0; q < pts.length; q++) {
+        turn(pts[q], 'x', 'y', 'z');
+        turn(pts[q], 'nx', 'ny', 'nz');
       }
     })();
 
@@ -240,7 +273,12 @@ var SHAPE = (function () {
         u: p.x * view.right[0] + p.y * view.right[1] + p.z * view.right[2],
         v: p.x * view.up[0] + p.y * view.up[1] + p.z * view.up[2],
         d: p.x * view.look[0] + p.y * view.look[1] + p.z * view.look[2],
-        part: p.part
+        /* How squarely this bit of surface faces the viewer. Positive means it
+           is on the near side and should be drawn; negative means it is round
+           the back and is hidden by the pot itself. */
+        face: (p.nx === undefined) ? 1
+          : p.nx * view.look[0] + p.ny * view.look[1] + p.nz * view.look[2],
+        part: p.part, side: p.side, pat: p.pat
       };
     }
     return out;
@@ -311,8 +349,21 @@ var SHAPE = (function () {
     top: { az: 0, el: 89.9, label: 'from above' }
   };
 
+  /* Points to actually draw, in the order to draw them: the far side dropped,
+     and what is left sorted back to front so that nearer points paint over
+     farther ones. That is what makes the pot look solid instead of made of
+     glass, which matters here because the whole point of the module is that a
+     view HIDES things. */
+  function visible(pr) {
+    var out = [], i;
+    for (i = 0; i < pr.length; i++) if (pr[i].face > 0) out.push(pr[i]);
+    out.sort(function (a, b) { return a.d - b.d; });
+    return out;
+  }
+
   return {
     teapot: teapot, viewFromAngles: viewFromAngles, project: project,
+    visible: visible,
     spread: spread, covariance: covariance, bestView: bestView,
     anglesOfView: anglesOfView, AXIS_VIEWS: AXIS_VIEWS,
     normalize: normalize, cross: cross

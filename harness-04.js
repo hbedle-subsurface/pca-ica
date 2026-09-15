@@ -57,6 +57,14 @@ JSDOM.fromFile(file, {
     if (!M) { console.error('module did not expose its state'); process.exit(1); }
     const six = M.six();
 
+    console.log('\n=== STEP 1: spinning the teapot about each of its axes');
+    const sp = M.spin();
+    sp.axes.forEach(a=>console.log('  '+a.axis.padEnd(12)+' eigenvalue '+a.eigenvalue.toFixed(4)+
+      '   seen runs '+a.lo.toFixed(4)+' to '+a.hi.toFixed(4)+
+      (a.hi>=sp.best-2e-3?'   reaches the best view':'   never reaches it')));
+    console.log('  best possible '+sp.best.toFixed(4)+'   worst possible '+sp.worst.toFixed(4)+
+      '   total '+sp.total.toFixed(4));
+
     console.log('\n=== EXERCISE 1: sweep against eigenvector, two attributes');
     [['rms','coherence'],['rms','envelope'],['peakfreq','bandwidth']].forEach((p)=>{
       const c=M.pairCheck(p[0],p[1]);

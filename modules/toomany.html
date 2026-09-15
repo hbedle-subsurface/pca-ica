@@ -92,11 +92,14 @@
       you all four at once.</p>
 
     <p class="lede">These three are the obvious ones. Every one of them hides something.</p>
+    <p class="lede">The pot is solid, so what is round the back really is gone. It also carries two
+      different markings &mdash; <b>bands on one side, stripes on the other</b> &mdash; so you can tell
+      at a glance which half you are being shown, and which half you are not.</p>
 
     <div class="plot">
       <div class="plot-head">
         <h3>The same teapot, three ways</h3>
-        <span class="hint">Lid gold, spout crimson, handle teal</span>
+        <span class="hint">Bands on one side, stripes on the other</span>
       </div>
       <canvas id="c1" aria-label="The teapot point cloud projected along each of the three coordinate axes"></canvas>
     </div>
@@ -107,6 +110,11 @@
       </div>
     </div>
     <div class="stats" id="s1"></div>
+    <div class="legend prose">
+      <span>Turn it right under and the lid disappears completely: from below there is only the foot.
+        That is a projection doing what a projection does. Nothing about the lid changed, and no
+        measurement of the picture can bring it back.</span>
+    </div>
     <div class="legend prose">
       <span>The teapot is not built lined up with the axes. It sits at an angle to them, on purpose. A
         set of seismic attributes is an arbitrary coordinate system in exactly the same way — nothing
@@ -458,9 +466,13 @@
       are not. The twelve-attribute matrix in step 5 adds mean absolute amplitude, sweetness, peak
       frequency, spectral bandwidth, coherence, an amplitude gradient, two texture measures, and RMS
       amplitude measured on a window above the target.</p>
-    <p class="lede"><b>Simplifications, stated plainly.</b> The teapot is drawn as a point cloud with
-      depth shading and no hidden-surface removal, so points on the far side show through; a solid
-      rendering would look better and would hide that a projection keeps every point. The comparison
+    <p class="lede"><b>How it is drawn.</b> The teapot is a cloud of points, but it is drawn solid:
+      every point carries the outward normal of the surface it sits on, points whose surface faces away
+      are dropped, and the rest are painted back to front so nearer ones cover farther ones. An earlier
+      version drew it translucent, which let a reader see the lid from underneath and quietly contradicted
+      the module &mdash; the whole argument is that a view hides things. The two markings on the body are
+      generated from the point&rsquo;s own position, bands on one half and stripes on the other.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> The comparison
       between the teapot and the attributes is an analogy and it breaks in the way the Why it matters tab
       describes. Nothing in this module is standardized or normalized, because both clouds are already in
       comparable units.</p>
@@ -625,41 +637,59 @@
   /* One cloud, one view, one box. The scale is fixed by the object's own
      overall size rather than by what the current view happens to span, so
      turning it makes the picture change shape rather than change size. */
-  function drawCloud(ctx, r, pts, view, scale, colored) {
-    var pr = SHAPE.project(pts, view), i;
-    var order = pr.slice().sort(function (a, b) { return b.d - a.d; });
-    var dlo = Infinity, dhi = -Infinity;
-    for (i = 0; i < pr.length; i++) {
-      if (pr[i].d < dlo) dlo = pr[i].d;
-      if (pr[i].d > dhi) dhi = pr[i].d;
+  /* One cloud, one view, one box.
+
+     The teapot is drawn SOLID: points whose bit of surface faces away are
+     dropped, and what is left is painted back to front so nearer points cover
+     farther ones. That matters here more than it looks. A see-through pot lets
+     a reader see the lid from underneath, which quietly undoes the whole
+     argument — the point of the module is that a view HIDES things.
+
+     The attribute cloud has no surface, so it keeps the old translucent dots:
+     there is nothing there to be hidden behind. */
+  function drawCloud(ctx, r, pts, view, scale, solid) {
+    var pr = SHAPE.project(pts, view);
+    var order = solid ? SHAPE.visible(pr) : pr.slice().sort(function (a, b) { return a.d - b.d; });
+    var i, dlo = Infinity, dhi = -Infinity;
+    for (i = 0; i < order.length; i++) {
+      if (order[i].d < dlo) dlo = order[i].d;
+      if (order[i].d > dhi) dhi = order[i].d;
     }
     var cx = r.x + r.w / 2, cy = r.y + r.h / 2;
     var k = Math.min(r.w, r.h) / (2 * scale);
+    var rad = solid ? Math.max(1.6, k * 0.055) : 1.0;
     ctx.save();
     ctx.beginPath(); ctx.rect(r.x, r.y, r.w, r.h); ctx.clip();
     for (i = 0; i < order.length; i++) {
       var p = order[i];
-      var t = (p.d - dlo) / (dhi - dlo || 1);
+      var near = 1 - (p.d - dlo) / (dhi - dlo || 1);
       var X = cx + p.u * k, Y = cy - p.v * k;
-      if (colored && p.part === 'spout') {
-        ctx.fillStyle = 'rgba(132,22,23,' + (0.45 + 0.5 * t).toFixed(2) + ')';
-      } else if (colored && p.part === 'handle') {
-        ctx.fillStyle = 'rgba(11,114,133,' + (0.45 + 0.5 * t).toFixed(2) + ')';
-      } else if (colored && p.part === 'lid') {
-        ctx.fillStyle = 'rgba(176,124,46,' + (0.45 + 0.5 * t).toFixed(2) + ')';
-      } else {
-        var g = Math.round(150 - 105 * t);
-        ctx.fillStyle = 'rgba(' + g + ',' + g + ',' + (g + 6) + ',' +
-          (colored ? 0.9 : 0.34) + ')';
+      if (!solid) {
+        var g0 = Math.round(150 - 105 * (1 - near));
+        ctx.fillStyle = 'rgba(' + g0 + ',' + g0 + ',' + (g0 + 6) + ',0.34)';
+        ctx.fillRect(X - 1, Y - 1, 2, 2);
+        continue;
       }
-      var s = colored ? 1.5 : 1.0;
-      ctx.fillRect(X - s, Y - s, 2 * s, 2 * s);
+      var base = PARTCOL[p.part] || BODYCOL;
+      var f = 0.60 + 0.40 * (1 - near);
+      if (p.pat) f *= 0.58;                       // the marking on the body
+      ctx.fillStyle = 'rgb(' + shadeOf(base[0], f) + ',' + shadeOf(base[1], f) +
+        ',' + shadeOf(base[2], f) + ')';
+      ctx.beginPath();
+      ctx.arc(X, Y, rad, 0, 2 * Math.PI);
+      ctx.fill();
     }
     ctx.restore();
     ctx.save();
     ctx.strokeStyle = '#C9CDD2';
     ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
     ctx.restore();
+  }
+
+  var PARTCOL = { lid: [176, 124, 46], spout: [150, 40, 40], handle: [20, 95, 110] };
+  var BODYCOL = [158, 160, 164];
+  function shadeOf(c, f) {
+    return Math.round(Math.max(0, Math.min(255, c * f + 255 * (1 - f) * 0.20)));
   }
 
   function potScale() { return 2.05; }
