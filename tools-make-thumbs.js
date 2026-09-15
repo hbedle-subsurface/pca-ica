@@ -13,15 +13,15 @@ var T={};
 
 // 00 — three teapot silhouettes
 (function(){
-  var pts=SHAPE.teapot({density:1});
+  var pts=SHAPE.plane({density:1});
   var keep=[]; for(var q=0;q<pts.length;q+=11) keep.push(pts[q]);
   var s=open_();
-  [[0,89.9],[-61,-33]].forEach(function(v,k){
+  [[0,0],[141,-61]].forEach(function(v,k){
     var view=SHAPE.viewFromAngles(v[0],v[1]);
     var pr=SHAPE.project(keep,view);
-    var cx=78+k*146, cy=H/2, sc=26;
+    var cx=78+k*146, cy=H/2, sc=20;
     pr.forEach(function(p){
-      var c=p.part==='spout'?CRIM:(p.part==='handle'?TEAL:GREY);
+      var c=p.part==='fin'?CRIM:(p.part==='tail'?TEAL:(p.part==='engine'?'#B07C2E':GREY));
       s+=dot(cx+p.u*sc,cy-p.v*sc,1,c);
     });
   });

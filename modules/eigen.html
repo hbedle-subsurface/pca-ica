@@ -81,23 +81,22 @@
   <section class="tabpane" id="p1" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
       <h3><span class="stepno">1</span>An eigenvector is an axis you can spin the thing about</h3>
-      <span class="hint">The teapot from module 00, again</span>
+      <span class="hint">The aeroplane from module 00, again</span>
     </div>
 
     <p class="qbox"><b>Start here if eigenvectors have never made sense.</b> Forget the word for a
-      moment. A teapot has three natural axes: a long one, a middling one and a short one. Those three
+      moment. An aeroplane has three natural axes: across the wings, along the fuselage, and top to bottom. Those three
       are its eigenvectors. Nothing more mysterious than that.</p>
 
-    <p class="lede"><b>Pick an axis and spin it.</b> Watch how much of the pot you can see as it turns.</p>
+    <p class="lede"><b>Pick an axis and spin it.</b> Watch how much of the aircraft you can see as it turns.</p>
 
     <details class="reveal"><summary>Why those three axes and not any other three</summary>
-      <p class="lede">Spin a teapot about a randomly chosen axis and it wobbles: the thing lurches
-        about because the axis does not line up with the shape. Spin it about its own long axis and it
+      <p class="lede">Spin an aeroplane about a randomly chosen axis and it wobbles: the thing lurches
+        about because the axis does not line up with the shape. Spin it about its own wingspan and it
         turns evenly. The three axes it turns evenly about are the three the shape itself picks out, and
         they are always at right angles to each other.</p>
       <p class="lede">Those three axes are what comes out of the arithmetic. The <b>eigenvalue</b> that
-        goes with each one is simply how far the pot extends along it &mdash; 0.483 along the long axis,
-        0.207 along the middling one, 0.152 along the short one, in the units this page uses.</p>
+        goes with each one is simply how far the aircraft extends along it &mdash; 1.040 across the wings, 0.480 along the fuselage and 0.043 top to bottom, in the units this page uses.</p>
       <p class="lede">The word eigenvector means a direction a matrix leaves pointing the same way,
         stretching it without turning it. For a rotation that is the axis the rotation turns about. For a
         covariance matrix, which is what is used here, it is an axis of the cloud. Both are the same
@@ -108,15 +107,15 @@
         <h3>Spinning about each of the three axes</h3>
         <span class="hint">How much you can see, all the way round</span>
       </div>
-      <canvas id="c1" aria-label="The teapot spun about each of its three axes, with how much of it is visible plotted against the spin angle"></canvas>
+      <canvas id="c1" aria-label="The aeroplane spun about each of its three axes, with how much of it is visible plotted against the spin angle"></canvas>
     </div>
     <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
       <div class="ctl" style="flex:1 1 280px;min-width:260px">
         <h2 style="margin:0 0 6px">Spin it about</h2>
         <div class="seg" id="segAxis" role="group" aria-label="Which axis to spin about">
-          <button type="button" data-ax="0">Long axis</button>
-          <button type="button" data-ax="1">Middle axis</button>
-          <button type="button" data-ax="2">Short axis</button>
+          <button type="button" data-ax="0">Wingspan</button>
+          <button type="button" data-ax="1">Length</button>
+          <button type="button" data-ax="2">Height</button>
         </div>
       </div>
       <div class="ctl" style="flex:1 1 240px;min-width:220px">
@@ -126,10 +125,7 @@
     </div>
     <div class="stats" id="s1"></div>
     <div class="legend prose">
-      <span><b>The axis you spin about is the one that stays in the picture.</b> Spin about the long
-        axis and it is always there, so the view never gets bad: it stays between 0.635 and 0.690. Spin
-        about the short axis and the long one keeps swinging out of sight, so the view never gets good:
-        0.360 to 0.635. Spinning about the middle axis gives you the whole range, best and worst
+      <span><b>The axis you spin about is the one that stays in the picture.</b> Spin about the wingspan and it is always there, so the view never gets bad: it stays between 1.083 and 1.521. Spin about the height and the wingspan keeps swinging out of sight, so the view never gets good: 0.523 to 1.083. Spinning about the middle axis gives you the whole range, best and worst
         both.</span>
     </div>
   </section>
@@ -582,7 +578,7 @@
   var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
 
   var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
-  var AXNAME = ['long axis', 'middle axis', 'short axis'];
+  var AXNAME = ['wingspan', 'length', 'height'];
   var AXCOL = ['#841617', '#0B7285', '#5C6670'];
   var PARTCOL = { lid: [176, 124, 46], spout: [150, 40, 40], handle: [20, 95, 110] };
   var BODYCOL = [158, 160, 164];
@@ -639,13 +635,13 @@
 
      Same object as module 00. Its covariance matrix has three eigenvectors,
      which are the three axes the shape itself picks out, and the eigenvalue
-     of each is how far the pot extends along it.
+     of each is how far the aircraft extends along it.
      ===================================================================== */
 
   var POT = null;
   function pot() {
     if (POT) return POT;
-    var pts = SHAPE.teapot({ density: 1 });   // same pot as module 00, exactly
+    var pts = SHAPE.plane({ density: 1 });   // the same aircraft as module 00, exactly
     var C = SHAPE.covariance(pts);
     var e = MV.jacobi(C);
     var total = e.values[0] + e.values[1] + e.values[2];
@@ -667,8 +663,8 @@
     return s;
   }
 
-  /* Spinning the pot about one of its axes sweeps the viewing direction round
-     a circle perpendicular to that axis. How much of the pot you can see is
+  /* Spinning the aircraft about one of its axes sweeps the viewing direction round
+     a circle perpendicular to that axis. How much of the aircraft you can see is
      the total spread minus whatever is lost along the direction you are
      looking. */
   function lookWhenSpun(axIndex, deg) {
@@ -876,7 +872,7 @@
     var ctx = fit('c1', w, size + 66);
     if (!ctx) return;
 
-    /* the pot as it looks at the current spin */
+    /* the aircraft as it looks at the current spin */
     var view = viewFromLook(lookWhenSpun(S.spinax, S.spin));
     /* Solid, as in module 00: the far side dropped and the rest painted back
        to front, so that spinning it actually hides things. */
@@ -1373,20 +1369,16 @@
 })();
 </script>
 </body>
-</html>        <li><b>Spin the teapot about each of its three axes.</b>
+</html>        <li><b>Spin the aeroplane about each of its three axes.</b>
           <em class="point">Why: an eigenvector is an axis, and this is the least abstract way to
             meet one.</em>
-          In step 1, spin about each axis in turn and read how much of the pot you can see as it goes
+          In step 1, spin about each axis in turn and read how much of the aircraft you can see as it goes
           round.
           <em class="predict">Before starting: commit to which axis you think gives the best view of the
             pot.</em>
-          <details class="reveal"><summary>Hint</summary><span class="ans">Spinning about the long axis,
-            the view stays between 0.635 and 0.690 and passes through the best there is. Spinning about
-            the short axis it runs between 0.360 and 0.635 and never reaches the best. Spinning about the
-            middle axis covers the whole range, 0.360 to 0.690. The reason is simple once seen: the axis
-            you spin about is the one that stays in the picture. Keep the long axis and you always see a
-            lot; keep only the short one and the long axis spends half its time pointing at you, which is
-            the one direction that shows you nothing. The eigenvalues are 0.483, 0.207 and 0.152, and
-            those three numbers are just how far the pot extends along each of its own
+          <details class="reveal"><summary>Hint</summary><span class="ans">Spinning about the wingspan, the view stays between 1.083 and 1.521 and passes through the best there is. Spinning about the height it runs between 0.523 and 1.083 and never reaches the best. Spinning about the length covers the whole range, 0.523 to 1.521. The reason is simple once seen: the axis
+            you spin about is the one that stays in the picture. Keep the wingspan and you always see a lot; keep only the height and the wings spend half their time pointing straight at you, which is
+            the one direction that shows you nothing. The eigenvalues are 1.040, 0.480 and 0.043, and
+            those three numbers are just how far the aircraft extends along each of its own
             axes.</span></details></li>
 

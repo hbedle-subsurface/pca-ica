@@ -56,7 +56,7 @@ JSDOM.fromFile(file, {
     const M = win.__M00;
     if (!M) { console.error('module did not expose its state'); process.exit(1); }
 
-    console.log('\n=== EXERCISE 1 and 2: the teapot views');
+    console.log('\n=== EXERCISE 1 and 2: the aeroplane views');
     const p = M.potViews();
     console.log('  points '+p.points);
     console.log('  front '+p.front.toFixed(4)+'   side '+p.side.toFixed(4)+

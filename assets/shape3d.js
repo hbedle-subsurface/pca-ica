@@ -136,10 +136,13 @@ var SHAPE = (function () {
            it changes which pattern you are looking at and a student can see
            directly that one side has gone. Bands on one side, stripes on the
            other. */
+        /* Two markings that cannot be confused with each other from any
+           distance: round spots on one half, vertical stripes on the other.
+           Bands and stripes were too alike once the pot was turned. */
         var side = Math.cos(a) >= 0 ? 0 : 1;
         var pat = side === 0
-          ? (Math.sin(z * 5.2) > 0 ? 1 : 0)      // bands round the pot
-          : (Math.sin(a * 6) > 0 ? 1 : 0);       // stripes up and down it
+          ? (Math.cos(a * 4.5) * Math.cos((z - 0.1) * 7.5) > 0.30 ? 1 : 0)   // spots
+          : (Math.sin(a * 7) > 0.15 ? 1 : 0);                                // stripes
         pts.push({
           x: jr * Math.cos(a), y: jr * Math.sin(a), z: z,
           nx: Math.cos(a) / nL, ny: Math.sin(a) / nL, nz: -slope / nL,
@@ -231,6 +234,182 @@ var SHAPE = (function () {
     mx /= n; my /= n; mz /= n;
     for (i = 0; i < n; i++) { pts[i].x -= mx; pts[i].y -= my; pts[i].z -= mz; }
 
+    return pts;
+  }
+
+
+  /* =====================================================================
+     AN AEROPLANE
+
+     Replaces the teapot. Same job, done better: the three extents are clearly
+     ordered and clearly different (wingspan, then length, then height), every
+     axis view loses something a reader can name, and the view that shows the
+     most is the three-quarter view everybody has seen on a departures board.
+
+     Built from equations like everything else here. The fuselage is a surface
+     of revolution about the long axis; the wings, tailplane and fin are thin
+     slabs sampled on both faces; the engines are short tubes. Every point
+     carries the outward normal of the surface it sits on, so the far side can
+     be dropped and the thing drawn solid.
+     ===================================================================== */
+
+  function fuseRadius(u) {
+    // u runs 0 at the tail to 1 at the nose; tapered at both ends
+    var s = Math.max(0.001, Math.min(0.999, 0.06 + 0.90 * u));
+    return 0.30 * Math.pow(Math.sin(Math.PI * s), 0.55);
+  }
+
+  /* A flat slab: a wing, a tailplane or a fin. Sampled on its two faces so
+     that the normals point in opposite directions and one face is always
+     hidden. `axis` is 'z' for a horizontal surface and 'y' for a vertical
+     one. */
+  function slab(pts, opt, d, rnd) {
+    var nS = Math.max(4, Math.round(opt.nSpan * d));
+    var nC = Math.max(3, Math.round(opt.nChord * d));
+    var i, j, f;
+    for (i = 0; i < nS; i++) {
+      var ts = i / (nS - 1);
+      var s = opt.root + (opt.tip - opt.root) * ts;         // along the span
+      var chord = opt.chordRoot + (opt.chordTip - opt.chordRoot) * ts;
+      var lead = opt.leadRoot + (opt.leadTip - opt.leadRoot) * ts;
+      var rise = opt.riseRoot + (opt.riseTip - opt.riseRoot) * ts;
+      for (j = 0; j < nC; j++) {
+        var tc = j / (nC - 1);
+        var x = lead - chord * tc;
+        var jit = 1 + 0.01 * (rnd() - 0.5);
+        for (f = -1; f <= 1; f += 2) {
+          var half = opt.thick * 0.5 * Math.sin(Math.PI * Math.max(0.05, Math.min(0.95, tc)));
+          var pt = { part: opt.part, pat: 0, side: opt.side === undefined ? 2 : opt.side };
+          if (opt.axis === 'y') {           // a vertical surface: the fin
+            pt.x = x * jit; pt.y = f * half; pt.z = rise + s;
+            pt.nx = 0; pt.ny = f; pt.nz = 0;
+          } else {                          // a horizontal surface
+            pt.x = x * jit; pt.y = opt.mirror * s; pt.z = rise + f * half;
+            pt.nx = 0; pt.ny = 0; pt.nz = f;
+          }
+          if (opt.mark) pt.pat = opt.mark(s, tc);
+          pts.push(pt);
+        }
+      }
+    }
+  }
+
+  function plane(opt) {
+    opt = opt || {};
+    var d = opt.density || 1;
+    var rnd = lcg(opt.seed || 4321);
+    var pts = [], i, j;
+
+    /* fuselage */
+    var nL = Math.round(46 * d), nA = Math.round(22 * d);
+    for (i = 0; i < nL; i++) {
+      var u = i / (nL - 1);
+      var x = -1.45 + 3.05 * u;
+      var r = fuseRadius(u);
+      var dr = fuseRadius(Math.min(1, u + 0.01)) - fuseRadius(Math.max(0, u - 0.01));
+      var slope = dr / (3.05 * 0.02);
+      var nrm = Math.hypot(1, slope) || 1;
+      for (j = 0; j < nA; j++) {
+        var a = 2 * Math.PI * (j + 0.5 * (i % 2)) / nA;
+        var jr = r * (1 + 0.012 * (rnd() - 0.5));
+        /* Two markings, one per side of the aircraft, so that turning it
+           swaps which one you can see. Spots to port, stripes to starboard. */
+        var side = Math.sin(a) >= 0 ? 0 : 1;
+        var pat = side === 0
+          ? (Math.cos(a * 5) * Math.cos(x * 6.5) > 0.32 ? 1 : 0)
+          : (Math.sin(x * 7.5) > 0.15 ? 1 : 0);
+        pts.push({
+          x: x, y: jr * Math.cos(a), z: jr * Math.sin(a),
+          nx: -slope / nrm, ny: Math.cos(a) / nrm, nz: Math.sin(a) / nrm,
+          part: 'fuselage', side: side, pat: pat
+        });
+      }
+    }
+
+    /* wings, one each side, swept and with a little dihedral */
+    [1, -1].forEach(function (m) {
+      slab(pts, {
+        part: 'wing', axis: 'z', mirror: m,
+        root: 0.24, tip: 2.30, nSpan: 30, nChord: 13,
+        chordRoot: 1.15, chordTip: 0.40,
+        leadRoot: 0.62, leadTip: -0.30,
+        riseRoot: -0.02, riseTip: 0.16, thick: 0.10,
+        side: m > 0 ? 0 : 1,
+        /* One wing banded across the span, the other spotted. In a plan view
+           the two are impossible to confuse, so a reader can see directly
+           which half of the aircraft a given view has kept. */
+        mark: m > 0
+          ? function (s, tc) { return Math.sin(s * 4.4) > 0.05 ? 1 : 0; }
+          : function (s, tc) {
+              return Math.cos(s * 6.5) * Math.cos((tc - 0.5) * 5.0) > 0.42 ? 1 : 0;
+            }
+      }, d, rnd);
+    });
+
+    /* tailplane */
+    [1, -1].forEach(function (m) {
+      slab(pts, {
+        part: 'tail', axis: 'z', mirror: m,
+        root: 0.16, tip: 0.92, nSpan: 12, nChord: 6,
+        chordRoot: 0.52, chordTip: 0.24,
+        leadRoot: -0.92, leadTip: -1.16,
+        riseRoot: 0.10, riseTip: 0.14, thick: 0.07
+      }, d, rnd);
+    });
+
+    /* fin */
+    slab(pts, {
+      part: 'fin', axis: 'y', mirror: 1,
+      root: 0.12, tip: 0.98, nSpan: 16, nChord: 8,
+      chordRoot: 0.72, chordTip: 0.34,
+      leadRoot: -0.72, leadTip: -1.06,
+      riseRoot: 0.14, riseTip: 0.14, thick: 0.08
+    }, d, rnd);
+
+    /* two engines, slung under the wings */
+    [1, -1].forEach(function (m) {
+      var nE = Math.round(12 * d), nR = Math.round(14 * d);
+      for (i = 0; i < nE; i++) {
+        var te = i / (nE - 1);
+        var ex = 0.42 - 0.62 * te;
+        for (j = 0; j < nR; j++) {
+          var ae = 2 * Math.PI * j / nR;
+          pts.push({
+            x: ex, y: m * 1.02 + 0.17 * Math.cos(ae), z: -0.16 + 0.17 * Math.sin(ae),
+            nx: 0, ny: Math.cos(ae), nz: Math.sin(ae),
+            part: 'engine', side: m > 0 ? 0 : 1, pat: 0
+          });
+        }
+      }
+    });
+
+    /* Tilt it inside the coordinate system, for the same reason the teapot
+       was tilted: an object lined up with its own axes would make the best
+       view come out as an axis view, and attribute spaces are never lined up
+       with anything. */
+    var TILT = opt.tilt === undefined ? [28, 22, 15] : opt.tilt;
+    (function () {
+      var rz = TILT[0] * Math.PI / 180, rx = TILT[1] * Math.PI / 180,
+          ry = TILT[2] * Math.PI / 180, q;
+      function turn(o, kx, ky, kz) {
+        var c, s, X, Y, Z;
+        c = Math.cos(rz); s = Math.sin(rz);
+        X = o[kx] * c - o[ky] * s; Y = o[kx] * s + o[ky] * c; o[kx] = X; o[ky] = Y;
+        c = Math.cos(rx); s = Math.sin(rx);
+        Y = o[ky] * c - o[kz] * s; Z = o[ky] * s + o[kz] * c; o[ky] = Y; o[kz] = Z;
+        c = Math.cos(ry); s = Math.sin(ry);
+        Z = o[kz] * c - o[kx] * s; X = o[kz] * s + o[kx] * c; o[kz] = Z; o[kx] = X;
+      }
+      for (q = 0; q < pts.length; q++) {
+        turn(pts[q], 'x', 'y', 'z');
+        turn(pts[q], 'nx', 'ny', 'nz');
+      }
+    })();
+
+    var n = pts.length, mx = 0, my = 0, mz = 0;
+    for (i = 0; i < n; i++) { mx += pts[i].x; my += pts[i].y; mz += pts[i].z; }
+    mx /= n; my /= n; mz /= n;
+    for (i = 0; i < n; i++) { pts[i].x -= mx; pts[i].y -= my; pts[i].z -= mz; }
     return pts;
   }
 
@@ -362,7 +541,7 @@ var SHAPE = (function () {
   }
 
   return {
-    teapot: teapot, viewFromAngles: viewFromAngles, project: project,
+    plane: plane, teapot: teapot, viewFromAngles: viewFromAngles, project: project,
     visible: visible,
     spread: spread, covariance: covariance, bestView: bestView,
     anglesOfView: anglesOfView, AXIS_VIEWS: AXIS_VIEWS,

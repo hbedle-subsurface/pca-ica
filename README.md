@@ -13,8 +13,8 @@ opening a paper on the subject meets *feature*, *sample*, *dimension*,
 *loading*, *score*, *whitening*, *latent variable* and *explained variance* in
 the first two pages, and none of them are defined there.
 
-These modules start with a teapot. Look at one from the front and the spout
-points at you; from the side the handle folds against the body; from above it
+These modules start with an aeroplane. Look at one from the front and the spout
+points at you; from the side the wings vanish edge-on; from above it
 is a circle. The view that shows the most is none of those — it is a mixture of
 all three directions at once. That is dimension reduction, and module 00 does
 nothing but that, with no seismic data in it for the first three steps.
@@ -33,7 +33,7 @@ textbook version of the same figure — and in two places, it does.
 
 | | | |
 |---|---|---|
-| 00 | Looking at it from the right direction | a teapot, and why the good view is a mixture of axes |
+| 00 | Looking at it from the right direction | an aeroplane, and why the good view is a mixture of axes |
 | 01 | A direction through a cloud | projection and variance, found by hand |
 | 02 | Spread, and the shape of the cloud | covariance, correlation, redundancy |
 | 03 | Units, and why they decide the answer | standardization |
@@ -67,7 +67,7 @@ nothing about you. Saved to disk, every module runs with no network at all.
     modules/*.html          the twelve modules, one file each, self-contained
     assets/multivar.js      all the statistics and linear algebra
     assets/attrfield.js     the synthetic survey and the attributes computed from it
-    assets/shape3d.js       the teapot in module 00, built from equations
+    assets/shape3d.js       the aeroplane in module 00, built from equations
     assets/score.js         the progress bar and the drag/invitation helpers
     assets/glossary.js      48 terms: dimension reduction, and the seismic
                             vocabulary, which links out to the other module sets
