@@ -339,6 +339,47 @@ var hclip = MV.hist(gaussians(10000, 63), -0.5, 0.5, 10);
 tot = 0;
 for (i = 0; i < 10; i++) tot += hclip.counts[i];
 ok('out-of-range samples clamped, not dropped', tot, 10000, 0);
+head('Scalings: two linear ones and one that reshapes');
+(function scalings() {
+  var n = 4000, i;
+  var r = lcg(31);
+  var a = new Float64Array(n), b = new Float64Array(n);
+  for (i = 0; i < n; i++) {
+    var g = Math.sqrt(-2 * Math.log(Math.max(r(), 1e-12))) * Math.cos(2 * Math.PI * r());
+    a[i] = Math.exp(0.8 * g);                       // log-normal: strongly skewed
+    b[i] = 0.6 * a[i] + 0.9 * (r() - 0.5);
+  }
+  var X = [a, b], r0 = MV.corr(X)[0][1];
+
+  var mm = MV.minmax(X);
+  ok('minmax lower bound', Math.min.apply(null, Array.from(mm[0])), 0, 1e-12);
+  ok('minmax upper bound', Math.max.apply(null, Array.from(mm[0])), 1, 1e-12);
+  ok('minmax leaves the correlation alone', MV.corr(mm)[0][1], r0, 1e-12);
+  ok('minmax leaves the shape alone', MV.kurtosis(mm[0]), MV.kurtosis(X[0]), 1e-9);
+
+  ok('zscore leaves the correlation alone', MV.corr(MV.zscore(X))[0][1], r0, 1e-12);
+  ok('minmax and zscore agree on the correlation route',
+    Math.abs(MV.pca(mm, { standardize: true }).vectors[0][0]),
+    Math.abs(MV.pca(X, { standardize: true }).vectors[0][0]), 1e-9);
+
+  var gs = MV.normalScore(X);
+  ok('normal score has mean zero', MV.mean(gs[0]), 0, 1e-9);
+  ok('normal score has unit spread', MV.std(gs[0]), 1, 0.01);
+  ok('normal score comes out Gaussian in shape', MV.kurtosis(gs[0]), 0, 0.05);
+  var mono = 1;
+  for (i = 1; i < 400; i++) {
+    if ((X[0][i * 7] < X[0][i * 7 + 3]) !== (gs[0][i * 7] < gs[0][i * 7 + 3])) mono = 0;
+  }
+  ok('normal score keeps the ordering', mono, 1, 0);
+  ok('normal score DOES move the correlation',
+    Math.abs(MV.corr(gs)[0][1] - r0) > 0.01 ? 1 : 0, 1, 0);
+  ok('normalQuantile at the median', MV.normalQuantile(0.5), 0, 1e-9);
+  ok('normalQuantile at 97.5 percent', MV.normalQuantile(0.975), 1.959964, 1e-4);
+  ok('normalQuantile at 2.5 percent', MV.normalQuantile(0.025), -1.959964, 1e-4);
+  ok('scale dispatches minmax', MV.scale(X, 'minmax')[0][0], mm[0][0], 1e-12);
+  ok('scale dispatches gauss', MV.scale(X, 'gauss')[0][0], gs[0][0], 1e-12);
+})();
+
 
 console.log('\n' + (fails ? fails + ' FAILED of ' : 'all ') + checks + ' checks' +
   (fails ? '' : ' passed'));

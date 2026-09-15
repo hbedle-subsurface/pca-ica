@@ -86,6 +86,88 @@ var MV = (function () {
     });
   }
 
+
+  /* =====================================================================
+     SCALINGS
+
+     Standardizing is not the only option a package offers, and the three that
+     turn up most often are not equivalent. Two of them are linear: they slide
+     and stretch each attribute without changing the shape of its
+     distribution, so they leave every correlation exactly as it was. The
+     third is not: it replaces each value by where it sits in the order, which
+     changes the shape and therefore changes the correlations too.
+     ===================================================================== */
+
+  /* Map each attribute onto 0 to 1 using its own smallest and largest value.
+     One extreme trace sets the range, so the bulk of the data can end up
+     squeezed into a small part of it. */
+  function minmax(X) {
+    return X.map(function (col) {
+      var lo = Infinity, hi = -Infinity, i;
+      for (i = 0; i < col.length; i++) {
+        if (col[i] < lo) lo = col[i];
+        if (col[i] > hi) hi = col[i];
+      }
+      var r = (hi - lo) || 1, o = new Float64Array(col.length);
+      for (i = 0; i < col.length; i++) o[i] = (col[i] - lo) / r;
+      return o;
+    });
+  }
+
+  /* The inverse of the standard normal distribution function, by the rational
+     approximation of Acklam, accurate to about 1.15e-9 across the range. */
+  function normalQuantile(p) {
+    var a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02,
+             1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+    var b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02,
+             6.680131188771972e+01, -1.328068155288572e+01];
+    var c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00,
+             -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+    var d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00,
+             3.754408661907416e+00];
+    var lo = 0.02425, q, r;
+    if (p <= 0) return -Infinity;
+    if (p >= 1) return Infinity;
+    if (p < lo) {
+      q = Math.sqrt(-2 * Math.log(p));
+      return (((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+             ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    }
+    if (p > 1 - lo) {
+      q = Math.sqrt(-2 * Math.log(1 - p));
+      return -(((((c[0] * q + c[1]) * q + c[2]) * q + c[3]) * q + c[4]) * q + c[5]) /
+              ((((d[0] * q + d[1]) * q + d[2]) * q + d[3]) * q + 1);
+    }
+    q = p - 0.5; r = q * q;
+    return (((((a[0] * r + a[1]) * r + a[2]) * r + a[3]) * r + a[4]) * r + a[5]) * q /
+           (((((b[0] * r + b[1]) * r + b[2]) * r + b[3]) * r + b[4]) * r + 1);
+  }
+
+  /* The Gaussian, or normal score, transform. Sort the values, replace each
+     one by the normal quantile of its position in the sorted order, and the
+     attribute comes out with a Gaussian distribution whatever shape it went
+     in with. Ties are broken by position, which is what makes it exactly
+     reproducible. It is monotonic, so the ORDER of the values is untouched;
+     only the spacing between them changes. */
+  function normalScore(X) {
+    return X.map(function (col) {
+      var n = col.length, idx = new Array(n), i;
+      for (i = 0; i < n; i++) idx[i] = i;
+      idx.sort(function (a, b) { return col[a] - col[b] || a - b; });
+      var o = new Float64Array(n);
+      for (i = 0; i < n; i++) o[idx[i]] = normalQuantile((i + 0.5) / n);
+      return o;
+    });
+  }
+
+  /* Whichever scaling a caller asks for, by name. */
+  function scale(X, how) {
+    if (how === 'minmax') return minmax(X);
+    if (how === 'zscore') return zscore(X);
+    if (how === 'gauss') return normalScore(X);
+    return center(X);                                // 'none': centred only
+  }
+
   /* =====================================================================
      COVARIANCE AND CORRELATION
 
@@ -597,6 +679,7 @@ var MV = (function () {
   return {
     mean: mean, std: std, variance: variance,
     center: center, zscore: zscore,
+    minmax: minmax, normalScore: normalScore, normalQuantile: normalQuantile, scale: scale,
     cov: cov, corr: corr, jacobi: jacobi, inverse: inverse,
     unit: unit, project: project, dirFromAngle: dirFromAngle,
     principalAngle: principalAngle,

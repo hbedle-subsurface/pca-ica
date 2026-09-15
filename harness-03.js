@@ -97,6 +97,16 @@ JSDOM.fromFile(file, {
       console.log('    components for 90%:  '+c.n6+' -> '+c.n7);
     });
 
+    console.log('\n=== STEP 6: the four scalings');
+    ['none','minmax','zscore','gauss'].forEach(function(sc){
+      M.set('sc',sc);
+      const q=M.scaling();
+      console.log('  '+sc.padEnd(8)+' PC1 '+(q.share*100).toFixed(2)+'%   kurtosis of envelope '+
+        q.kurt.toFixed(3).padStart(7)+'   correlations moved '+(q.moved<1e-9?'0':q.moved.toFixed(4))+
+        '   loadings '+q.loadings.map(v=>v.toFixed(2)).join(' '));
+    });
+    M.set('sc','zscore');
+
     console.log('\n=== GLOSSARY');
     const marked=win.document.querySelectorAll('button.gterm');
     const names=new Set(); marked.forEach(b=>names.add(b.getAttribute('data-term')));

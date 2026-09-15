@@ -71,6 +71,7 @@
     <button role="tab" data-tab="p3" aria-selected="false">3 · Who wins, and why</button>
     <button role="tab" data-tab="p4" aria-selected="false">4 · What it erases</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · An equal share</button>
+    <button role="tab" data-tab="p6" aria-selected="false">6 · The scalings on offer</button>
     <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
     <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
@@ -316,6 +317,64 @@
     </div>
   </section>
 
+
+  <!-- =============================== STEP 6 =============================== -->
+  <section class="tabpane" id="p6" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">6</span>The scalings a package will actually offer you</h3>
+      <span class="hint">Three names, and what each one does</span>
+    </div>
+
+    <p class="lede"><b>Press each of the four buttons and watch the histogram.</b> Two of them move and
+      stretch it. One changes its shape.</p>
+
+    <details class="reveal"><summary>What each one is</summary>
+      <p class="lede"><b>None.</b> Only the mean removed, which PCA does anyway. This is the covariance
+        route of the first five steps, and the loudest attribute wins.</p>
+      <p class="lede"><b>Min-max.</b> Slide and stretch each attribute onto 0 to 1 using its own smallest
+        and largest value. Every attribute ends with the same range. A single extreme trace sets that
+        range, so the bulk of the data can end up squeezed into a small part of it.</p>
+      <p class="lede"><b>Z-score.</b> Subtract the mean, divide by the standard deviation. Every
+        attribute ends with the same variance. This is standardization, and it is what the correlation
+        route means.</p>
+      <p class="lede"><b>Gaussian.</b> Sort the values and replace each one by where it sits in the
+        order, read off a Gaussian. Every attribute comes out with a Gaussian distribution whatever shape
+        it went in with. Also called the normal score transform, and used in geostatistics for the same
+        reason it is used here.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>One attribute under all four, and what comes out of PCA</h3>
+        <span class="hint">Same data every time</span>
+      </div>
+      <canvas id="c6" aria-label="The distribution of one attribute under each of four scalings, with the first principal component loadings that follow from each"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 320px;min-width:300px">
+        <h2 style="margin:0 0 6px">Scaling</h2>
+        <div class="seg" id="segScale" role="group" aria-label="Which scaling">
+          <button type="button" data-sc="none">None</button>
+          <button type="button" data-sc="minmax">Min-max</button>
+          <button type="button" data-sc="zscore">Z-score</button>
+          <button type="button" data-sc="gauss">Gaussian</button>
+        </div>
+      </div>
+      <div class="ctl" style="flex:1 1 220px;min-width:200px">
+        <label for="a6">Attribute shown</label>
+        <select id="a6" data-key="a6"></select>
+      </div>
+    </div>
+    <div class="stats" id="s6"></div>
+    <div class="legend prose">
+      <span><b>Min-max and z-score leave every correlation exactly as it was</b> &mdash; they differ from
+        each other by about 10⁻¹⁵ &mdash; because sliding and stretching an attribute cannot change how
+        it tracks another one. So the two give identical answers on the correlation route, and different
+        answers on the covariance route, where min-max equalizes ranges and the z-score equalizes
+        variances. The Gaussian transform is not linear, and it moves correlations by up to 0.48 on this
+        set.</span>
+    </div>
+  </section>
+
   <!-- ============================ WHY IT MATTERS =========================== -->
   <section class="tabpane" id="pw" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
@@ -358,6 +417,34 @@
     <div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
+        <li><b>Work out which of the four scalings changes the shape of an attribute.</b>
+          <em class="point">Why: two of them are the same kind of operation and one is not, and telling
+            them apart decides what you can safely do next.</em>
+          In step 6, read the kurtosis of the chosen attribute under each of the four.
+          <em class="predict">Before starting: three of the four leave it identical. Commit to
+            which.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">None, min-max and the z-score
+            all leave peak envelope at a kurtosis of 2.441, because sliding and stretching a set of
+            numbers cannot change the shape of their distribution. The Gaussian transform takes it to
+            &minus;0.007, which is a Gaussian to three decimals, because it replaces each value by where
+            it sits in the order rather than by a rescaling of the value. The consequence follows
+            immediately: the two linear scalings leave every correlation exactly as it was, and the
+            Gaussian transform moves them by up to 0.476 on this set. So min-max and the z-score are
+            interchangeable if what you do next reads correlations, and not otherwise.</span></details></li>
+
+        <li><b>Find out where min-max and the z-score disagree.</b>
+          <em class="point">Why: they are often described as two ways of doing the same thing, and on
+            one route they are, and on the other they are not.</em>
+          In step 6, compare the first component under min-max against the one under the z-score.
+          <details class="reveal"><summary>Hint</summary><span class="ans">They give completely different
+            answers: min-max holds 60.98% and is led by coherence at 0.680, while the z-score holds
+            52.62% and is led by RMS amplitude at 0.506. Both are linear, so both leave the correlation
+            matrix identical &mdash; and if you then run PCA on correlations they agree to about
+            10⁻¹⁵. The disagreement is on the covariance route, because the two are equalizing different
+            things: the z-score gives every attribute the same variance, min-max gives every attribute
+            the same range. An attribute with a few extreme traces has a wide range and a narrow bulk, so
+            min-max squashes it and the z-score does not.</span></details></li>
+
         <li><b>Read the two first components against each other.</b>
           <em class="point">Why: this is the comparison that shows the choice is not cosmetic.</em>
           With the six-attribute set and no rescaling, read the loadings of the first component under
@@ -441,6 +528,8 @@
     <div class="takeaway">
       <h3>If you remember nothing else</h3>
       <ul>
+        <li><b>Min-max, z-score and Gaussian are the three you will be offered.</b> The first two are
+          linear and leave correlations untouched; the third reshapes the distribution and does not.</li>
         <li><b>There are two routes and they give different answers.</b> Decomposing the covariance
           matrix and decomposing the correlation matrix are different analyses of the same data.</li>
         <li><b>The covariance route is decided by whichever attribute has the largest numbers.</b> On
@@ -588,13 +677,18 @@
     bandwidth: 'Spectral bandwidth', coherence: 'Coherence', glcmcon: 'GLCM contrast',
     shallow: 'RMS above the target'
   };
+  var LONGNAME = { rms: 'RMS amplitude', envelope: 'peak envelope', peakfreq: 'peak frequency',
+                   bandwidth: 'spectral bandwidth', coherence: 'coherence', glcmcon: 'GLCM contrast' };
   var SHORT = {
     rms: 'RMS', envelope: 'envelope', peakfreq: 'f peak', bandwidth: 'bandwidth',
     coherence: 'coherence', glcmcon: 'GLCM contrast', shallow: 'shallow RMS'
   };
 
-  var DEF = { gt: 'rms', gain: 0, weak: 0, px: 'rms', py: 'envelope', route: 'z', tab: 'p1' };
+  var DEF = { gt: 'rms', gain: 0, weak: 0, px: 'rms', py: 'envelope', route: 'z',
+              sc: 'zscore', a6: 1, tab: 'p1' };
   var S = MV.readState(DEF);
+  if (['none', 'minmax', 'zscore', 'gauss'].indexOf(S.sc) < 0) S.sc = 'zscore';
+  S.a6 = Math.max(0, Math.min(5, Math.round(S.a6)));
   var ALL = CORE.concat([WEAK]);
   if (ALL.indexOf(S.gt) < 0) S.gt = DEF.gt;
   if (ALL.indexOf(S.px) < 0) S.px = DEF.px;
@@ -1063,6 +1157,105 @@
     ctx.restore();
   }
 
+
+  /* =====================================================================
+     STEP 6: the four scalings
+
+     Same six attributes every time. What changes is only how each one is put
+     onto a common footing before the covariance matrix is formed.
+     ===================================================================== */
+
+  var SCNAME = { none: 'none, centred only', minmax: 'min-max', zscore: 'z-score', gauss: 'Gaussian' };
+  var SCALED = {};
+  function scaled(how) {
+    if (SCALED[how]) return SCALED[how];
+    var sv = survey();
+    var X = CORE.map(function (n) { return sv.attr[n]; });
+    var D = MV.scale(X, how === 'none' ? 'none' : how);
+    SCALED[how] = { D: D, P: MV.pca(D, {}), R: MV.corr(D) };
+    return SCALED[how];
+  }
+
+  function drawStep6() {
+    var host = $('c6');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var hw = Math.min(190, (w - 60) / 4);
+    var ctx = fit('c6', w, hw + 150);
+    if (!ctx) return;
+    var order = ['none', 'minmax', 'zscore', 'gauss'];
+    var gap = Math.max(10, (w - 12 - 4 * hw) / 4);
+
+    /* the same attribute, four ways */
+    order.forEach(function (how, k) {
+      var col = scaled(how).D[S.a6];
+      var lo = AF.percentile(col, 0.005), hi = AF.percentile(col, 0.995);
+      var H = MV.hist(col, lo, hi, 34);
+      var r = { x: 6 + k * (hw + gap), y: 22, w: hw, h: hw };
+      var mx = 0, i;
+      for (i = 0; i < H.counts.length; i++) mx = Math.max(mx, H.counts[i]);
+      ctx.save();
+      ctx.strokeStyle = '#C9CDD2';
+      ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+      ctx.restore();
+      var bw = r.w / H.counts.length;
+      for (i = 0; i < H.counts.length; i++) {
+        var bh = (H.counts[i] / (mx || 1)) * (r.h - 6);
+        ctx.save();
+        ctx.fillStyle = (how === S.sc) ? CRIM : SLATE;
+        ctx.globalAlpha = (how === S.sc) ? 0.88 : 0.35;
+        ctx.fillRect(r.x + i * bw + 0.4, r.y + r.h - bh, Math.max(1, bw - 0.8), bh);
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.fillStyle = (how === S.sc) ? INK : SLATE;
+      ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(SCNAME[how], r.x, r.y - 6);
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillStyle = SLATE;
+      ctx.fillText('kurtosis ' + MV.kurtosis(scaled(how).D[S.a6]).toFixed(2), r.x, r.y + r.h + 14);
+      ctx.restore();
+    });
+
+    /* and the first component each one leads to */
+    var yb = hw + 52;
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.font = '600 11px ui-monospace,Menlo,monospace';
+    ctx.fillText('first component under ' + SCNAME[S.sc], 6, yb);
+    ctx.restore();
+    var P = scaled(S.sc).P;
+    var bx = 96, bw2 = (w - bx - 30) / CORE.length;
+    CORE.forEach(function (n, k) {
+      var v = P.vectors[0][k];
+      var mid = yb + 62;
+      var h = v * 46;
+      ctx.save();
+      ctx.fillStyle = Math.abs(v) === Math.max.apply(null, Array.from(P.vectors[0]).map(Math.abs))
+        ? CRIM : SLATE;
+      ctx.globalAlpha = 0.9;
+      ctx.fillRect(bx + k * bw2 + bw2 * 0.2, Math.min(mid, mid - h), bw2 * 0.6, Math.abs(h));
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(SHORT[n], bx + k * bw2 + bw2 * 0.5, yb + 82);
+      ctx.fillText(v.toFixed(2), bx + k * bw2 + bw2 * 0.5, yb + 96);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.beginPath(); ctx.moveTo(bx, yb + 62); ctx.lineTo(w - 24, yb + 62); ctx.stroke();
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'right';
+    ctx.font = '10px ui-monospace,Menlo,monospace';
+    ctx.fillText('loading', bx - 8, yb + 66);
+    ctx.restore();
+  }
+
   /* =====================================================================
      READOUTS
      ===================================================================== */
@@ -1117,6 +1310,22 @@
         stat('Standardized PC1', (Pz.explained[0] * 100).toFixed(2) + '%',
           'the correlation sets this, not the angle');
     }
+    if ($('s6')) {
+      var sc6 = scaled(S.sc), zc = scaled('zscore');
+      var dR = 0, i6, j6;
+      for (i6 = 0; i6 < CORE.length; i6++) for (j6 = 0; j6 < CORE.length; j6++) {
+        dR = Math.max(dR, Math.abs(sc6.R[i6][j6] - zc.R[i6][j6]));
+      }
+      var col6 = sc6.D[S.a6];
+      $('s6').innerHTML =
+        stat('Scaling', SCNAME[S.sc], 'applied to all six') +
+        stat('Spread of ' + SHORT[CORE[S.a6]], MV.std(col6).toFixed(4),
+          'range ' + (AF.percentile(col6, 1) - AF.percentile(col6, 0)).toFixed(3)) +
+        stat('Shape', MV.kurtosis(col6).toFixed(3),
+          S.sc === 'gauss' ? 'reshaped to Gaussian' : 'unchanged by this scaling') +
+        stat('Correlations moved', dR < 1e-9 ? 'not at all' : dR.toFixed(3),
+          'against the z-score');
+    }
     if ($('s5')) {
       var sv2 = survey();
       var opt = (S.route === 'z') ? { standardize: true } : {};
@@ -1137,7 +1346,7 @@
      WIRING
      ===================================================================== */
 
-  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'pw', 'pe', 'pk', 'pm'];
 
   function fillSelect(id, key, list) {
     var el = $(id);
@@ -1152,7 +1361,24 @@
     el.value = S[key];
   }
 
+  function fillA6() {
+    var el = $('a6');
+    if (!el || el.options.length) return;
+    CORE.forEach(function (n, i) {
+      var o = document.createElement('option');
+      o.value = String(i); o.textContent = LONGNAME[n] || n;
+      el.appendChild(o);
+    });
+  }
+
   function syncLabels() {
+    fillA6();
+    if ($('a6')) $('a6').value = String(S.a6);
+    document.querySelectorAll('#segScale button').forEach(function (b) {
+      var on = b.dataset.sc === S.sc;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
     ['gt', 'gt2', 'gt3'].forEach(function (id) { var e = $(id); if (e) e.value = S.gt; });
     ['gain', 'gain2', 'gain3'].forEach(function (id) {
       var e = $(id); if (e) e.value = S.gain;
@@ -1174,7 +1400,7 @@
 
   function drawAll() {
     drawHead();
-    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5(); drawStep6();
     drawStats();
   }
 
@@ -1242,6 +1468,14 @@
   showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
 
   window.__M03 = {
+    scaling: function () {
+      var sc = scaled(S.sc), zc = scaled('zscore'), d = 0, i, j;
+      for (i = 0; i < CORE.length; i++) for (j = 0; j < CORE.length; j++) {
+        d = Math.max(d, Math.abs(sc.R[i][j] - zc.R[i][j]));
+      }
+      return { share: sc.P.explained[0], kurt: MV.kurtosis(sc.D[1]), moved: d,
+               loadings: Array.prototype.slice.call(sc.P.vectors[0]) };
+    },
     set: function (k, v) {
       S[k] = v;
       if (k === 'weak') {
