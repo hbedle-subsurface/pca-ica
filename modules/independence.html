@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Independence is not decorrelation | How PCA and ICA Actually Work</title>
-<meta name="description" content="Two quantities can be uncorrelated to machine precision and still strongly dependent. What whitening does, what kurtosis and negentropy measure that a covariance matrix cannot, why a mixture always looks more shapeless than the things mixed, and the search that is still available afterward.">
+<meta name="description" content="Two quantities can be uncorrelated to machine precision and still strongly dependent. What whitening does, what kurtosis and negentropy measure that a covariance matrix cannot, why a mixture always looks more Gaussian than the things mixed, and the search that is still available afterward.">
 <link rel="stylesheet" href="../assets/fonts.css">
 <link rel="stylesheet" href="../assets/style.css">
 </head>
@@ -23,7 +23,7 @@
   <div class="mod-head">
     <p class="eyebrow">Module 07 &nbsp;·&nbsp; Dimension reduction</p>
     <h1>Independence is not decorrelation</h1>
-    <p class="sub">Module 06 ended with component scores that are uncorrelated to fifteen decimal places and distributions that are visibly not shapeless. Those two facts are compatible, and the gap between them is where a second family of methods lives. These steps establish what dependence without correlation looks like, what whitening does, what statistic can see the difference, and why a mixture of things always looks blander than the things that went into it.</p>
+    <p class="sub">Module 06 ended with component scores that are uncorrelated to fifteen decimal places and distributions that are visibly not Gaussian. Those two facts are compatible, and the gap between them is where a second family of methods lives. These steps establish what dependence without correlation looks like, what whitening does, what statistic can see the difference, and why a mixture of things always looks blander than the things that went into it.</p>
   </div>
 
   <div class="labhead">
@@ -31,6 +31,11 @@
       <div>
         <p class="cap">Two component scores <span>&mdash; uncorrelated, and not independent</span></p>
         <canvas id="cHead" aria-label="Crossplot of two component scores with the spread of the vertical one measured within bins of the horizontal one"></canvas>
+        <div class="score" id="score">
+          <span class="say" id="scoreSay">drag the direction in step 5</span>
+          <span class="track"><span class="fill" id="scoreFill"></span><span class="target" id="scoreTgt"></span></span>
+          <span class="pct" id="scorePct">&mdash;</span>
+        </div>
       </div>
       <div>
         <p class="cap">Choose the pair <span>&mdash; steps 1 and 2 follow it</span></p>
@@ -67,7 +72,7 @@
     <button role="tab" data-tab="p1" aria-selected="false">1 · Uncorrelated, dependent</button>
     <button role="tab" data-tab="p2" aria-selected="false">2 · Whitening</button>
     <button role="tab" data-tab="p3" aria-selected="false">3 · A number for shape</button>
-    <button role="tab" data-tab="p4" aria-selected="false">4 · Mixtures go bland</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Mixtures go Gaussian</button>
     <button role="tab" data-tab="p5" aria-selected="false">5 · What is still findable</button>
     <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
     <span class="gap"></span>
@@ -86,17 +91,23 @@
     <p class="qbox"><b>Why this step is here.</b> Correlation is so often used as a synonym for
       relatedness that the difference has to be met head-on before anything built on it makes sense.</p>
 
-    <p class="lede">Two quantities are <b>uncorrelated</b> when knowing one tells you nothing about the
-      average of the other. They are <b>independent</b> when knowing one tells you nothing about the
-      other at all, including its spread, its shape and its tails. The second is a much stronger
-      statement and correlation cannot test it.</p>
-    <p class="lede">The second and third component scores are uncorrelated at about ten to the minus
-      fifteen, which is as decorrelated as arithmetic gets. Split the traces into bins by their value of
-      the first and measure the spread of the second within each bin, as a fraction of its own overall
-      spread, and the answer runs from 0.56 to 2.36 — a factor of more than four. Knowing where a trace sits on one component predicts how far it can stray
-      on the other. That is dependence, and the correlation coefficient is blind to it.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>The correlation is zero to fifteen decimal places.</b> Now read the heights of the bars below.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Two quantities are <b>uncorrelated</b> when knowing one tells you nothing about the
+        average of the other. They are <b>independent</b> when knowing one tells you nothing about the
+        other at all, including its spread, its shape and its tails. The second is a much stronger
+        statement and correlation cannot test it.</p>
+        <p class="lede">The second and third component scores are uncorrelated at about ten to the minus
+        fifteen, which is as decorrelated as arithmetic gets. Split the traces into bins by their value of
+        the first and measure the spread of the second within each bin, as a fraction of its own overall
+        spread, and the answer runs from 0.56 to 2.36 — a factor of more than four. Knowing where a trace sits on one component predicts how far it can stray
+        on the other. That is dependence, and the correlation coefficient is blind to it.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Spread of the vertical score within bins of the horizontal one</h3>
         <span class="hint">A flat row would mean independence</span>
@@ -127,18 +138,24 @@
       <span class="hint">Switch the coordinates in the header</span>
     </div>
 
-    <p class="lede">Whitening projects onto the components and then divides each projection by the square
-      root of its eigenvalue. Every direction then carries a variance of exactly one, the cloud becomes a
-      round ball, and the covariance matrix becomes the identity.</p>
-    <p class="lede">The curve below is the variance along a direction as that direction turns through the
-      plane of the two chosen components. Before whitening it has a maximum and a minimum, and finding
-      the maximum is the whole of what PCA did. After whitening it is flat at 1.0000 to four decimal
-      places at every angle.</p>
-    <p class="lede">That flatness is the point. Variance can no longer prefer one direction over another,
-      so a method that only knows about variance has nothing left to say. Anything that goes further has
-      to be looking at something else.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Press Whitened in the header.</b> The curve goes flat at 1.0000 and stays flat at every angle.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Whitening projects onto the components and then divides each projection by the square
+        root of its eigenvalue. Every direction then carries a variance of exactly one, the cloud becomes a
+        round ball, and the covariance matrix becomes the identity.</p>
+        <p class="lede">The curve below is the variance along a direction as that direction turns through the
+        plane of the two chosen components. Before whitening it has a maximum and a minimum, and finding
+        the maximum is the whole of what PCA did. After whitening it is flat at 1.0000 to four decimal
+        places at every angle.</p>
+        <p class="lede">That flatness is the point. Variance can no longer prefer one direction over another,
+        so a method that only knows about variance has nothing left to say. Anything that goes further has
+        to be looking at something else.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Variance along a direction, before and after whitening</h3>
         <span class="hint">Same axis, same scale</span>
@@ -169,20 +186,26 @@
       <span class="hint">Three reference distributions, then the real ones</span>
     </div>
 
-    <p class="lede">Mean and variance are first and second order: where a distribution sits and how wide
-      it is. Neither says anything about its shape, and two distributions with identical means and
-      variances can look nothing alike.</p>
-    <p class="lede"><b>Excess kurtosis</b> is a fourth-order statistic. It is exactly zero for a
-      Gaussian, negative for a flat-topped distribution and positive for one with a sharp peak and long
-      tails. A uniform distribution gives &minus;1.2 exactly and a Laplace gives +3 exactly, which fixes
-      the scale. It is cheap to compute and sensitive to outliers, because a fourth power gives one
-      extreme sample a great deal of influence.</p>
-    <p class="lede"><b>Negentropy</b> measures how far a distribution sits from the Gaussian of the same
-      variance. It is never negative and is exactly zero only for a Gaussian, which makes it the cleaner
-      quantity of the two, and it cannot be computed exactly from a finite sample, so implementations use
-      an approximation built from one or two simple functions.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Compare the fourth panel against the first three.</b> Uniform is &minus;1.2, Gaussian is 0, Laplace is 3. That is the scale.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Mean and variance are first and second order: where a distribution sits and how wide
+        it is. Neither says anything about its shape, and two distributions with identical means and
+        variances can look nothing alike.</p>
+        <p class="lede"><b>Excess kurtosis</b> is a fourth-order statistic. It is exactly zero for a
+        Gaussian, negative for a flat-topped distribution and positive for one with a sharp peak and long
+        tails. A uniform distribution gives &minus;1.2 exactly and a Laplace gives +3 exactly, which fixes
+        the scale. It is cheap to compute and sensitive to outliers, because a fourth power gives one
+        extreme sample a great deal of influence.</p>
+        <p class="lede"><b>Negentropy</b> measures how far a distribution sits from the Gaussian of the same
+        variance. It is never negative and is exactly zero only for a Gaussian, which makes it the cleaner
+        quantity of the two, and it cannot be computed exactly from a finite sample, so implementations use
+        an approximation built from one or two simple functions.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Three references, and a component score beside them</h3>
         <span class="hint">All four scaled to the same variance</span>
@@ -200,7 +223,7 @@
       <span>Sharply peaked with long tails is what a map made mostly of background with a few bright
         features looks like when its values are collected into a histogram. Most traces sit near the
         middle and a small number sit a long way out, which is the shape a sparse geological feature
-        produces and the shape a shapeless background does not.</span>
+        produces and the shape a Gaussian background does not.</span>
     </div>
   </section>
 
@@ -211,21 +234,27 @@
       <span class="hint">Slide the number of sources</span>
     </div>
 
-    <p class="lede">Adding independent quantities together moves the result toward a Gaussian. That is
-      the central limit theorem, and it is the reason the Gaussian turns up everywhere, but it is also
-      the mechanism the next module exploits.</p>
-    <p class="lede">The panel below sums independent uniform sources. One on its own has an excess
-      kurtosis of &minus;1.2006 against a theoretical &minus;1.2. Two give &minus;0.5895, three
-      &minus;0.3937, four &minus;0.2934, eight &minus;0.1513. The measured values follow &minus;1.2
-      divided by the number of sources closely, and the histogram goes from a flat box to a bell within
-      four or five terms.</p>
-    <p class="lede">Turn that around. A measurement that looks Gaussian is what a mixture of several
-      things looks like, and a measurement that looks strongly non-Gaussian is more likely to be one
-      thing on its own. So among all the ways of combining a set of attributes, the combinations that
-      look least Gaussian are the candidates for being single effects rather than mixtures. That
-      sentence is the whole idea of independent component analysis.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Slide the number of sources from 1 to 8.</b> A flat box becomes a bell by about four.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Adding independent quantities together moves the result toward a Gaussian. That is
+        the central limit theorem, and it is the reason the Gaussian turns up everywhere, but it is also
+        the mechanism the next module exploits.</p>
+        <p class="lede">The panel below sums independent uniform sources. One on its own has an excess
+        kurtosis of &minus;1.2006 against a theoretical &minus;1.2. Two give &minus;0.5895, three
+        &minus;0.3937, four &minus;0.2934, eight &minus;0.1513. The measured values follow &minus;1.2
+        divided by the number of sources closely, and the histogram goes from a flat box to a bell within
+        four or five terms.</p>
+        <p class="lede">Turn that around. A measurement that looks Gaussian is what a mixture of several
+        things looks like, and a measurement that looks strongly non-Gaussian is more likely to be one
+        thing on its own. So among all the ways of combining a set of attributes, the combinations that
+        look least Gaussian are the candidates for being single effects rather than mixtures. That
+        sentence is the whole idea of independent component analysis.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The sum of independent sources, and its shape</h3>
         <span class="hint">Fixed axes, so the flattening is visible</span>
@@ -248,19 +277,27 @@
       <span class="hint">The same plane module 06 rotated through</span>
     </div>
 
-    <p class="lede">Module 06 turned a direction through the plane of components 2 and 3 and found that
-      the channel separation peaked where the variance did not. The same plane is here, whitened, so
-      every direction in it carries the same variance and PCA has no preference between any of them.</p>
-    <p class="lede">The curves below are negentropy and excess kurtosis as that direction turns.
-      Negentropy peaks at 40 degrees, where the excess kurtosis is 8.37. Nothing about a channel was used
-      to find it; the criterion is only that the projection should look as un-Gaussian as possible.</p>
-    <p class="lede">The third curve is the channel separation, the same measurement as module 06. At the
-      angle of maximum negentropy it reads 7.33. The supervised best inside this plane, computed in
-      module 06 with the channel positions in hand, was 7.42. An unsupervised criterion that never saw a
-      channel got within about one percent of a direction that was chosen knowing where the channel
-      was.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Drag the direction until the bar fills.</b> The bar is measuring how un-Gaussian
+      the projection looks, and nothing else. Then look at the bottom panel &mdash; the channel came with
+      it, without ever being asked for.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Module 06 turned a direction through the plane of components 2 and 3 and found that
+        the channel separation peaked where the variance did not. The same plane is here, whitened, so
+        every direction in it carries the same variance and PCA has no preference between any of them.</p>
+        <p class="lede">The curves below are negentropy and excess kurtosis as that direction turns.
+        Negentropy peaks at 40 degrees, where the excess kurtosis is 8.37. Nothing about a channel was used
+        to find it; the criterion is only that the projection should look as un-Gaussian as possible.</p>
+        <p class="lede">The third curve is the channel separation, the same measurement as module 06. At the
+        angle of maximum negentropy it reads 7.33. The supervised best inside this plane, computed in
+        module 06 with the channel positions in hand, was 7.42. An unsupervised criterion that never saw a
+        channel got within about one percent of a direction that was chosen knowing where the channel
+        was.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Negentropy, kurtosis and separation as the direction turns</h3>
         <span class="hint">One shared angle axis, all fixed</span>
@@ -363,12 +400,15 @@
             because a fourth power on a long-tailed distribution is the hardest of the three to
             estimate. Against that scale the component scores read 5.11, 3.73, 3.85, &minus;0.18,
             5.13 and 2.78. Five of the six are more peaked than a Laplace, which is what a map holding a
-            quiet background and a few bright features gives. The fourth, at &minus;0.18, is the only one
+            quiet background and a few bright features gives. Read backwards it is weaker than it looks:
+            a strongly peaked distribution could come from a sparse geological feature, from a handful of
+            noisy traces, or from a processing artifact over part of the survey. High kurtosis says the
+            values are concentrated with a long tail. It does not say what made the tail. The fourth, at &minus;0.18, is the only one
             close to Gaussian, and module 05 found it was also the component carrying most of the
             acquisition footprint — a periodic artifact spread evenly over the survey looks a great deal
             more Gaussian than a channel does.</span></details></li>
 
-        <li><b>Watch a mixture become shapeless.</b>
+        <li><b>Watch a mixture lose its shape.</b>
           <em class="point">Why: the assumption behind the whole next module is that mixtures look
             Gaussian, and it is worth watching it happen rather than accepting it.</em>
           In step 4, walk the number of sources from 1 to 8 and record the excess kurtosis at each.
@@ -522,6 +562,7 @@
 <script src="../assets/popout.js"></script>
 <script src="../assets/panelout.js"></script>
 <script src="../assets/glossary.js"></script>
+<script src="../assets/score.js"></script>
 <script src="../assets/multivar.js"></script>
 <script src="../assets/attrfield.js"></script>
 <script>
@@ -655,6 +696,27 @@
     }
     SUMS[k] = { raw: o, z: standardize(o), kurt: MV.kurtosis(o), neg: MV.negentropy(o) };
     return SUMS[k];
+  }
+
+  /* =====================================================================
+     THE SCORE
+
+     Step 5 is the first unsupervised hunt in the set: turn a direction until
+     the projection looks as un-Gaussian as it can. The maximum exists, so the
+     distance to it is shown. Nothing about a channel is used to compute it.
+     ===================================================================== */
+
+  function drawScore() {
+    var sw = sweep(), best = 0, worst = Infinity, i;
+    for (i = 0; i < sw.length; i++) {
+      if (sw[i].neg > best) best = sw[i].neg;
+      if (sw[i].neg < worst) worst = sw[i].neg;
+    }
+    var here = sw[Math.round(S.rot / 5)] || sw[0];
+    SCORE.set({ now: here.neg, best: best, worst: worst, key: 'neg',
+      verb: 'drag the direction',
+      won: 'most un-Gaussian direction in the plane',
+      next: 'look at the channel in the bottom panel' });
   }
 
   /* =====================================================================
@@ -1167,6 +1229,7 @@
     drawHead();
     drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
     drawStats();
+    drawScore();
   }
 
   function showTab(id) {
@@ -1177,12 +1240,25 @@
     var lab = document.querySelector('.labhead');
     // steps 3 to 5 have their own data and controls
     if (lab) lab.hidden = !/^p[12]$/.test(id);
+    SCORE.show(id === 'p5');
     var done = (id === 'pe' || id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
     if ($('pager')) $('pager').hidden = !done;
     S.tab = id;
     drawAll();
     saveState();
+    offerInvite(id);
+  }
+
+  /* A slider that has never moved looks like a label. This nudges it once,
+     when the step that needs it first appears, and puts it back. */
+  function offerInvite(id) {
+    if (id !== 'p5') return;
+    var r0 = S.rot;
+    SCORE.invite(function (phase) {
+      S.rot = Math.max(0, Math.min(175, Math.round(r0 + 15 * Math.sin(phase * Math.PI * 2))));
+      syncLabels(); drawAll();
+    }, { key: 'rot' });
   }
 
   document.querySelectorAll('#tabs button').forEach(function (b) {
@@ -1220,6 +1296,16 @@
 
   window.__M07 = {
     set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    score: function () {
+      var sw = sweep(), best = 0, worst = Infinity, i;
+      for (i = 0; i < sw.length; i++) {
+        if (sw[i].neg > best) best = sw[i].neg;
+        if (sw[i].neg < worst) worst = sw[i].neg;
+      }
+      var here = sw[Math.round(S.rot / 5)] || sw[0];
+      return { now: here.neg, best: best, worst: worst, pct: 100 * here.neg / best,
+               sep: here.sep };
+    },
     bins: function () { return bins(); },
     correlation: function () { return MV.corr(pairOf())[0][1]; },
     varianceCurve: function () {

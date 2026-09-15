@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What counts as a dimension | How PCA and ICA Actually Work</title>
+<meta name="description" content="An attribute is a dimension. So is a time sample, and so is a frequency. The same arithmetic on the same window, three ways, with eigenvectors that come out as wavelets and as spectra — and a result that beat changing the method.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="sidebyside.html">← Module 09</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 10 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>What counts as a dimension</h1>
+    <p class="sub">Every module so far has treated an attribute as a dimension, because that is the usual arrangement and because it had to be something. It is a choice, and there are others. A window of twenty-eight time samples is twenty-eight dimensions. A magnitude spectrum of twelve frequencies is twelve. The same arithmetic runs on all three, the eigenvectors come back looking completely different in each, and on this survey the choice mattered more than the choice of method did.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">One trace, three ways of writing it down</p>
+        <canvas id="cHead" aria-label="The same trace shown as six attribute values, as twenty-eight time samples, and as twelve frequency magnitudes"></canvas>
+        <div class="score" id="score">
+          <span class="say" id="scoreSay">try all three feature spaces</span>
+          <span class="track"><span class="fill" id="scoreFill"></span><span class="target" id="scoreTgt"></span></span>
+          <span class="pct" id="scorePct">&mdash;</span>
+        </div>
+      </div>
+      <div>
+        <p class="cap">Which feature space <span>&mdash; and which component of it</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>What is a dimension</h2>
+            <div class="seg" id="segSpace" role="group" aria-label="Which feature space">
+              <button type="button" data-space="attr">6 attributes</button>
+              <button type="button" data-space="wave">28 time samples</button>
+              <button type="button" data-space="spec">12 frequencies</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">Same window of the same survey in all three. Only
+              the question of what a dimension is has changed.</p>
+          </div>
+          <div class="ctl-col">
+            <h2>Which component</h2>
+            <div class="ctl">
+              <label for="pc">Component <span class="val" id="pcV">1</span></label>
+              <input type="range" data-key="pc" id="pc" min="1" max="6" step="1" value="1">
+            </div>
+            <div class="ctl">
+              <label for="trace">Which trace to show
+                <span class="val" id="traceV">channel axis</span></label>
+              <input type="range" data-key="trace" id="trace" min="0" max="2" step="1" value="0">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Five steps. The first three build the same thing three ways.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Three vectors</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Eigen-wavelets</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · Eigen-spectra</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Which wins</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · Choosing one</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>One trace, written down three ways</h3>
+      <span class="hint">Move the trace slider</span>
+    </div>
+
+    <p class="qbox"><b>A dimension is whatever you decided to put on an axis.</b> Nothing in the
+      arithmetic knows or cares what that was.</p>
+
+    <p class="lede"><b>Switch the feature space in the header.</b> Same trace, same window, three different
+      lists of numbers describing it.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">Six attributes computed over the window make a six-dimensional vector. The
+        twenty-eight time samples in that same window make a twenty-eight-dimensional one. The twelve
+        frequency magnitudes of the same window make a twelve-dimensional one. All three describe the
+        same piece of seismic data and all three are complete enough to work with.</p>
+      <p class="lede">Every trace in the survey supplies one of these vectors, so each feature space gives a
+        cloud of 5184 points in a space of its own. Everything from module 01 onward applies to each of
+        them identically, because nothing in a covariance matrix knows what its axes were.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The same window as three lists of numbers</h3>
+        <span class="hint">Attributes, samples, frequencies</span>
+      </div>
+      <canvas id="c1" aria-label="One seismic trace window shown as attribute values, as time samples, and as frequency magnitudes"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <label for="trace1">Which trace to show
+          <span class="val" id="trace1V">channel axis</span></label>
+        <input type="range" data-key="trace" id="trace1" min="0" max="2" step="1" value="0">
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>When a time sample is a dimension, the eigenvectors are wavelets</h3>
+      <span class="hint">Step through the components</span>
+    </div>
+
+    <p class="lede"><b>Drag through the components.</b> These are eigenvectors, the same object as module
+      04's loadings — and here each one is a waveform with 3, 3, 4 and 4 zero crossings.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">A loading is one number per dimension. When the dimensions are the twenty-eight
+        time samples of a window, a loading vector has twenty-eight numbers laid out in time, which is a
+        wavelet. Nothing made them wavelet-shaped except the data: the traces are wavelets, so the
+        directions of greatest spread among them are wavelets too.</p>
+      <p class="lede">The score for each component is then how much of that particular waveform is
+        present on each trace, which is a map. This is what AASPI's waveform classification programs
+        compute, and it is where their documentation calls the eigenvectors the initial training
+        waveforms and the projections the principal components.</p>
+      <p class="lede">The first four hold 55.0%, 21.6%, 11.5% and 7.4% of the variance, so four of
+        twenty-eight dimensions reach 95.5% — a much harder compression than six attributes
+        managed.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Eigenvectors as waveforms, and the map of each</h3>
+        <span class="hint">Channel axes marked</span>
+      </div>
+      <canvas id="c2" aria-label="The eigenvectors of the waveform covariance drawn as wavelets beside the map of each one's scores"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="pc2">Component <span class="val" id="pc2V">1</span></label>
+        <input type="range" data-key="pc" id="pc2" min="1" max="6" step="1" value="1">
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>When a frequency is a dimension, they are spectra</h3>
+      <span class="hint">Component 2 is the one to look at</span>
+    </div>
+
+    <p class="lede"><b>Component 1 is all one sign</b> — a brightness measure, peaking at 39 Hz.
+      <b>Component 2 changes sign</b>: low frequencies against high. That one is a frequency shift, and
+      it separates the channel at 7.95.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">Two components reach 95.4% here, against four for the waveform space and four for
+        the attributes. Magnitude spectra of a band-limited wavelet are smooth and strongly redundant
+        between neighbouring frequencies, so there is very little independent information across twelve
+        bins.</p>
+      <p class="lede">A component whose loadings are all the same sign is measuring how much there is of
+        everything, which is an amplitude. A component whose loadings change sign is measuring a balance
+        between the parts on either side of the change, which for a spectrum is a frequency shift. The
+        channel here is a tuned thin bed, so it shifts the spectrum rather than simply brightening it,
+        and the sign-changing component is the one that finds it.</p>
+      <p class="lede">Guo, Marfurt and Liu (2009) set this out as principal component spectral analysis.
+        The AASPI implementation goes further and decomposes magnitude and phase together as a single
+        complex quantity, which this module does not do.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Eigenvectors as spectra, and the map of each</h3>
+        <span class="hint">Frequency across, loading up</span>
+      </div>
+      <canvas id="c3" aria-label="The eigenvectors of the spectral covariance drawn against frequency beside the map of each one's scores"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="pc3">Component <span class="val" id="pc3V">1</span></label>
+        <input type="range" data-key="pc" id="pc3" min="1" max="6" step="1" value="1">
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>The feature space mattered more than the method</h3>
+      <span class="hint">Fill the bar</span>
+    </div>
+
+    <p class="lede"><b>Find the feature space and component that shows the channel best.</b> Then compare what
+      you find against everything the previous nine modules achieved.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">On the attribute space, the best principal component separated the channel at
+        2.81 and the best independent component at 6.47 — module 08's headline, and a good argument for
+        the harder method.</p>
+      <p class="lede">On the spectral space, ordinary PCA reaches 7.95. Changing what counted as a
+        dimension did more than changing the method did, on the same window of the same survey, and it
+        cost nothing beyond a different way of writing the data down.</p>
+      <p class="lede">That is not an argument that spectra are better than attributes. It is an argument
+        that the choice of feature space is a decision with consequences, and it is normally made without being noticed
+        at all.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Every component of every feature space, against the channel</h3>
+        <span class="hint">Previous results marked as lines</span>
+      </div>
+      <canvas id="c4" aria-label="Channel separation achieved by each component of each of the three feature spaces, with the results from earlier modules marked"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">What is a dimension</h2>
+        <div class="seg" id="segSpace4" role="group" aria-label="Which feature space">
+          <button type="button" data-space="attr">Attributes</button>
+          <button type="button" data-space="wave">Samples</button>
+          <button type="button" data-space="spec">Frequencies</button>
+        </div>
+      </div>
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="pc4">Component <span class="val" id="pc4V">1</span></label>
+        <input type="range" data-key="pc" id="pc4" min="1" max="6" step="1" value="1">
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Choosing a feature space on purpose</h3>
+      <span class="hint">Three questions, three answers</span>
+    </div>
+
+    <p class="lede">The feature space is chosen by what you are looking for, and the programs that implement
+      each one are separate programs with separate documentation.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The three feature spaces as properties</h3>
+        <span class="hint">Measured here, except where noted</span>
+      </div>
+      <canvas id="c5" aria-label="A comparison of the three feature spaces: what a dimension is, what an eigenvector looks like, and what each is good for"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 280px;min-width:260px">
+        <h2 style="margin:0 0 6px">Show</h2>
+        <div class="seg" id="segCmp" role="group" aria-label="Which comparison">
+          <button type="button" data-cmp="what">What a dimension is</button>
+          <button type="button" data-cmp="eig">What comes back</button>
+          <button type="button" data-cmp="use">What each suits</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>None of the three is a different method. Every number on this page came out of the same
+        eigensolver reading the same kind of covariance matrix, and the only thing that changed between
+        them was what got written on the axes.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">Where this shows up in real work</span>
+    </div>
+    <p class="lede">The feature space is chosen before anything else and is usually inherited from whichever
+      program was opened. It is worth choosing on purpose.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Reading a paper or a manual.</b> "PCA on seismic data" describes at least three different
+        analyses. A figure of eigenvectors that look like wavelets is the waveform space; a bar chart
+        against attribute names is the attribute space. They are not comparable.</li>
+      <li><b>Waveform classification.</b> Projecting traces onto a few eigen-wavelets and classifying the
+        result is a standard facies workflow, and the eigen-wavelets are the vocabulary it uses.</li>
+      <li><b>Before reaching for a harder method.</b> Here, rewriting the data as spectra outperformed
+        switching from PCA to ICA. That is a cheap thing to try first.</li>
+      <li><b>Knowing what the components mean.</b> All-one-sign loadings measure how much there is of
+        everything. Sign-changing loadings measure a balance. That reading works in every feature space, and it
+        is usually the fastest way to name a component.</li>
+    </ul>
+    <p class="lede"><b>Two points that are commonly confused.</b> The first is that more dimensions means
+      more information. The spectral feature space has twelve dimensions carrying less independent content than
+      six attributes did — two components reach 95% — because neighbouring frequencies of a band-limited
+      wavelet are nearly the same measurement. The second is that these are alternative methods. They are
+      one method applied to three different descriptions of identical data.</p>
+    <div class="legend prose">
+      <span>The result on this page is one target on one synthetic survey. What transfers is not that
+        spectra win, but that the choice of feature space is a lever most people never touch.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Count the dimensions three ways.</b>
+          <em class="point">Why: "dimension" is the word that causes the most trouble, and this fixes
+            it.</em>
+          In step 1, switch between the three feature spaces and note how many numbers describe one trace in
+          each.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Six, twenty-eight and twelve,
+            for the same window of the same trace. The survey has 5184 traces, so each feature space gives a
+            cloud of 5184 points in a space of that many dimensions. Nothing in the arithmetic notices
+            the difference: a covariance matrix is a covariance matrix whether its axes are attributes,
+            milliseconds or hertz.</span></details></li>
+
+        <li><b>Look at an eigenvector that is a wavelet.</b>
+          <em class="point">Why: seeing a loading vector as a signal rather than a bar chart is what
+            makes the waveform literature readable.</em>
+          In step 2, step through the first four components and count the zero crossings of each.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Three, three, four and four.
+            They look like wavelets because the data are wavelets — the direction of greatest spread
+            among a set of wavelets is itself a wavelet. The four components hold 55.0%, 21.6%, 11.5%
+            and 7.4%, reaching 95.5% between them, so four of twenty-eight dimensions carry almost
+            everything. The score of each is a map of how much of that particular waveform sits on each
+            trace, which is exactly what a waveform classification is built
+            from.</span></details></li>
+
+        <li><b>Name a component from its loadings alone.</b>
+          <em class="point">Why: this reading works in every feature space and is the quickest way to know what
+            a component contains.</em>
+          In step 3, compare the sign pattern of spectral component 1 against component 2, then look at
+          their maps.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Component 1 is positive at
+            every frequency, peaking at 39 Hz, so it measures how much spectrum there is altogether —
+            a brightness. Component 2 runs 0.46, 0.54, 0.33 at the low end and &minus;0.36, &minus;0.41,
+            &minus;0.27 in the middle, so it measures low frequencies against high, which is a frequency
+            shift. The channel is a tuned thin bed and shifts the spectrum rather than simply
+            brightening it, so component 2 is the one that finds it: 7.95 against 2.08. All-one-sign
+            means an amount, sign-changing means a balance, and that holds for attribute loadings and
+            eigen-wavelets equally.</span></details></li>
+
+        <li><b>Beat module 08 without changing the method.</b>
+          <em class="point">Why: the feature space is a cheaper lever than the algorithm and almost nobody
+            reaches for it.</em>
+          In step 4, find the best component of each feature space and set the three against the results marked
+          on the panel.
+          <em class="predict">Before starting: module 08 needed ICA to get from 2.81 to 6.47. Commit to
+            whether ordinary PCA in a different feature space can do better.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">Attributes: 2.81. Time
+            samples: 3.09. Frequencies: 7.95. Plain PCA on the spectral space beats the independent
+            component analysis of module 08, which reached 6.47, and beats every attribute result in the
+            set. Nothing about the method changed — same eigensolver, same covariance matrix, same
+            survey, same window. Only the axes were relabelled. Two readings of that are available and the page does not choose between them.
+            It may be that spectra suit this target, because a tuned thin bed shifts the spectrum and the
+            attribute set contains only one frequency measure. Or it may be that twelve frequency bins
+            describe the window more completely than six hand-chosen attributes do. The experiment run
+            here cannot separate those. What it does establish is that changing the feature space is
+            worth trying before reaching for a harder algorithm.</span></details></li>
+
+        <li><b>Find where the extra dimensions went.</b>
+          <em class="point">Why: a bigger space is not automatically a richer one, and this is the
+            clearest case in the set.</em>
+          Read how many components each feature space needs to reach 90% of its variance.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Attributes need four of six.
+            Time samples need four of twenty-eight. Frequencies need two of twelve. The spectral feature space
+            has twice as many dimensions as the attribute space and less independent content in them,
+            because the magnitude spectrum of a band-limited wavelet is smooth and neighbouring bins are
+            nearly the same number. Counting dimensions tells you about the description; counting
+            components tells you about the data.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>A dimension is whatever you put on an axis.</b> An attribute, a millisecond, a hertz. The
+          arithmetic does not know the difference.</li>
+        <li><b>Eigenvectors look like whatever the axes were.</b> Twenty-eight time samples give
+          eigenvectors that are wavelets, with 3, 3, 4 and 4 zero crossings here.</li>
+        <li><b>All-one-sign loadings measure an amount; sign-changing loadings measure a balance.</b>
+          That reading names a component in any feature space.</li>
+        <li><b>The feature space can matter more than the method.</b> Plain PCA on spectra reached 7.95 against
+          6.47 for ICA on attributes, on the same window.</li>
+        <li><b>More dimensions is not more information.</b> Twelve frequencies needed two components for
+          90%; six attributes needed four.</li>
+        <li><b>These are not three methods.</b> One method, three descriptions of identical data.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>All three feature spaces use the same window</b>, samples 22 to 50 of the same 72 by 72
+      trace synthetic survey the whole set uses, and the same 5184 traces.</p>
+    <p class="lede"><b>The attribute feature space</b> is the six of modules 04 to 08, Z-scored, which is the
+      correlation route of module 03. <b>The waveform feature space</b> takes the twenty-eight samples directly
+      with means removed and no standardization, because every sample is already in the same amplitude
+      units and standardizing them individually would distort the wavelet shape. <b>The spectral feature space</b>
+      takes the magnitude spectrum of the Hann-tapered window on a 64-point transform, keeping the first
+      twelve bins, which at 2 ms sampling is 7.8 to 93.8 Hz, again with means removed only.</p>
+    <p class="lede"><b>The separation statistic</b> is identical to modules 05 to 09 and is described in
+      module 06's Method tab, so every number here can be set directly beside the ones there. The
+      comparison figures quoted from earlier modules are 2.81 for the best attribute principal component,
+      6.47 for the best independent component and 8.97 for the best direction module 06 found, all on the attribute
+      feature space.</p>
+    <p class="lede"><b>What this leaves out of the published methods.</b> AASPI's complex principal
+      component spectral analysis decomposes magnitude and phase together as one complex quantity with a
+      self-adjoint covariance matrix, following Guo et al. (2009); this module uses magnitudes only, which
+      is simpler and discards the phase. Its waveform programs run on windows tracked along an
+      interpreted horizon rather than on a flat window, and classify the resulting scores rather than
+      stopping at them. Neither difference changes what an eigenvector is or what it looks like, which is
+      what this module is about.</p>
+    <p class="lede"><b>An error in the source documentation, for the record.</b> The AASPI documents for
+      <span class="k">pca_waveform_classification</span> and <span class="k">real_pca_waveform</span>
+      state that the principal components are not orthogonal. Module 04 measures the score vectors of
+      this set at mutual dot products of about 10⁻¹⁵, which is orthogonal to machine precision; with the
+      means removed, uncorrelated and orthogonal are the same statement. The two documents also have
+      their menu paths swapped, and <span class="k">complex_pca_spectra</span> writes the eigenvalue
+      decomposition of the covariance matrix where it means the eigenvector matrix.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> One window on one synthetic survey. The
+      window is flat, where real waveform work follows a horizon and a flat window across dipping strata
+      mixes different geology into the same dimension. No decimation. The spectral feature space keeps twelve
+      bins because that covers the useful band of a 30 Hz wavelet; a different choice of transform length
+      or band would give different numbers.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Guo, H., K. J. Marfurt, and J. Liu, 2009, Principal component spectral analysis:
+          <em>Geophysics</em>, <b>74</b>, P35&ndash;P43.</li>
+        <li>Coléou, T., M. Poupon, and K. Azbel, 2003, Unsupervised seismic facies classification: a
+          review and comparison of techniques and implementation: <em>The Leading Edge</em>, <b>22</b>,
+          942&ndash;953 — waveform classification.</li>
+        <li>Partyka, G., J. Gridley, and J. Lopez, 1999, Interpretational applications of spectral
+          decomposition in reservoir characterization: <em>The Leading Edge</em>, <b>18</b>,
+          353&ndash;360.</li>
+        <li>Chopra, S., and K. J. Marfurt, 2007, <em>Seismic Attributes for Prospect Identification and
+          Reservoir Characterization</em>: SEG Geophysical Development Series 11.</li>
+        <li>Jolliffe, I. T., 2002, <em>Principal Component Analysis</em>, 2nd ed.: Springer.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>11 · Components are not geology</h3>
+    <p>The last module in the set, and the one that says what none of this can do. An artifact arriving as
+      a component, a real feature nothing finds, and where to go when a straight line through the data is
+      not enough.</p>
+    <a class="btn ghost" href="notgeology.html">Module 11 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="sidebyside.html">← Module 09: the two, side by side</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="notgeology.html">Module 11: components are not geology →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened &mdash; no cookie, no account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/score.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+  var NX = 72, NY = 72, N = NX * NY, T0 = 22, T1 = 50, J = T1 - T0;
+  var NF = 64, NB = 12;
+  var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
+  var SHORT = { rms: 'RMS', envelope: 'env', peakfreq: 'f peak', bandwidth: 'bandw',
+                coherence: 'coher', glcmcon: 'GLCM' };
+
+  /* Results carried in from earlier modules, for the comparison in step 4. */
+  var PRIOR = { pca: 2.812, ica: 6.473, attr: 5.972, ceiling: 8.973 };
+
+  var DEF = { space: 'attr', pc: 1, trace: 0, cmp: 'what', tab: 'p1' };
+  var S = MV.readState(DEF);
+  if (['attr', 'wave', 'spec'].indexOf(S.space) < 0) S.space = 'attr';
+  S.pc = Math.max(1, Math.min(6, Math.round(S.pc)));
+  S.trace = Math.max(0, Math.min(2, Math.round(S.trace)));
+  if (['what', 'eig', 'use'].indexOf(S.cmp) < 0) S.cmp = 'what';
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  /* =====================================================================
+     THE THREE FRAMINGS
+
+     Same window, same traces. Only what goes on an axis changes.
+     ===================================================================== */
+
+  var SURVEY = null;
+  function survey() {
+    if (SURVEY) return SURVEY;
+    var slab = AF.build({ nx: NX, ny: NY, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var attr = AF.attributes(slab, CORE);
+
+    // waveform: one dimension per time sample in the window
+    var W = [], j, ix, iy;
+    for (j = 0; j < J; j++) {
+      var col = new Float64Array(N);
+      for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+        col[ix * NY + iy] = slab.data[(ix * NY + iy) * slab.nt + T0 + j];
+      }
+      W.push(col);
+    }
+
+    // spectral: one dimension per frequency bin of the same window
+    var F = [], f;
+    for (f = 0; f < NB; f++) F.push(new Float64Array(N));
+    for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+      var re = new Float64Array(NF), im = new Float64Array(NF);
+      for (j = 0; j < J; j++) {
+        var w = 0.5 - 0.5 * Math.cos(2 * Math.PI * j / (J - 1));
+        re[j] = slab.data[(ix * NY + iy) * slab.nt + T0 + j] * w;
+      }
+      AF.fft(re, im, false);
+      for (f = 0; f < NB; f++) F[f][ix * NY + iy] = Math.hypot(re[f + 1], im[f + 1]);
+    }
+
+    SURVEY = {
+      slab: slab, attr: attr, df: 1 / (NF * slab.dt),
+      spaces: {
+        attr: { X: CORE.map(function (n) { return attr[n]; }), dims: CORE.length,
+                label: 'attributes', std: true,
+                axis: CORE.map(function (n) { return SHORT[n]; }) },
+        wave: { X: W, dims: J, label: 'time samples', std: false,
+                axis: null },
+        spec: { X: F, dims: NB, label: 'frequencies', std: false, axis: null }
+      }
+    };
+    Object.keys(SURVEY.spaces).forEach(function (k) {
+      var sp = SURVEY.spaces[k];
+      sp.P = MV.pca(sp.X, sp.std ? { standardize: true } : {});
+    });
+    return SURVEY;
+  }
+
+  function space(which) { return survey().spaces[which || S.space]; }
+
+  /* The separation statistic, identical to modules 05 to 09. */
+  var MASK = null;
+  function masks() {
+    if (MASK) return MASK;
+    var axis = [], marg = [], ix, iy;
+    for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+      var yc = AF.centerline(ix, NX, AF.YOUNG) * (NY - 1);
+      var d = Math.abs(iy - yc) / (AF.YOUNG.halfWidth * (NY - 1));
+      var k = ix * NY + iy;
+      if (d < 0.45) axis.push(k); else if (d > 1.1 && d < 2.0) marg.push(k);
+    }
+    MASK = { axis: axis, marg: marg };
+    return MASK;
+  }
+  function sep(m) {
+    var M = masks();
+    var a = M.axis.map(function (k) { return m[k]; });
+    var b = M.marg.map(function (k) { return m[k]; });
+    var ma = MV.mean(a), mb = MV.mean(b);
+    var sa = MV.std(a, ma), sb = MV.std(b, mb);
+    return (ma - mb) / Math.sqrt((sa * sa + sb * sb) / 2 || 1);
+  }
+
+  /* Three traces worth looking at: on the channel, on its margin, in the
+     background. Chosen from the model, once. */
+  var TRACES = null;
+  function traces() {
+    if (TRACES) return TRACES;
+    var ix = Math.round(NX * 0.5);
+    var yc = AF.centerline(ix, NX, AF.YOUNG) * (NY - 1);
+    var hw = AF.YOUNG.halfWidth * (NY - 1);
+    TRACES = [
+      { k: ix * NY + Math.round(yc), label: 'channel axis' },
+      { k: ix * NY + Math.round(Math.min(NY - 1, yc + 1.5 * hw)), label: 'channel margin' },
+      { k: ix * NY + Math.round(Math.min(NY - 1, yc + 4.0 * hw)), label: 'background' }
+    ];
+    return TRACES;
+  }
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+  function grid(ctx, r, y0, y1, nx, ny, yfmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE; ctx.strokeStyle = '#E4E7EA'; ctx.lineWidth = 1;
+    var i, X, Y, v;
+    for (i = 0; i <= nx; i++) {
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      if (yfmt !== false) ctx.fillText(yfmt ? yfmt(v) : v.toFixed(1), r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var stops = [[26, 47, 63], [61, 109, 125], [166, 196, 198], [244, 240, 227],
+                 [214, 156, 110], [166, 71, 52], [102, 20, 24]];
+    var u = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(u)), f = u - i;
+    var a = stops[i], b = stops[i + 1];
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * f) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * f) + ',' + Math.round(a[2] + (b[2] - a[2]) * f) + ')';
+  }
+  function drawMap(ctx, r, m, title, sub) {
+    var q = Math.max(Math.abs(AF.percentile(m, 0.01)), Math.abs(AF.percentile(m, 0.99))) || 1;
+    var cw = r.w / NX, ch = r.h / NY, ix, iy;
+    for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+      ctx.fillStyle = cmap((m[ix * NY + iy] + q) / (2 * q));
+      ctx.fillRect(r.x + ix * cw, r.y + (NY - 1 - iy) * ch, cw + 0.6, ch + 0.6);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.lineWidth = 1.1;
+    [[AF.YOUNG, 'rgba(255,255,255,0.9)', []], [AF.OLD, 'rgba(255,255,255,0.65)', [4, 3]]]
+      .forEach(function (p) {
+        ctx.strokeStyle = p[1]; ctx.setLineDash(p[2]);
+        ctx.beginPath();
+        for (var jx = 0; jx < NX; jx++) {
+          var yc = AF.centerline(jx, NX, p[0]) * (NY - 1);
+          var X = r.x + (jx + 0.5) * r.w / NX, Y = r.y + r.h - (yc + 0.5) * r.h / NY;
+          if (jx === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+        }
+        ctx.stroke();
+      });
+    ctx.setLineDash([]);
+    if (title) {
+      ctx.fillStyle = INK; ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 5);
+    }
+    if (sub) {
+      ctx.fillStyle = SLATE; ctx.textAlign = 'left';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(sub, r.x, r.y + r.h + 14);
+    }
+    ctx.restore();
+  }
+
+  /* A vector drawn against its own axis: bars for attributes, a line for a
+     waveform, a line for a spectrum. */
+  function drawVector(ctx, r, v, kind, title, color) {
+    var n = v.length, i;
+    var mx = 0;
+    for (i = 0; i < n; i++) mx = Math.max(mx, Math.abs(v[i]));
+    mx = mx || 1;
+    grid(ctx, r, -mx, mx, Math.min(n, 8), 2, false);
+    var zero = r.y + r.h / 2;
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(r.x, zero); ctx.lineTo(r.x + r.w, zero); ctx.stroke();
+    ctx.restore();
+    if (kind === 'bars') {
+      var bw = r.w / n;
+      for (i = 0; i < n; i++) {
+        var h = v[i] / mx * (r.h / 2);
+        ctx.save();
+        ctx.fillStyle = color; ctx.globalAlpha = 0.88;
+        ctx.fillRect(r.x + i * bw + bw * 0.2, Math.min(zero, zero - h), bw * 0.6, Math.abs(h));
+        ctx.restore();
+      }
+    } else {
+      ctx.save();
+      ctx.strokeStyle = color; ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      for (i = 0; i < n; i++) {
+        var X = r.x + (n === 1 ? 0.5 : i / (n - 1)) * r.w;
+        var Y = zero - v[i] / mx * (r.h / 2);
+        if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    }
+    if (title) {
+      ctx.save();
+      ctx.fillStyle = INK; ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 5);
+      ctx.restore();
+    }
+  }
+
+  function kindOf(which) { return (which || S.space) === 'attr' ? 'bars' : 'line'; }
+
+  /* =====================================================================
+     HEADER
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 168;
+    var ctx = fit('cHead', w, h);
+    if (!ctx) return;
+    var sv = survey(), t = traces()[S.trace];
+    var pw = Math.min(190, (w - 60) / 3);
+    var gap = Math.max(12, (w - 20 - 3 * pw) / 3);
+    ['attr', 'wave', 'spec'].forEach(function (key, k) {
+      var sp = sv.spaces[key];
+      var v = sp.X.map(function (col) { return col[t.k]; });
+      var r = { x: 10 + k * (pw + gap), y: 26, w: pw, h: h - 26 - 34 };
+      ctx.save();
+      ctx.globalAlpha = (key === S.space) ? 1 : 0.4;
+      drawVector(ctx, r, v, kindOf(key), sp.dims + ' ' + sp.label,
+        key === S.space ? CRIM : SLATE);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.fillStyle = SLATE; ctx.textAlign = 'left';
+    ctx.fillText('trace on the ' + t.label, 10, h - 10);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     STEPS
+     ===================================================================== */
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 230;
+    var ctx = fit('c1', w, h);
+    if (!ctx) return;
+    var sv = survey(), t = traces()[S.trace];
+    var pw = Math.min(250, (w - 70) / 3);
+    var gap = Math.max(14, (w - 20 - 3 * pw) / 3);
+    ['attr', 'wave', 'spec'].forEach(function (key, k) {
+      var sp = sv.spaces[key];
+      var v = sp.X.map(function (col) { return col[t.k]; });
+      var r = { x: 10 + k * (pw + gap), y: 26, w: pw, h: h - 26 - 40 };
+      drawVector(ctx, r, v, kindOf(key), sp.dims + ' ' + sp.label, CRIM);
+      ctx.save();
+      ctx.fillStyle = SLATE; ctx.textAlign = 'left';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(key === 'wave' ? '22 to 50 ms into the window'
+        : key === 'spec' ? '7.8 to 93.8 Hz' : 'one bar per attribute',
+        r.x, r.y + r.h + 16);
+      ctx.restore();
+    });
+  }
+
+  function drawComponentPanel(id, which) {
+    var host = $(id);
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var sp = space(which);
+    var c = Math.min(S.pc, sp.dims) - 1;
+    var size = Math.min(230, (w - 80) / 2);
+    var ctx = fit(id, w, size + 46);
+    if (!ctx) return;
+    var v = Array.prototype.slice.call(sp.P.vectors[c]);
+    var rV = { x: 46, y: 26, w: Math.max(150, w - size - 90), h: size };
+    drawVector(ctx, rV, v, kindOf(which),
+      'component ' + (c + 1) + ' \u2014 ' + (sp.P.explained[c] * 100).toFixed(2) + '% of the variance',
+      CRIM);
+    var rM = { x: w - size - 10, y: 26, w: size, h: size };
+    drawMap(ctx, rM, sp.P.scores[c], 'its score, as a map',
+      'channel separation ' + Math.abs(sep(sp.P.scores[c])).toFixed(2));
+    ctx.save();
+    ctx.fillStyle = SLATE; ctx.textAlign = 'left';
+    ctx.font = '10px ui-monospace,Menlo,monospace';
+    ctx.fillText(which === 'wave' ? 'one loading per time sample'
+      : which === 'spec' ? 'one loading per frequency, 7.8 to 93.8 Hz'
+      : 'one loading per attribute', rV.x, rV.y + rV.h + 16);
+    ctx.restore();
+  }
+
+  function drawStep2() { drawComponentPanel('c2', 'wave'); }
+  function drawStep3() { drawComponentPanel('c3', 'spec'); }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 290;
+    var ctx = fit('c4', w, h);
+    if (!ctx) return;
+    var sv = survey();
+    var r = { x: 56, y: 14, w: w - 56 - 24, h: h - 14 - 58 };
+    grid(ctx, r, 0, 9, 6, 3);
+    var order = ['attr', 'wave', 'spec'], groupW = r.w / 3;
+    order.forEach(function (key, gi) {
+      var sp = sv.spaces[key];
+      var nshow = Math.min(6, sp.dims);
+      var bw = groupW / (nshow + 1);
+      for (var i = 0; i < nshow; i++) {
+        var v = Math.abs(sep(sp.P.scores[i]));
+        var x = r.x + gi * groupW + (i + 0.5) * bw + bw * 0.25;
+        var y = r.y + r.h - Math.min(9, v) / 9 * r.h;
+        ctx.save();
+        ctx.globalAlpha = (key === S.space && i === S.pc - 1) ? 1 : 0.55;
+        ctx.fillStyle = key === S.space ? CRIM : SLATE;
+        ctx.fillRect(x, y, bw * 0.6, r.y + r.h - y);
+        ctx.restore();
+      }
+      ctx.save();
+      ctx.fillStyle = INK; ctx.textAlign = 'center';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(sp.dims + ' ' + sp.label, r.x + gi * groupW + groupW / 2, r.y + r.h + 20);
+      ctx.restore();
+    });
+    [[PRIOR.ica, TEAL, 'ICA on attributes, module 08'],
+     [PRIOR.ceiling, INK, 'best found, module 06']].forEach(function (q) {
+      var Y = r.y + r.h - Math.min(9, q[0]) / 9 * r.h;
+      ctx.save();
+      ctx.strokeStyle = q[1]; ctx.lineWidth = 1.4; ctx.setLineDash([6, 4]);
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = q[1]; ctx.textAlign = 'right';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(q[2], r.x + r.w - 6, Y - 5);
+      ctx.restore();
+    });
+    ctx.save();
+    ctx.fillStyle = SLATE; ctx.textAlign = 'left';
+    ctx.fillText('channel separation of each component, first six of each feature space',
+      r.x + 6, r.y + 14);
+    ctx.restore();
+  }
+
+  var TABLES = {
+    what: ['What a dimension is', [
+      ['attributes', 'one measured property of the window; six here'],
+      ['time samples', 'one amplitude at one time; twenty-eight here'],
+      ['frequencies', 'one magnitude at one frequency; twelve here'],
+      ['all three', 'the same 5184 traces and the same window'],
+      ['all three', 'the same covariance matrix and the same solver']
+    ]],
+    eig: ['What an eigenvector looks like', [
+      ['attributes', 'a list of weights, one per attribute'],
+      ['time samples', 'a wavelet; 3, 3, 4 and 4 zero crossings here'],
+      ['frequencies', 'a spectrum; all one sign is brightness, sign change is a shift'],
+      ['attributes', '4 of 6 components reach 90%'],
+      ['time samples', '4 of 28 reach 90%'],
+      ['frequencies', '2 of 12 reach 90%']
+    ]],
+    use: ['What each suits', [
+      ['attributes', 'combining unlike measurements; needs module 03\u2019s choice made'],
+      ['time samples', 'waveform classification and facies mapping'],
+      ['time samples', 'compressing or denoising traces by reconstruction'],
+      ['frequencies', 'anything tuning-related, where the spectrum shifts'],
+      ['frequencies', 'reducing a spectral decomposition to a few volumes for blending']
+    ]]
+  };
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var T = TABLES[S.cmp], rows = T[1], rowH = 32;
+    var ctx = fit('c5', w, rows.length * rowH + 44);
+    if (!ctx) return;
+    ctx.save();
+    ctx.fillStyle = INK; ctx.textAlign = 'left';
+    ctx.font = '600 12px ui-monospace,Menlo,monospace';
+    ctx.fillText(T[0], 8, 18);
+    ctx.restore();
+    var COL = { attributes: CRIM, 'time samples': TEAL, frequencies: SLATE, 'all three': INK };
+    rows.forEach(function (row, i) {
+      var y = 32 + i * rowH;
+      ctx.save();
+      if (i % 2 === 0) { ctx.fillStyle = '#F4F6F7'; ctx.fillRect(8, y, w - 16, rowH - 2); }
+      ctx.fillStyle = COL[row[0]] || INK;
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(row[0], 18, y + 20);
+      ctx.fillStyle = INK;
+      ctx.font = '12px system-ui, -apple-system, sans-serif';
+      ctx.fillText(row[1], 128, y + 20);
+      ctx.restore();
+    });
+  }
+
+  /* =====================================================================
+     SCORE AND READOUTS
+     ===================================================================== */
+
+  function allSeps() {
+    var sv = survey(), out = [];
+    ['attr', 'wave', 'spec'].forEach(function (key) {
+      var sp = sv.spaces[key];
+      for (var i = 0; i < Math.min(6, sp.dims); i++) {
+        out.push({ space: key, pc: i + 1, sep: Math.abs(sep(sp.P.scores[i])) });
+      }
+    });
+    return out;
+  }
+  function scoreNow() {
+    var all = allSeps(), best = 0, worst = Infinity, i;
+    for (i = 0; i < all.length; i++) {
+      if (all[i].sep > best) best = all[i].sep;
+      if (all[i].sep < worst) worst = all[i].sep;
+    }
+    var sp = space();
+    var now = Math.abs(sep(sp.P.scores[Math.min(S.pc, sp.dims) - 1]));
+    return { now: now, best: best, worst: worst, pct: 100 * now / best };
+  }
+  function drawScore() {
+    var s = scoreNow();
+    SCORE.set({ now: s.now, best: s.best, worst: s.worst, key: 'space',
+      verb: 'try each feature space, and each component of it',
+      won: 'best component in any of the three feature spaces',
+      next: 'plain PCA, and it beat the ICA result' });
+  }
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function cumFor(sp, frac) { return MV.componentsFor(sp.P, frac); }
+
+  function drawStats() {
+    var sv = survey(), sp = space();
+    var c = Math.min(S.pc, sp.dims) - 1;
+    if ($('s1')) {
+      var t = traces()[S.trace];
+      $('s1').innerHTML =
+        stat('Attributes', '6', 'numbers describing this window') +
+        stat('Time samples', String(J), 'the same window') +
+        stat('Frequencies', String(NB), '7.8 to 93.8 Hz') +
+        stat('Trace', t.label, 'one point in each of three clouds');
+    }
+    if ($('s2')) {
+      var wv = sv.spaces.wave, cw = Math.min(S.pc, wv.dims) - 1;
+      var v = wv.P.vectors[cw], zc = 0, i;
+      for (i = 1; i < v.length; i++) if (v[i] * v[i - 1] < 0) zc++;
+      $('s2').innerHTML =
+        stat('Component ' + (cw + 1), (wv.P.explained[cw] * 100).toFixed(2) + '%', 'of the variance') +
+        stat('Zero crossings', String(zc), 'it is a wavelet') +
+        stat('Channel separation', Math.abs(sep(wv.P.scores[cw])).toFixed(2), 'of its score map') +
+        stat('Components for 90%', cumFor(wv, 0.9) + ' of ' + wv.dims, 'a hard compression');
+    }
+    if ($('s3')) {
+      var fs = sv.spaces.spec, cf = Math.min(S.pc, fs.dims) - 1;
+      var vf = fs.P.vectors[cf], zf = 0, b = 0, k;
+      for (k = 1; k < vf.length; k++) if (vf[k] * vf[k - 1] < 0) zf++;
+      for (k = 0; k < vf.length; k++) if (Math.abs(vf[k]) > Math.abs(vf[b])) b = k;
+      $('s3').innerHTML =
+        stat('Component ' + (cf + 1), (fs.P.explained[cf] * 100).toFixed(2) + '%', 'of the variance') +
+        stat('Sign changes', String(zf), zf === 0 ? 'an amount' : 'a balance') +
+        stat('Largest loading at', ((b + 1) * sv.df).toFixed(0) + ' Hz', 'where it weighs most') +
+        stat('Channel separation', Math.abs(sep(fs.P.scores[cf])).toFixed(2), 'of its score map');
+    }
+    if ($('s4')) {
+      var all = allSeps();
+      var bestAll = all.reduce(function (a, b2) { return b2.sep > a.sep ? b2 : a; });
+      var lab = { attr: 'attributes', wave: 'time samples', spec: 'frequencies' };
+      $('s4').innerHTML =
+        stat('This component', Math.abs(sep(sp.P.scores[c])).toFixed(2),
+          lab[S.space] + ', component ' + (c + 1)) +
+        stat('Best anywhere', bestAll.sep.toFixed(2),
+          lab[bestAll.space] + ', component ' + bestAll.pc) +
+        stat('ICA on attributes', PRIOR.ica.toFixed(2), 'module 08') +
+        stat('Supervised ceiling', PRIOR.ceiling.toFixed(2), 'module 06, attribute feature space');
+    }
+    if ($('s5')) {
+      $('s5').innerHTML =
+        stat('Attributes', cumFor(sv.spaces.attr, 0.9) + ' of 6', 'components for 90%') +
+        stat('Time samples', cumFor(sv.spaces.wave, 0.9) + ' of ' + J, 'components for 90%') +
+        stat('Frequencies', cumFor(sv.spaces.spec, 0.9) + ' of ' + NB, 'components for 90%') +
+        stat('Same solver', 'all three', 'nothing about the method changed');
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+  var TRLAB = ['channel axis', 'channel margin', 'background'];
+
+  function syncLabels() {
+    ['pc', 'pc2', 'pc3', 'pc4'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.pc;
+      var v = $(id + 'V'); if (v) v.textContent = String(S.pc);
+    });
+    ['trace', 'trace1'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.trace;
+      var v = $(id + 'V'); if (v) v.textContent = TRLAB[S.trace];
+    });
+    document.querySelectorAll('#segSpace button, #segSpace4 button').forEach(function (b) {
+      var on = b.dataset.space === S.space;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+    document.querySelectorAll('#segCmp button').forEach(function (b) {
+      var on = b.dataset.cmp === S.cmp;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+    drawScore();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !/^p[1-4]$/.test(id);
+    SCORE.show(id === 'p4');
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+    offerInvite(id);
+  }
+
+  function offerInvite(id) {
+    if (id !== 'p4') return;
+    var p0 = S.pc;
+    SCORE.invite(function (phase) {
+      S.pc = Math.max(1, Math.min(6, p0 + Math.round(2 * Math.sin(phase * Math.PI * 2))));
+      syncLabels(); drawAll();
+    }, { key: 'space', frames: 30 });
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('#segSpace button, #segSpace4 button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.space = b.dataset.space; syncLabels(); drawAll(); saveState();
+    });
+  });
+  document.querySelectorAll('#segCmp button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.cmp = b.dataset.cmp; syncLabels(); drawAll(); saveState();
+    });
+  });
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t || t.tagName !== 'INPUT') return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    S[key] = parseFloat(t.value);
+    syncLabels(); drawAll(); saveState();
+  });
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt); rt = setTimeout(drawAll, 140);
+  });
+
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M10 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    spaces: function () {
+      var sv = survey();
+      return ['attr', 'wave', 'spec'].map(function (key) {
+        var sp = sv.spaces[key];
+        return {
+          space: key, dims: sp.dims,
+          explained: sp.P.explained.slice(0, 6),
+          k90: MV.componentsFor(sp.P, 0.9),
+          seps: sp.P.scores.slice(0, 6).map(function (s) { return sep(s); }),
+          crossings: sp.P.vectors.slice(0, 6).map(function (v) {
+            var z = 0;
+            for (var i = 1; i < v.length; i++) if (v[i] * v[i - 1] < 0) z++;
+            return z;
+          })
+        };
+      });
+    },
+    loadings: function (key, c) {
+      return Array.prototype.slice.call(survey().spaces[key].P.vectors[c]);
+    },
+    score: function () { return scoreNow(); },
+    prior: function () { return PRIOR; }
+  };
+})();
+</script>
+</body>
+</html>

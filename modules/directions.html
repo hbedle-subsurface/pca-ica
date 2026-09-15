@@ -29,8 +29,13 @@
   <div class="labhead">
     <div class="labgrid">
       <div>
-        <p class="cap">Two attributes, one point per trace <span>&mdash; drag the direction through it</span></p>
-        <canvas id="cHead" aria-label="Crossplot of two seismic attributes with a rotatable direction line through the center of the cloud"></canvas>
+        <p class="cap">Two attributes, one point per trace <span>&mdash; grab the crimson line and swing it</span></p>
+        <canvas id="cHead" class="grabbable" aria-label="Crossplot of two seismic attributes with a direction line through the center of the cloud that can be dragged"></canvas>
+        <div class="score" id="score">
+          <span class="say" id="scoreSay">drag the line around</span>
+          <span class="track"><span class="fill" id="scoreFill"></span><span class="target" id="scoreTgt"></span></span>
+          <span class="pct" id="scorePct">&mdash;</span>
+        </div>
       </div>
       <div>
         <p class="cap">Choose the pair, then choose a direction <span>&mdash; every panel updates as you drag</span></p>
@@ -97,7 +102,12 @@
       <p class="lede">The two attributes are measuring overlapping things, so a trace with a strong
         reflection tends to be strong in both. That overlap is what makes one of them partly predictable
         from the other, and it is the reason a set of twelve attributes is rarely twelve independent
-        pieces of information.</p></details>
+        pieces of information.</p>
+      <p class="lede">Worth keeping in mind for everything that follows: a bright amplitude has several
+        possible causes. A large impedance contrast will do it, so will a bed close to its tuning
+        thickness, and so will constructive interference between reflections that have nothing to do with
+        each other. The attributes cannot separate those, and neither can any combination of
+        them.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -128,8 +138,9 @@
       <span class="hint">Drag the angle and watch the histogram</span>
     </div>
 
-    <p class="lede"><b>Drag the angle slider.</b> Every trace drops onto the line; how far along it
-      lands is its one number. The histogram below counts where they land.</p>
+    <p class="lede"><b>Grab the crimson line and swing it.</b> Every trace drops onto it; how far along
+      it lands is that trace's one number. The histogram below counts where they land, and the bar above
+      says how close you are to the widest direction there is.</p>
     <p class="lede">The cloud never moves. The histogram does.</p>
 
     <details class="reveal"><summary>The longer version</summary>
@@ -389,9 +400,8 @@
             attributes. The across map holds 15.2% and carries what the two attributes disagreed about.
             Measured as the separation between the younger channel axis and its own margins, in pooled
             standard deviations, the across map reaches 5.39 against 0.28 for the along map — and against
-            2.79 for RMS amplitude on its own and 1.16 for peak envelope on its own. The narrow direction
-            is not merely better than the wide one here, it is about twice as good as either input
-            attribute was. The footprint goes the other way: measured as the part of each map that
+            2.79 for RMS amplitude on its own and 1.16 for peak envelope on its own. The narrow direction here is about twice as good as either input attribute, and roughly twenty times
+            the wide one. The footprint goes the other way: measured as the part of each map that
             follows the six-trace acquisition period, the along map carries 0.25 of a standard deviation
             and the across map 0.11. So the component holding a sixth of the variance carries the better
             image and less of the artifact, and nothing in the eigenvalues would have said
@@ -527,6 +537,7 @@
 <script src="../assets/popout.js"></script>
 <script src="../assets/panelout.js"></script>
 <script src="../assets/glossary.js"></script>
+<script src="../assets/score.js"></script>
 <script src="../assets/multivar.js"></script>
 <script src="../assets/attrfield.js"></script>
 <script>
@@ -797,6 +808,8 @@
      THE HEADER CROSSPLOT
      ===================================================================== */
 
+  var HEADRECT = null;
+
   function drawHead() {
     var host = $('cHead');
     if (!host || host.offsetParent === null) return;
@@ -807,6 +820,7 @@
     if (!ctx) return;
     var d = dataset();
     var r = { x: 54, y: 12, w: size, h: size };
+    HEADRECT = r;
 
     ticks(ctx, r, -HALF, HALF, -HALF, HALF, 4, 4);
 
@@ -1042,6 +1056,30 @@
   }
 
   /* =====================================================================
+     THE SCORE
+
+     Same mechanic as module 00: the reader is hunting for an answer the
+     arithmetic already has, so the distance to it is on screen while they
+     hunt. The bar runs from the narrowest direction available to the widest,
+     which are the two eigenvalues, so it is full only at the real maximum.
+     ===================================================================== */
+
+  function scoreNow() {
+    var d = dataset(), aa = alongAcross();
+    var best = d.pca.values[0], worst = d.pca.values[1];
+    return { now: aa.vAl, best: best, worst: worst, pct: 100 * aa.vAl / best };
+  }
+
+  function drawScore() {
+    var s = scoreNow();
+    SCORE.set({ now: s.now, best: s.best, worst: s.worst,
+                key: S.pair + '|' + S.noise,
+                verb: 'grab the crimson line and swing it',
+                won: 'that is the widest direction there is',
+                next: 'now try another attribute pair \u2014 the answer moves' });
+  }
+
+  /* =====================================================================
      WIRING
      ===================================================================== */
 
@@ -1070,6 +1108,7 @@
     drawHead();
     drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
     drawStats();
+    drawScore();
   }
 
   function showTab(id) {
@@ -1079,12 +1118,27 @@
     });
     var lab = document.querySelector('.labhead');
     if (lab) lab.hidden = !/^p[1-5]$/.test(id);
+    // a challenge on the steps where the angle is the thing being chosen
+    SCORE.show(id === 'p2' || id === 'p3' || id === 'p4');
     var done = (id === 'pe' || id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
     if ($('pager')) $('pager').hidden = !done;
     S.tab = id;
     drawAll();
     saveState();
+    offerInvite(id);
+  }
+
+  /* The line swings by itself when a step that asks for a hunt first appears,
+     so the reader sees that it is the thing to grab. Swung about a remembered
+     base so it returns exactly to where it was. */
+  function offerInvite(id) {
+    if (id !== 'p2' && id !== 'p3' && id !== 'p4') return;
+    var a0 = S.ang;
+    SCORE.invite(function (phase) {
+      S.ang = Math.round(((a0 + 9 * Math.sin(phase * Math.PI * 2)) % 180 + 180) % 180);
+      syncLabels(); drawAll();
+    }, { key: 'line-' + id });
   }
 
   document.querySelectorAll('#tabs button').forEach(function (b) {
@@ -1113,12 +1167,23 @@
     rt = setTimeout(drawAll, 140);
   });
 
+  SCORE.drag('cHead', {
+    onPoint: function (x, y) {
+      if (!HEADRECT) return;
+      var cx = HEADRECT.x + HEADRECT.w / 2, cy = HEADRECT.y + HEADRECT.h / 2;
+      var a = Math.atan2(cy - y, x - cx) * 180 / Math.PI;
+      S.ang = ((Math.round(a) % 180) + 180) % 180;
+      syncLabels(); drawAll();
+    },
+    onEnd: saveState
+  });
   syncLabels();
   showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
 
   // exposed so the headless harness can drive the module and read it back
   window.__M01 = {
     set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    score: function () { return scoreNow(); },
     read: function () {
       var aa = alongAcross(), d = dataset();
       return {

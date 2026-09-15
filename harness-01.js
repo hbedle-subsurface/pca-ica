@@ -127,6 +127,15 @@ JSDOM.fromFile(file, {
     const o = M.read();
     console.log('  traces ' + o.n + '   total ' + o.total.toFixed(4));
 
+    console.log('\n=== THE SCORE BAR as the line swings (RMS & envelope)');
+    M.set('pair','ae'); M.set('noise',12);
+    [0,15,30,45,59,75,90,120,149].forEach((a)=>{
+      M.set('ang',a);
+      const s=M.score();
+      console.log('  '+String(a).padStart(3)+'deg   variance '+s.now.toFixed(1).padStart(7)+
+        '   '+s.pct.toFixed(1)+'% of best   bar '+(s.frac*100).toFixed(0)+'%'+(s.pct>=99?'   WIN':''));
+    });
+
     console.log('\n=== GLOSSARY: terms marked in the prose');
     const marked = win.document.querySelectorAll('button.gterm');
     const names = new Set();

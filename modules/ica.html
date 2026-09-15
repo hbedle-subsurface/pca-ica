@@ -31,6 +31,11 @@
       <div>
         <p class="cap">The six independent components <span>&mdash; unordered, by construction</span></p>
         <canvas id="cHead" aria-label="For each independent component, the channel separation it achieves and its negentropy, as paired bars"></canvas>
+        <div class="score" id="score">
+          <span class="say" id="scoreSay">try the two settings</span>
+          <span class="track"><span class="fill" id="scoreFill"></span><span class="target" id="scoreTgt"></span></span>
+          <span class="pct" id="scorePct">&mdash;</span>
+        </div>
       </div>
       <div>
         <p class="cap">The two choices that move the answer <span>&mdash; everything follows them</span></p>
@@ -85,18 +90,24 @@
       closing, because the parts of the answer that are undetermined follow from what the iteration
       actually does.</p>
 
-    <p class="lede">The whole method is three moves. <b>Standardize</b>, so that attributes in unlike
-      units are comparable, which is module 03's choice made deliberately. <b>Whiten</b>, so that every
-      direction carries the same variance and second-order statistics can no longer prefer one rotation
-      over another, which is module 07's step 2. <b>Rotate</b>, until each direction's projection is as
-      far from Gaussian as it can be made.</p>
-    <p class="lede">The rotation is where the work is. For each direction in turn, the algorithm applies
-      a fixed-point update that moves the current guess toward a nearby maximum of the contrast function,
-      makes it perpendicular to the directions already found, and repeats until it stops moving. One
-      direction at a time, each from what the previous ones left, which is the same deflation module 04
-      used for principal components — the only thing that changed is what is being maximized.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Standardize, whiten, rotate.</b> That is the whole method. The six maps below are what comes out of it.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">The whole method is three moves. <b>Standardize</b>, so that attributes in unlike
+        units are comparable, which is module 03's choice made deliberately. <b>Whiten</b>, so that every
+        direction carries the same variance and second-order statistics can no longer prefer one rotation
+        over another, which is module 07's step 2. <b>Rotate</b>, until each direction's projection is as
+        far from Gaussian as it can be made.</p>
+        <p class="lede">The rotation is where the work is. For each direction in turn, the algorithm applies
+        a fixed-point update that moves the current guess toward a nearby maximum of the contrast function,
+        makes it perpendicular to the directions already found, and repeats until it stops moving. One
+        direction at a time, each from what the previous ones left, which is the same deflation module 04
+        used for principal components — the only thing that changed is what is being maximized.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The independent components, drawn on the survey</h3>
         <span class="hint">Both channel axes marked on each</span>
@@ -127,16 +138,22 @@
       <span class="hint">One target, five ways of going after it</span>
     </div>
 
-    <p class="lede">The younger channel has been the test target since module 01, and by now there are
-      several numbers to put beside each other. The best single input attribute, peak frequency, reaches
-      a separation of 5.97. The best principal component reaches 2.81. The best direction obtainable at
-      all, computed in module 06 with the channel positions in hand, reaches 8.97.</p>
-    <p class="lede">With the log cosh contrast and all six directions retained, the best independent
-      component reaches 6.47. That is more than twice what PCA managed, better than the best raw
-      attribute, and about seventy-two percent of the supervised ceiling — from a method that was never
-      shown where the channel is.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Four bars.</b> ICA, PCA, the best raw attribute on its own, and the best any direction was found to do.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">The younger channel has been the test target since module 01, and by now there are
+        several numbers to put beside each other. The best single input attribute, peak frequency, reaches
+        a separation of 5.97. The best principal component reaches 2.81. The best direction module 06
+        found with the channel positions in hand reaches 8.97.</p>
+        <p class="lede">With the log cosh contrast and all six directions retained, the best independent
+        component reaches 6.47. That is more than twice what PCA managed, better than the best raw
+        attribute, and about seventy-two percent of the supervised ceiling — from a method that was never
+        shown where the channel is.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Channel separation, five ways</h3>
         <span class="hint">Same measurement throughout the set</span>
@@ -168,24 +185,30 @@
       <span class="hint">Three things the data does not fix</span>
     </div>
 
-    <p class="lede"><b>Scale.</b> Every independent component here has a variance of exactly 1.0000,
-      because they are rotations of whitened data. There is no equivalent of an eigenvalue and no
-      component is larger than another. Whatever scale a package writes out is a convention it
-      chose.</p>
-    <p class="lede"><b>Order.</b> With no variance to rank by, the numbering is whatever order the
-      deflation happened to produce. On this run the component with the highest negentropy is the first
-      one, and it separates the younger channel at 0.25 — nearly nothing. The component that shows the
-      channel is the second, and no property the algorithm knows about would have put it at the top. In
-      the Taranaki study that introduced this workflow to seismic attributes, the components were sorted
-      by visual inspection for exactly this reason.</p>
-    <p class="lede"><b>Sign.</b> As with eigenvectors, reversing a direction satisfies everything the
-      method asked for, so the sign is a convention. This set fixes it by making the largest loading
-      positive.</p>
-    <p class="lede">The panel below re-runs the search from four different starting rotations and matches
-      each result against the run in the header. The directions come back, and they come back in a
-      different order.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Step through the four starts.</b> The same six directions come back every time, in a different order.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede"><b>Scale.</b> Every independent component here has a variance of exactly 1.0000,
+        because they are rotations of whitened data. There is no equivalent of an eigenvalue and no
+        component is larger than another. Whatever scale a package writes out is a convention it
+        chose.</p>
+        <p class="lede"><b>Order.</b> With no variance to rank by, the numbering is whatever order the
+        deflation happened to produce. On this run the component with the highest negentropy is the first
+        one, and it separates the younger channel at 0.25 — nearly nothing. The component that shows the
+        channel is the second, and no property the algorithm knows about would have put it at the top. In
+        the Taranaki study that introduced this workflow to seismic attributes, the components were sorted
+        by visual inspection for exactly this reason.</p>
+        <p class="lede"><b>Sign.</b> As with eigenvectors, reversing a direction satisfies everything the
+        method asked for, so the sign is a convention. This set fixes it by making the largest loading
+        positive.</p>
+        <p class="lede">The panel below re-runs the search from four different starting rotations and matches
+        each result against the run in the header. The directions come back, and they come back in a
+        different order.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Four different starts, matched against the reference run</h3>
         <span class="hint">Which reference component each one landed on</span>
@@ -214,23 +237,29 @@
       <span class="hint">Count the iterations</span>
     </div>
 
-    <p class="lede">The fixed-point iteration stops when the direction stops moving. How long that takes
-      varies enormously between components, and on this run it varies from one iteration to three
-      hundred, which is the cap.</p>
-    <p class="lede">The components that converge fastest and the ones that never converge are both worth
-      looking at. A direction whose projection is strongly non-Gaussian has a sharp maximum to climb
-      toward and gets there quickly. A direction whose projection is close to Gaussian has nothing to
-      climb: module 07 established that a Gaussian is exactly the case where non-Gaussianity cannot
-      distinguish one rotation from another, so the update wanders and the iteration limit is what stops
-      it.</p>
-    <p class="lede">On this run, component 4 reached the three-hundred-iteration cap and has an excess
-      kurtosis of &minus;0.29 and a negentropy of 2.6&times;10⁻⁵ — nearly Gaussian, as predicted.
-      Component 6 converged in two iterations, has a negentropy of 1.8&times;10⁻⁶, and carries the
-      most acquisition footprint of any component at 0.322. Neither of those is a malfunction. Both are
-      the method reporting, in its own terms, that the direction it was handed has no structure in it to
-      find.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Read the iteration counts.</b> One component hit the cap of 300. One finished in two.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">The fixed-point iteration stops when the direction stops moving. How long that takes
+        varies enormously between components, and on this run it varies from one iteration to three
+        hundred, which is the cap.</p>
+        <p class="lede">The components that converge fastest and the ones that never converge are both worth
+        looking at. A direction whose projection is strongly non-Gaussian has a sharp maximum to climb
+        toward and gets there quickly. A direction whose projection is close to Gaussian has nothing to
+        climb: module 07 established that a Gaussian is exactly the case where non-Gaussianity cannot
+        distinguish one rotation from another, so the update wanders and the iteration limit is what stops
+        it.</p>
+        <p class="lede">On this run, component 4 reached the three-hundred-iteration cap and has an excess
+        kurtosis of &minus;0.29 and a negentropy of 2.6&times;10⁻⁵ — nearly Gaussian, as predicted.
+        Component 6 converged in two iterations, has a negentropy of 1.8&times;10⁻⁶, and carries the
+        most acquisition footprint of any component at 0.322. Neither of those is a malfunction. Both are
+        the method reporting, in its own terms, that the direction it was handed has no structure in it to
+        find.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Iterations to convergence against how non-Gaussian the result is</h3>
         <span class="hint">Fixed axes, both</span>
@@ -256,25 +285,32 @@
       <span class="hint">Move both and watch the target</span>
     </div>
 
-    <p class="lede">Two things are chosen before an ICA run, and on this data they interact rather than
-      acting separately. The second one first: how many directions to retain in the whitening step before
-      searching. Keeping only two costs almost everything, whichever contrast is used — the best
-      component then reaches 2.72 with log cosh and 2.69 with kurtosis, no better than PCA managed. The
-      subspace the useful rotation lives in is simply not there to be searched.</p>
-    <p class="lede">Above three retained the two contrasts part company. Log cosh is steady, giving 6.33,
-      6.10, 6.18 and 6.47 at three, four, five and six. Kurtosis starts higher, at 6.60 with three
-      retained, which is the best single figure anywhere on this page, and then falls away: 5.91, 5.48
-      and 4.04. The more near-Gaussian directions are included in the space being searched, the worse it
-      does, which is the outlier sensitivity of a fourth power showing up as instability rather than as a
-      uniformly lower number.</p>
-    <p class="lede">So the robust contrast is not better everywhere; it is <em>less sensitive to the
-      other choice</em>. Log cosh varies by 0.38 across the retained counts from three up and kurtosis
-      varies by 2.56. Picking kurtosis and getting the retained count right beats everything; picking
-      kurtosis and getting it wrong is the worst outcome on the page. The common ninety-percent
-      retained-variance convention selects four here, which costs about six percent with log cosh and
-      about eleven percent with kurtosis against each one's own best.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Find the settings that fill the bar.</b> Ten combinations, and they do not line
+      up the way the guidance suggests &mdash; the robust contrast does not win everywhere.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Two things are chosen before an ICA run, and on this data they interact rather than
+        acting separately. The second one first: how many directions to retain in the whitening step before
+        searching. Keeping only two costs almost everything, whichever contrast is used — the best
+        component then reaches 2.72 with log cosh and 2.69 with kurtosis, no better than PCA managed. The
+        subspace the useful rotation lives in is simply not there to be searched.</p>
+        <p class="lede">Above three retained the two contrasts part company. Log cosh is steady, giving 6.33,
+        6.10, 6.18 and 6.47 at three, four, five and six. Kurtosis starts higher, at 6.60 with three
+        retained, which is the best single figure anywhere on this page, and then falls away: 5.91, 5.48
+        and 4.04. The more near-Gaussian directions are included in the space being searched, the worse it
+        does, which is the outlier sensitivity of a fourth power showing up as instability rather than as a
+        uniformly lower number.</p>
+        <p class="lede">So the robust contrast is not better everywhere; it is <em>less sensitive to the
+        other choice</em>. Log cosh varies by 0.38 across the retained counts from three up and kurtosis
+        varies by 2.56. Picking kurtosis and getting the retained count right beats everything; picking
+        kurtosis and getting it wrong is the worst outcome on the page. The common ninety-percent
+        retained-variance convention selects four here, which costs about six percent with log cosh and
+        about eleven percent with kurtosis against each one's own best.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The best component against both choices</h3>
         <span class="hint">Same target, same measurement</span>
@@ -355,7 +391,7 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">The best independent component
             reaches 6.47, against 2.81 for the best principal component, 5.97 for peak frequency on its
             own, and a ceiling of 8.97. So it is 2.3 times better than PCA, it does beat the best single
-            attribute, and it recovers about 72% of what was available. The comparison to keep is the one
+            attribute, and it recovers about 72% of the best any direction was found to reach. The comparison to keep is the one
             against the raw attribute rather than the one against PCA: any multi-attribute method that
             cannot beat the best single input has not earned its place in the
             workflow.</span></details></li>
@@ -372,8 +408,10 @@
             quantity the algorithm maximized would put the wrong one first. Nothing available to the
             method identifies the useful component, which is why the published workflow sorts them by
             inspection. What component 1 is showing instead is a fair question and not one the numbers
-            answer; it is sharply peaked, carries almost no footprint at 0.018, and would have to be
-            looked at against a geological interpretation to be named.</span></details></li>
+            answer. It is sharply peaked and carries almost no footprint, at 0.018. Sharply peaked means
+            a few traces take extreme values and most do not, which fits a thin sparse feature, a small
+            patch of anomalous response, or a handful of bad traces equally well. Naming it would need a
+            well, a horizon, or somebody who knows the survey.</span></details></li>
 
         <li><b>Restart the search from somewhere else.</b>
           <em class="point">Why: this separates repeatability from meaning, which are easy to
@@ -547,6 +585,7 @@
 <script src="../assets/popout.js"></script>
 <script src="../assets/panelout.js"></script>
 <script src="../assets/glossary.js"></script>
+<script src="../assets/score.js"></script>
 <script src="../assets/multivar.js"></script>
 <script src="../assets/attrfield.js"></script>
 <script>
@@ -651,6 +690,40 @@
       if (Math.abs(sep(list[i], which)) > Math.abs(sep(list[b], which))) b = i;
     }
     return { index: b, value: Math.abs(sep(list[b], which)) };
+  }
+
+  /* =====================================================================
+     THE SCORE
+
+     Here the hunt is over the two parameters rather than over a direction:
+     which contrast, and how many components to retain. The bar spans the
+     worst and best results obtainable from any combination of the two, so a
+     reader can find out by trying that the settings interact.
+     ===================================================================== */
+
+  var EXTREMES = null;
+  function extremes() {
+    if (EXTREMES) return EXTREMES;
+    var best = 0, worst = Infinity, k, ci;
+    ['logcosh', 'kurtosis'].forEach(function (con) {
+      for (k = 2; k <= 6; k++) {
+        var v = bestOf(run(con, k, 0).S).value;
+        if (v > best) best = v;
+        if (v < worst) worst = v;
+      }
+    });
+    void ci;
+    EXTREMES = { best: best, worst: worst };
+    return EXTREMES;
+  }
+
+  function drawScore() {
+    var e = extremes();
+    var now = bestOf(current().S).value;
+    SCORE.set({ now: now, best: e.best, worst: e.worst, key: 'params',
+      verb: 'try the retained count, then the other contrast',
+      won: 'best result either setting can give',
+      next: 'and it is not the contrast everyone recommends' });
   }
 
   /* =====================================================================
@@ -876,7 +949,7 @@
     ctx.fillStyle = SLATE;
     ctx.textAlign = 'left';
     ctx.fillText('separation of the ' + (S.tgt === 'young' ? 'younger' : 'older') +
-      ' channel axis from its margins, pooled sd', r.x + 6, r.y + 14);
+      ' channel axis from its margins, pooled standard deviations', r.x + 6, r.y + 14);
     ctx.restore();
   }
 
@@ -1088,8 +1161,8 @@
         stat('Best principal component', bestOf(sv.P.scores).value.toFixed(3), 'from module 06') +
         stat('Best single attribute', bestOf(sv.X).value.toFixed(3),
           CORE[bestOf(sv.X).index]) +
-        stat('Fraction of the ceiling', (100 * b.value / CEILING[S.tgt]).toFixed(0) + '%',
-          'ceiling ' + CEILING[S.tgt].toFixed(2));
+        stat('Fraction of the best', (100 * b.value / CEILING[S.tgt]).toFixed(0) + '%',
+          'best found, ' + CEILING[S.tgt].toFixed(2));
     }
     if ($('s3')) {
       var alt = run(S.con, S.k, S.seed), n = R.S.length, moved = 0, worst = 1, i, j;
@@ -1169,6 +1242,7 @@
     drawHead();
     drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
     drawStats();
+    drawScore();
   }
 
   function showTab(id) {
@@ -1178,12 +1252,27 @@
     });
     var lab = document.querySelector('.labhead');
     if (lab) lab.hidden = !/^p[1-5]$/.test(id);
+    // the parameters are the thing being hunted over, and that is step 5
+    SCORE.show(id === 'p5' && S.tgt === 'young');
     var done = (id === 'pe' || id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
     if ($('pager')) $('pager').hidden = !done;
     S.tab = id;
     drawAll();
     saveState();
+    offerInvite(id);
+  }
+
+  /* The retained count steps down and back, once, when step 5 appears. An ICA
+     run per frame would be too slow, so this moves in whole steps and the
+     results are cached from the curve the panel already drew. */
+  function offerInvite(id) {
+    if (id !== 'p5') return;
+    var k0 = S.k;
+    SCORE.invite(function (phase) {
+      S.k = Math.max(2, Math.min(6, k0 - Math.round(1.5 * (1 - Math.cos(phase * Math.PI * 2)))));
+      syncLabels(); drawAll();
+    }, { key: 'kcount', frames: 26 });
   }
 
   document.querySelectorAll('#tabs button').forEach(function (b) {
@@ -1221,6 +1310,10 @@
 
   window.__M08 = {
     set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    score: function () {
+      var e = extremes(), now = bestOf(current().S).value;
+      return { now: now, best: e.best, worst: e.worst, pct: 100 * now / e.best };
+    },
     components: function (contrast, k) {
       var R = run(contrast || S.con, k || S.k, 0);
       return R.S.map(function (s, i) {

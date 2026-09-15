@@ -89,6 +89,17 @@ JSDOM.fromFile(file, {
     console.log('  kurtosis peaks at '+bk.deg+' deg');
     console.log('  at 0 deg (component 2): separation '+sw[0].sep.toFixed(3));
 
+
+    console.log('\n=== THE SCORE BAR: hunting non-Gaussianity (nothing about a channel used)');
+    [0,15,30,40,45,60,90,150].forEach(function(a){
+      M.set('rot',a); const s=M.score();
+      console.log('  '+String(a).padStart(3)+'deg   negentropy '+s.now.toExponential(2)+
+        '   '+s.pct.toFixed(1)+'% of best   bar '+
+        (100*(s.now-s.worst)/(s.best-s.worst)).toFixed(0)+'%'+
+        '   (channel separation there: '+Math.abs(s.sep).toFixed(2)+')'+(s.pct>=99?'   WIN':''));
+    });
+    M.set('rot',0);
+
     console.log('\n=== GLOSSARY');
     const marked=win.document.querySelectorAll('button.gterm');
     const names=new Set(); marked.forEach(x=>names.add(x.getAttribute('data-term')));

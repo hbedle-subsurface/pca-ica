@@ -87,6 +87,17 @@ JSDOM.fromFile(file, {
     M.contrastAgreement().forEach(a=>console.log('    logcosh IC'+a.logcosh+' -> kurtosis IC'+a.kurtosis+
       '   |r| = '+a.r.toFixed(4)));
 
+
+    console.log('\n=== THE SCORE BAR: the ten parameter combinations');
+    ['logcosh','kurtosis'].forEach(function(con){
+      M.set('con',con);
+      let row=[];
+      for(let k=2;k<=6;k++){ M.set('k',k); const s=M.score();
+        row.push('k='+k+' '+s.now.toFixed(2)+' ('+s.pct.toFixed(0)+'%'+(s.pct>=99?' WIN':'')+')'); }
+      console.log('  '+con.padEnd(9)+' '+row.join('   '));
+    });
+    M.set('con','logcosh'); M.set('k',6);
+
     console.log('\n=== GLOSSARY');
     const marked=win.document.querySelectorAll('button.gterm');
     const names=new Set(); marked.forEach(x=>names.add(x.getAttribute('data-term')));

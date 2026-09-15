@@ -31,6 +31,11 @@
       <div>
         <p class="cap">Two targets, six components <span>&mdash; how well each is shown</span></p>
         <canvas id="cHead" aria-label="Separation of the young and old channel systems achieved by each of the six components, against the variance each holds"></canvas>
+        <div class="score" id="score">
+          <span class="say" id="scoreSay">drag the rotation and watch</span>
+          <span class="track"><span class="fill" id="scoreFill"></span><span class="target" id="scoreTgt"></span></span>
+          <span class="pct" id="scorePct">&mdash;</span>
+        </div>
       </div>
       <div>
         <p class="cap">Choose a target <span>&mdash; steps 2 to 4 follow it</span></p>
@@ -86,16 +91,22 @@
       distinct geological features will come out on distinct components. Nothing in the method promises
       that, and it is worth seeing what happens instead before seeing why.</p>
 
-    <p class="lede">The survey contains a younger sinuous channel and an older, thinner one at a
-      different orientation. Both are real features of the model, both affect several attributes, and
-      both are things an interpreter would want mapped separately.</p>
-    <p class="lede">The bars above the tabs give how well each component separates each channel axis from
-      its own margins. The younger channel is best shown by components 2 and 3, at 2.81 and 2.57, and
-      the older one is best shown by component 3 at 1.03. No component holds one of them without holding
-      some of the other, and the first component, which holds more than half the variance, shows
-      neither.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Switch between the two channels in the header.</b> No component holds one of them without holding some of the other.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">The survey contains a younger sinuous channel and an older, thinner one at a
+        different orientation. Both are real features of the model, both affect several attributes, and
+        both are things an interpreter would want mapped separately.</p>
+        <p class="lede">The bars above the tabs give how well each component separates each channel axis from
+        its own margins. The younger channel is best shown by components 2 and 3, at 2.81 and 2.57, and
+        the older one is best shown by component 3 at 1.03. No component holds one of them without holding
+        some of the other, and the first component, which holds more than half the variance, shows
+        neither.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The first four components, as maps</h3>
         <span class="hint">Both channel axes marked on each</span>
@@ -127,17 +138,23 @@
       <span class="hint">Computed with the answer in hand</span>
     </div>
 
-    <p class="lede">Suppose the position of each channel were known, and the best possible direction in
-      attribute space were computed for showing it: the weighted combination of the six attributes that
-      pushes the channel axis furthest from its margins relative to the scatter within each. That is a
-      standard discriminant calculation, and it uses information the method does not have. It is done
-      here only to establish what the answer would have been.</p>
-    <p class="lede">For the younger channel that direction achieves a separation of 8.97, against 2.81
-      for the best component and 5.97 for the best single attribute. For the older one it achieves 1.62
-      against 1.03. Both directions exist, both are available inside the same six attributes, and
-      neither is any component.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Switch targets and watch the two recipes.</b> These were computed knowing where the channels are. They are a ceiling, not a method.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Suppose the position of each channel were known, and the best direction in
+        attribute space were computed for showing it: the weighted combination of the six attributes that
+        pushes the channel axis furthest from its margins relative to the scatter within each. That is a
+        standard discriminant calculation, and it uses information the method does not have. It is done
+        here only to establish what the answer would have been.</p>
+        <p class="lede">For the younger channel that direction achieves a separation of 8.97, against 2.81
+        for the best component and 5.97 for the best single attribute. For the older one it achieves 1.62
+        against 1.03. Both directions exist, both are available inside the same six attributes, and
+        neither is any component.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The two directions, as weights on the six attributes</h3>
         <span class="hint">Shared axis, both drawn the same way</span>
@@ -170,18 +187,24 @@
       <span class="hint">The constraint, stated as a number</span>
     </div>
 
-    <p class="lede">The two directions from step 2 are 37.14 degrees apart. That is the whole of this
-      module in one measurement. Principal components are perpendicular to each other by construction,
-      because each is taken from the residual of the last; if two features in the ground want directions
-      thirty-seven degrees apart, no pair of perpendicular components can point along both.</p>
-    <p class="lede">The panel below gives the angle between every component and each of the two target
-      directions. Nothing is close. The nearest approach in the whole set is component 3 at 36.9 degrees
-      from the older channel's direction, and component 2 at 50.4 degrees from the younger one's. A
-      direction fifty degrees away from what you wanted still carries some of it, which is why the
-      components show the channels at all, and carries the rest of whatever else is in that direction,
-      which is why they show them mixed.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>The two targets are 37 degrees apart. Components are 90 degrees apart, always.</b> Nothing can point along both.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">The two directions from step 2 are 37.14 degrees apart. That is the whole of this
+        module in one measurement. Principal components are perpendicular to each other by construction,
+        because each is taken from the residual of the last; if two features in the ground want directions
+        thirty-seven degrees apart, no pair of perpendicular components can point along both.</p>
+        <p class="lede">The panel below gives the angle between every component and each of the two target
+        directions. Nothing is close. The nearest approach in the whole set is component 3 at 36.9 degrees
+        from the older channel's direction, and component 2 at 50.4 degrees from the younger one's. A
+        direction fifty degrees away from what you wanted still carries some of it, which is why the
+        components show the channels at all, and carries the rest of whatever else is in that direction,
+        which is why they show them mixed.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Angle between each component and each target direction</h3>
         <span class="hint">Ninety would mean the component carries none of that target</span>
@@ -207,18 +230,26 @@
       <span class="hint">Variance falls while the map improves</span>
     </div>
 
-    <p class="lede">Components 2 and 3 span a plane. Any direction inside that plane is available as a
-      weighted combination of the two, and any of them could be written out as a volume. The slider in
-      the header turns a direction through that plane, starting on component 2 at zero degrees and
-      reaching component 3 at ninety.</p>
-    <p class="lede">At zero degrees the direction separates the younger channel at 2.81 and holds a
-      variance of 1.286. At forty-five degrees it separates at 7.42 and holds 1.012. The map gets
-      dramatically better while the quantity the method ranks by gets worse, so the ranking is pointing
-      away from the useful direction. Nothing was added to the data to make this happen; the better
-      direction was inside the span of the components PCA already returned, and PCA had no reason to
-      prefer it.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Drag the rotation and fill the bar.</b> The map nearly triples on the way, while
+      the quantity PCA ranks by goes <em>down</em>. Both components PCA returned are in this plane, and
+      it chose neither of the good directions in it.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Components 2 and 3 span a plane. Any direction inside that plane is available as a
+        weighted combination of the two, and any of them could be written out as a volume. The slider in
+        the header turns a direction through that plane, starting on component 2 at zero degrees and
+        reaching component 3 at ninety.</p>
+        <p class="lede">At zero degrees the direction separates the younger channel at 2.81 and holds a
+        variance of 1.286. At forty-five degrees it separates at 7.42 and holds 1.012. The map gets
+        dramatically better while the quantity the method ranks by gets worse, so the ranking is pointing
+        away from the useful direction. Nothing was added to the data to make this happen; the better
+        direction was inside the span of the components PCA already returned, and PCA had no reason to
+        prefer it.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Separation and variance as the direction turns</h3>
         <span class="hint">One shared angle axis, both fixed</span>
@@ -248,20 +279,26 @@
       <span class="hint">The opening the next module walks through</span>
     </div>
 
-    <p class="lede">Everything PCA can see is in the covariance matrix, which holds variances and
-      covariances and nothing else. Once the components are found, that matrix has been fully used: the
-      scores are uncorrelated with each other, and no rotation of them can produce more decorrelation
-      than that.</p>
-    <p class="lede">But decorrelated is not the same as finished. The crossplot below is the score of one
-      component against another, and if the scores were shapeless the cloud would be a featureless round
-      ball with nothing in it to prefer one rotation over any other. It is not shapeless. The excess
-      kurtosis of the first component's score is 5.11, of the second 3.73, of the third 3.85: strongly
-      peaked distributions with long tails, which a shapeless cloud would not have.</p>
-    <p class="lede">That structure is invisible to a covariance matrix, which means it is invisible to
-      PCA, which means there is something left in the data that a method looking at it could still use.
-      That is module 07.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Pick any two components.</b> If there were nothing left to find, this cloud would be a featureless round ball. Look at it.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Everything PCA can see is in the covariance matrix, which holds variances and
+        covariances and nothing else. Once the components are found, that matrix has been fully used: the
+        scores are uncorrelated with each other, and no rotation of them can produce more decorrelation
+        than that.</p>
+        <p class="lede">But decorrelated is not the same as finished. The crossplot below is the score of one
+        component against another, and if the scores were Gaussian the cloud would be a featureless round
+        ball with nothing in it to prefer one rotation over any other. The cloud has structure in it. The excess
+        kurtosis of the first component's score is 5.11, of the second 3.73, of the third 3.85: strongly
+        peaked distributions with long tails, which a Gaussian cloud would not have.</p>
+        <p class="lede">That structure is invisible to a covariance matrix, which means it is invisible to
+        PCA, which means there is something left in the data that a method looking at it could still use.
+        That is module 07.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Two scores against each other, and their distributions</h3>
         <span class="hint">Round would mean nothing left to find</span>
@@ -341,16 +378,18 @@
         <li><b>Find the ceiling.</b>
           <em class="point">Why: knowing what was achievable is what turns a judgment about a map into a
             measurement.</em>
-          In step 2, read the separation achieved by the best direction for each target, and compare it
+          In step 2, read the separation achieved by the discriminant direction for each target, and compare it
           against the best component and the best single attribute from module 05.
           <details class="reveal"><summary>Hint</summary><span class="ans">For the younger channel the
-            best possible direction reaches 8.97. The best component reaches 2.81 and the best single
+            discriminant direction reaches 8.97. The best component reaches 2.81 and the best single
             attribute, peak frequency, reaches 5.97. For the older channel the ceiling is 1.62 against
             1.03 from the best component. So on the younger channel the unsupervised result recovered
             less than a third of what was available, and a single raw attribute did better than it. The
-            older channel is a harder target in every direction, which is itself worth knowing: its
-            ceiling of 1.62 says the six attributes carry little about it, and no method could have
-            fixed that.</span></details></li>
+            older channel is a harder target in every direction, which is itself worth knowing: 1.62 says
+            the six attributes carry little about it. Why they carry little is not something these
+            numbers answer. It is thinner, so it may be below tuning; it sits at a different level in the
+            window; and the younger system crosses and overprints it. Any of those would produce the same
+            low number, and separating them needs geology rather than more statistics.</span></details></li>
 
         <li><b>Measure the constraint.</b>
           <em class="point">Why: this is the number that says in advance whether a perpendicular basis
@@ -380,18 +419,18 @@
             improves.</span></details></li>
 
         <li><b>Check whether anything is left.</b>
-          <em class="point">Why: if the component scores were shapeless, PCA would be the end of the
+          <em class="point">Why: if the component scores were Gaussian, PCA would be the end of the
             story, and the next module would have nothing to work with.</em>
           In step 5, look at the crossplots of the first few scores against each other and read the
           excess kurtosis of each.
           <details class="reveal"><summary>Hint</summary><span class="ans">The excess kurtosis of the
-            six scores is 5.11, 3.73, 3.85, &minus;0.18, 5.13 and 2.78. A shapeless cloud would give zero
+            six scores is 5.11, 3.73, 3.85, &minus;0.18, 5.13 and 2.78. A Gaussian would give zero
             for all of them. Five of the six are strongly positive, meaning sharply peaked distributions
             with long tails, and the crossplots show clear structure rather than round blobs. The
             covariance matrix has nothing to say about any of it — every pair of scores is uncorrelated
             at about ten to the minus fifteen, which is as decorrelated as anything gets. So the
             second-order statistics are exhausted and the data is still visibly structured. The fourth
-            score, at &minus;0.18, is the one that is close to shapeless, and it is also the one carrying
+            score, at &minus;0.18, is the one that is close to Gaussian, and it is also the one carrying
             most of the acquisition footprint.</span></details></li>
       </ol>
     </div>
@@ -411,7 +450,7 @@
         <li><b>The variance ranking can point away from the useful direction.</b> Rotating inside the
           plane of components 2 and 3 nearly triples the channel separation while lowering the
           variance.</li>
-        <li><b>A supervised ceiling turns a judgment into a measurement.</b> The best possible direction
+        <li><b>A supervised reference turns a judgment into a measurement.</b> The discriminant direction
           reaches 8.97 here; the best component reached 2.81.</li>
         <li><b>Decorrelated is not finished.</b> The scores are uncorrelated to machine precision and
           their distributions are still strongly non-Gaussian, which is structure PCA cannot see.</li>
@@ -444,6 +483,13 @@
       from the matrix's own eigendecomposition by
       <span class="k">assets/multivar.js</span>, with eigenvalues clamped at a floor so that a matrix
       that is singular to working precision gives a pseudo-inverse rather than infinities.</p>
+    <p class="lede"><b>How close to a true maximum is it?</b> The discriminant maximizes a criterion
+      very close to, but not identical with, the separation statistic quoted here, so it is a near-best
+      direction rather than a proven maximum. A direct search over 20,000 random directions with local
+      refinement beats it by 0.69% on the younger channel and 0.93% on the older. It is used as the
+      reference because it is computed rather than searched for, and because a difference under one
+      percent does not change any comparison on these pages. The word ceiling is used loosely and means
+      "the best any direction was found to do".</p>
     <p class="lede"><b>This calculation is supervised and the module says so repeatedly.</b> It is told
       where the channel is, which no unsupervised method is, and it could not be run on a real survey
       before an interpretation existed. It is on the page to establish a ceiling: without it, a statement
@@ -488,7 +534,7 @@
     <p class="eyebrow">Next up</p>
     <h3>07 · Independence is not decorrelation</h3>
     <p>The scores are uncorrelated and their distributions are still structured. What kind of statistic
-      can see that structure, and why a mixture of things always looks more shapeless than the things
+      can see that structure, and why a mixture of things always looks more Gaussian than the things
       that went into it.</p>
     <a class="btn ghost" href="independence.html">Module 07 →</a>
   </section>
@@ -520,6 +566,7 @@
 <script src="../assets/popout.js"></script>
 <script src="../assets/panelout.js"></script>
 <script src="../assets/glossary.js"></script>
+<script src="../assets/score.js"></script>
 <script src="../assets/multivar.js"></script>
 <script src="../assets/attrfield.js"></script>
 <script>
@@ -664,6 +711,40 @@
       u[i] = Math.cos(th) * P.vectors[1][i] + Math.sin(th) * P.vectors[2][i];
     }
     return MV.unit(u);
+  }
+
+  /* =====================================================================
+     THE SCORE
+
+     Step 4 asks the reader to turn a direction through a plane and find the
+     one that shows the channel best. That best exists and is computable, so
+     it is on screen while they hunt. The bar spans the worst direction in the
+     plane to the best, both measured on the target currently selected.
+     ===================================================================== */
+
+  var SWEEPC = {};
+  function sweepFor(which) {
+    if (SWEEPC[which]) return SWEEPC[which];
+    var sv = survey(), out = [], t2;
+    for (t2 = 0; t2 <= 175; t2 += 5) {
+      out.push({ deg: t2, sep: Math.abs(sep(MV.project(sv.Z, rotated(t2)), which)) });
+    }
+    SWEEPC[which] = out;
+    return out;
+  }
+
+  function drawScore() {
+    var sw = sweepFor(S.tgt);
+    var best = 0, worst = Infinity, i;
+    for (i = 0; i < sw.length; i++) {
+      if (sw[i].sep > best) best = sw[i].sep;
+      if (sw[i].sep < worst) worst = sw[i].sep;
+    }
+    var now = Math.abs(sep(MV.project(survey().Z, rotated()), S.tgt));
+    SCORE.set({ now: now, best: best, worst: worst, key: S.tgt,
+      verb: 'drag the rotation slider',
+      won: 'best direction in this plane',
+      next: 'and its variance is lower than component 2\u2019s' });
   }
 
   /* =====================================================================
@@ -819,7 +900,7 @@
     ctx.fillStyle = TEAL;
     ctx.fillText('older channel', r.x + 130, r.y + 14);
     ctx.fillStyle = SLATE;
-    ctx.fillText('separation, pooled sd', r.x + 8, r.y + r.h - 6);
+    ctx.fillText('separation, pooled standard deviations', r.x + 8, r.y + r.h - 6);
     ctx.restore();
   }
 
@@ -1100,8 +1181,8 @@
         if (Math.abs(sep(P.scores[j], S.tgt)) > Math.abs(sep(P.scores[bestv], S.tgt))) bestv = j;
       }
       $('s2').innerHTML =
-        stat('Ceiling for the ' + tname, Math.abs(sep(prSel, S.tgt)).toFixed(3),
-          'best direction in these six attributes') +
+        stat('Best available', Math.abs(sep(prSel, S.tgt)).toFixed(3),
+          'the discriminant direction') +
         stat('Best component reached', Math.abs(sep(P.scores[bestv], S.tgt)).toFixed(3),
           'PC' + (bestv + 1)) +
         stat('Fraction recovered',
@@ -1145,13 +1226,13 @@
     if ($('s5')) {
       $('s5').innerHTML =
         stat('Kurtosis of PC' + (S.ca + 1), MV.kurtosis(P.scores[S.ca]).toFixed(3),
-          'zero would be shapeless') +
+          'zero for a Gaussian') +
         stat('Kurtosis of PC' + (S.cb + 1), MV.kurtosis(P.scores[S.cb]).toFixed(3), 'excess') +
         stat('Correlation between them',
           MV.corr([P.scores[S.ca], P.scores[S.cb]])[0][1].toExponential(1),
           'PCA has finished its job') +
         stat('Negentropy of PC' + (S.ca + 1), MV.negentropy(P.scores[S.ca]).toExponential(2),
-          'distance from shapeless');
+          'distance from a Gaussian');
     }
   }
 
@@ -1193,6 +1274,7 @@
     drawHead();
     drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
     drawStats();
+    drawScore();
   }
 
   function showTab(id) {
@@ -1209,6 +1291,18 @@
     S.tab = id;
     drawAll();
     saveState();
+    offerInvite(id);
+  }
+
+  /* A slider that has never moved looks like a label. This nudges it once,
+     when the step that needs it first appears, and puts it back. */
+  function offerInvite(id) {
+    if (id !== 'p4') return;
+    var r0 = S.rot;
+    SCORE.invite(function (phase) {
+      S.rot = Math.max(0, Math.min(175, Math.round(r0 + 15 * Math.sin(phase * Math.PI * 2))));
+      syncLabels(); drawAll();
+    }, { key: 'rot' });
   }
 
   document.querySelectorAll('#tabs button').forEach(function (b) {
@@ -1242,11 +1336,21 @@
 
   fillComponentSelect('ca', 'ca');
   fillComponentSelect('cb', 'cb');
+  /* The rotation drifts on arrival so the slider reads as the thing to move. */
   syncLabels();
   showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
 
   window.__M06 = {
     set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    score: function () {
+      var sw = sweepFor(S.tgt), best = 0, worst = Infinity, i;
+      for (i = 0; i < sw.length; i++) {
+        if (sw[i].sep > best) best = sw[i].sep;
+        if (sw[i].sep < worst) worst = sw[i].sep;
+      }
+      var now = Math.abs(sep(MV.project(survey().Z, rotated()), S.tgt));
+      return { now: now, best: best, worst: worst, pct: 100 * now / best };
+    },
     perComponent: function () {
       var P = survey().P;
       return P.scores.map(function (s, i) {

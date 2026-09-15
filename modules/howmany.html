@@ -87,15 +87,21 @@
       foot of a cliff, and the instruction that comes with it is to keep the components above the point
       where the curve flattens into the rubble. That works when there is a cliff.</p>
 
-    <p class="lede">The eigenvalues of the six standardized attributes, in descending order, are 3.13,
-      1.29, 0.74, 0.45, 0.26 and 0.13. Plotted, they fall away smoothly. There is a step between the
-      first and the second, and after that the curve bends without ever clearly stopping, which is what
-      most real attribute sets look like.</p>
-    <p class="lede">The panel below adds the reconstruction of one attribute alongside the plot, so the
-      abstract decision has something attached to it from the start. Everything to the left of the cut is
-      kept and everything to the right is thrown away.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Drag the cut.</b> The attribute rebuilds itself from whatever bars are left of it.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">The eigenvalues of the six standardized attributes, in descending order, are 3.13,
+        1.29, 0.74, 0.45, 0.26 and 0.13. Plotted, they fall away smoothly. There is a step between the
+        first and the second, and after that the curve bends without ever clearly stopping, which is what
+        most real attribute sets look like.</p>
+        <p class="lede">The panel below adds the reconstruction of one attribute alongside the plot, so the
+        abstract decision has something attached to it from the start. Everything to the left of the cut is
+        kept and everything to the right is thrown away.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>One attribute, rebuilt from the components kept</h3>
         <span class="hint">Original, reconstruction, residual</span>
@@ -122,18 +128,24 @@
       <span class="hint">Press each button in the header</span>
     </div>
 
-    <p class="lede">Several rules for where to cut are in common use, and all of them are defensible.
-      The broken-stick rule compares each eigenvalue against what it would have been if the total
-      variance had been divided up at random, and keeps the components that beat that. The Kaiser rule
-      keeps components whose eigenvalue exceeds one, on the argument that a standardized attribute
-      carries a variance of one and a component carrying less than that has done worse than an attribute
-      would have. The retained-variance rules keep enough components to reach a stated fraction of the
-      total.</p>
-    <p class="lede">On these six attributes they return one, two, three, four and five. Every number
-      between the extremes is somebody's correct answer, and the choice between them is not settled by
-      anything in the data.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Press all five rule buttons.</b> They return one, two, three, four and five components.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Several rules for where to cut are in common use, and all of them are defensible.
+        The broken-stick rule compares each eigenvalue against what it would have been if the total
+        variance had been divided up at random, and keeps the components that beat that. The Kaiser rule
+        keeps components whose eigenvalue exceeds one, on the argument that a standardized attribute
+        carries a variance of one and a component carrying less than that has done worse than an attribute
+        would have. The retained-variance rules keep enough components to reach a stated fraction of the
+        total.</p>
+        <p class="lede">On these six attributes they return one, two, three, four and five. Every number
+        between the extremes is somebody's correct answer, and the choice between them is not settled by
+        anything in the data.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>What each rule keeps</h3>
         <span class="hint">Eigenvalues against the thresholds each rule applies</span>
@@ -168,17 +180,23 @@
       <span class="hint">All six attributes, residual only</span>
     </div>
 
-    <p class="lede">A percentage of variance discarded is a summary of the residual and not a
-      description of it. The residual is a set of maps, one per attribute, and it can be looked at
-      directly. Random noise thrown away looks like random noise. Geology thrown away looks like
-      geology.</p>
-    <p class="lede">The panels below are the residual of every attribute at the current cut, each drawn
-      at its own scale so that whatever is in it is visible. At a cut of one component the channels are
-      plainly still there in most of them. By four they are mostly gone from the residual and what
-      remains is closer to noise and footprint. That transition, looked at rather than computed, is a
-      better basis for the decision than any of the rules in step 2.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Walk the cut from 1 to 5</b> and look for the channels in what was thrown away.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">A percentage of variance discarded is a summary of the residual and not a
+        description of it. The residual is a set of maps, one per attribute, and it can be looked at
+        directly. Random noise thrown away looks like random noise. Geology thrown away looks like
+        geology.</p>
+        <p class="lede">The panels below are the residual of every attribute at the current cut, each drawn
+        at its own scale so that whatever is in it is visible. At a cut of one component the channels are
+        plainly still there in most of them. By four they are mostly gone from the residual and what
+        remains is closer to noise and footprint. That transition, looked at rather than computed, is a
+        better basis for the decision than any of the rules in step 2.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>What the discarded components were carrying</h3>
         <span class="hint">Channel axes marked on every panel</span>
@@ -207,17 +225,23 @@
       <span class="hint">The total is not shared out evenly</span>
     </div>
 
-    <p class="lede">A retained-variance figure is a total across all the attributes at once. It says
-      nothing about how the shortfall is distributed between them, and it is never distributed evenly.
-      The bars below give, for each attribute, how much of its own spread the reconstruction fails to
-      account for at the current cut.</p>
-    <p class="lede">Keeping four components reaches 93.40% of the total variance. At that cut peak
-      frequency is reconstructed to within eleven percent of its own spread and spectral bandwidth to
-      within nine, while coherence is still missing thirty-five percent and GLCM contrast thirty-seven.
-      An attribute can be almost entirely absent from a reconstruction that a headline number describes
-      as ninety-three percent complete.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Set the cut to 4</b> &mdash; that is what the ninety-percent rule picks &mdash; and find the two attributes it left behind.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">A retained-variance figure is a total across all the attributes at once. It says
+        nothing about how the shortfall is distributed between them, and it is never distributed evenly.
+        The bars below give, for each attribute, how much of its own spread the reconstruction fails to
+        account for at the current cut.</p>
+        <p class="lede">Keeping four components reaches 93.40% of the total variance. At that cut peak
+        frequency is reconstructed to within eleven percent of its own spread and spectral bandwidth to
+        within nine, while coherence is still missing thirty-five percent and GLCM contrast thirty-seven.
+        An attribute can be almost entirely absent from a reconstruction that a headline number describes
+        as ninety-three percent complete.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Residual per attribute, as a fraction of its own spread</h3>
         <span class="hint">Fixed axis, so the bars fall as the cut moves right</span>
@@ -240,20 +264,26 @@
       <span class="hint">Compare the two panels against each other</span>
     </div>
 
-    <p class="lede">Everything so far has ranked the components by variance, because that is the only
-      thing the method knows about them. The panels below add a second ranking: how well each component
-      separates the axis of the younger channel from its own margins, measured in pooled standard
-      deviations. The two rankings are not the same ranking.</p>
-    <p class="lede">The first component holds 52.19% of the variance and separates the channel at 0.33,
-      which is no separation at all. The second holds 21.43% and separates at 2.81; the third holds
-      12.31% and separates at 2.57. The work is being done by the two components below the top, and a
-      rule that kept only the first would have discarded both of them.</p>
-    <p class="lede">The lower panel is the same measurement on the six input attributes, and it makes a
-      point that is easy to leave out of a lecture on dimension reduction. Peak frequency on its own
-      separates the channel at 5.97, twice as well as the best component. For this particular target on
-      this particular survey, the dimension reduction did not improve on the best single input.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Compare the two rows of bars.</b> The component holding half the variance is the worst of the six at finding the channel.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Everything so far has ranked the components by variance, because that is the only
+        thing the method knows about them. The panels below add a second ranking: how well each component
+        separates the axis of the younger channel from its own margins, measured in pooled standard
+        deviations. The two rankings are not the same ranking.</p>
+        <p class="lede">The first component holds 52.19% of the variance and separates the channel at 0.33,
+        which is no separation at all. The second holds 21.43% and separates at 2.81; the third holds
+        12.31% and separates at 2.57. The work is being done by the two components below the top, and a
+        rule that kept only the first would have discarded both of them.</p>
+        <p class="lede">The lower panel is the same measurement on the six input attributes, and it makes a
+        point that is easy to leave out of a lecture on dimension reduction. Peak frequency on its own
+        separates the channel at 5.97, twice as well as the best component. For this particular target on
+        this particular survey, the dimension reduction did not improve on the best single input.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Variance held against channel separation</h3>
         <span class="hint">Components above, input attributes below</span>
@@ -341,7 +371,11 @@
             are visible in the residual of nearly every attribute, which means a great deal of geology
             was discarded — and the broken-stick rule would have stopped there. By 3 they have faded
             from most of the panels. By 4 the residuals are dominated by the six-trace footprint
-            striping and by speckle, which is what a reader wants to see before accepting a cut. Note
+            striping and by speckle, which is what a reader wants to see before accepting a cut. Be
+            careful with the word noise here: a residual that looks like speckle could be random noise,
+            or it could be real geology finer than the attributes can resolve. What the panel shows is
+            that the discarded components no longer contain anything organized at the scale of the
+            channels, which is a weaker statement than saying they contain nothing. Note
             that the residual panels each use their own scale, so a nearly empty residual and a
             substantial one look equally emphatic; the sizes are in step 4.</span></details></li>
 
@@ -659,7 +693,7 @@
   function measure(m) { return S.meas === 'sep' ? separation(m) : footprint(m); }
   function measMax() { return S.meas === 'sep' ? 6.5 : 0.30; }
   function measName() {
-    return S.meas === 'sep' ? 'channel separation, pooled sd' : 'footprint, fraction of sd';
+    return S.meas === 'sep' ? 'channel separation, pooled standard deviations' : 'footprint, fraction of sd';
   }
 
   /* =====================================================================

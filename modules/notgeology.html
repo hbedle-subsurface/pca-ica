@@ -1,0 +1,1139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Components are not geology | How PCA and ICA Actually Work</title>
+<meta name="description" content="An acquisition artifact arriving as a ranked component, a real channel that nothing in the set can find, an attribute that missed the target taking second place, and the admission that every score in these modules was computed with the answer in hand.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="dimensions.html">← Module 10</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 11 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>Components are not geology</h1>
+    <p class="sub">The last module, and the one that says what none of this can do. A component is a direction in a space of numbers that satisfies a statistical criterion. Whether it corresponds to a body of rock is a different question, and nothing in the arithmetic is capable of answering it. Four things go wrong here, all of them on the same survey the set has used throughout, and the fourth one is about these modules rather than about the methods.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">Four components. <span>Which ones are geology?</span></p>
+        <canvas id="cHead" aria-label="Four component maps shown without labels, for the reader to judge before the answer is revealed"></canvas>
+      </div>
+      <div>
+        <p class="cap">Decide first, then reveal <span>&mdash; no scores this time</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>Labels</h2>
+            <div class="seg" id="segReveal" role="group" aria-label="Show what each component is">
+              <button type="button" data-rev="0">Hidden</button>
+              <button type="button" data-rev="1">Reveal</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">Look at the four maps and decide which you would
+              take to a meeting. Then press Reveal. There is no bar to fill on this page and that is
+              deliberate.</p>
+          </div>
+          <div class="ctl-col">
+            <h2>Which method</h2>
+            <div class="seg" id="segMeth" role="group" aria-label="Which method">
+              <button type="button" data-meth="pca">PCA</button>
+              <button type="button" data-meth="ica">ICA</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">Both make the same kind of mistake. Neither is
+              worse at it than the other.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Five steps. <b>The last one is about these modules</b>, not about the methods.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · Which is geology</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · The artifact</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · What nothing finds</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Garbage ranks</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · The confession</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Four maps. Pick the geological ones.</h3>
+      <span class="hint">Decide before you reveal</span>
+    </div>
+
+    <p class="qbox"><b>Do this honestly.</b> Look at the four maps above, choose which you would show
+      someone as a result, and only then press Reveal.</p>
+
+    <p class="lede">All four came out of the same run on the same six attributes. All four are clean,
+      coherent, structured maps. <b>Two of them are not geology at all.</b></p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The same four, larger</h3>
+        <span class="hint">Channel axes marked only after revealing</span>
+      </div>
+      <canvas id="c1" aria-label="The four component maps at a larger size, with channel axes drawn only when labels are revealed"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Labels</h2>
+        <div class="seg" id="segReveal1" role="group" aria-label="Show what each component is">
+          <button type="button" data-rev="0">Hidden</button>
+          <button type="button" data-rev="1">Reveal</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>The acquisition came back as component four</h3>
+      <span class="hint">Ranked above two real ones</span>
+    </div>
+
+    <p class="lede"><b>Component 4 holds 7.5% of the variance and is the acquisition footprint.</b> It
+      separates neither channel, and it is ranked above components 5 and 6, which do carry some
+      geology.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">The footprint was put into the survey as a regular striping on a six-trace period,
+        the kind a marine acquisition geometry leaves behind. It enters the attribute set mainly through
+        peak envelope, which carries 0.27 of it, and RMS amplitude at 0.14.</p>
+      <p class="lede">It is periodic, strong and consistent across the whole survey, which makes it
+        exactly the kind of thing a variance-maximizing method collects. Module 07 noted that this
+        component has an excess kurtosis of &minus;0.18, which is almost exactly Gaussian, and module 08
+        noted that the corresponding ICA component converged in two iterations and carries 0.322 of the
+        footprint. Both methods found it, ranked it, and handed it over looking like a result.</p>
+      <p class="lede">The one thing that would have caught it is knowing the acquisition geometry, which
+        is not in the data and is not something either method could have been told.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>What each component contains</h3>
+        <span class="hint">Geology against artifact, per component</span>
+      </div>
+      <canvas id="c2" aria-label="For each component, the channel separation it achieves beside the amount of acquisition footprint it carries"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Which method</h2>
+        <div class="seg" id="segMeth2" role="group" aria-label="Which method">
+          <button type="button" data-meth="pca">PCA</button>
+          <button type="button" data-meth="ica">ICA</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>The older channel is there, and nothing finds it</h3>
+      <span class="hint">And the method is not the problem</span>
+    </div>
+
+    <p class="lede"><b>The best anything manages on the older channel is 1.44</b> — and that is a raw
+      attribute, beating both methods. The ceiling is 1.62.</p>
+    <p class="lede">Compare the younger channel in the same six attributes: ceiling 8.97, ICA 6.47.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">Module 06 computed, with the channel positions in hand, the best direction that
+        exists anywhere in this attribute space for each target. For the younger channel it reaches 8.97.
+        For the older one it reaches 1.615, and the best principal component gets 1.03, the best
+        independent component 1.35, and the best single raw attribute 1.45.</p>
+      <p class="lede">Everything is close to the ceiling. That is the important part. When every method
+        lands near the best available, the shortfall is not in the methods — the six attributes simply do
+        not carry much about that channel. It is thinner, at a different level, and partly overprinted
+        where the younger system crosses it.</p>
+      <p class="lede">No amount of dimension reduction recovers information that was not in the inputs.
+        The correct response to this picture is to go back and compute attributes that would see a
+        thinner bed, not to try a different algorithm.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Both targets, every method, against the ceiling</h3>
+        <span class="hint">Same axis for both</span>
+      </div>
+      <canvas id="c3" aria-label="Channel separation achieved on the younger and older channels by each method, with the supervised ceiling marked for each"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 260px;min-width:240px">
+        <h2 style="margin:0 0 6px">Which channel</h2>
+        <div class="seg" id="segTgt" role="group" aria-label="Which target">
+          <button type="button" data-tgt="young">Younger</button>
+          <button type="button" data-tgt="old">Older</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>An attribute that missed the target took second place</h3>
+      <span class="hint">Switch it in and out</span>
+    </div>
+
+    <p class="lede"><b>Add an attribute computed on a window above the channel system</b> — correct
+      arithmetic, wrong interval — and it becomes the largest loading on component 2, at 0.528.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">The seventh attribute is RMS amplitude on samples 2 to 16, which sits entirely above
+        the target. It averages 0.04559 inside the younger channel and 0.04660 in the background, a
+        difference of two percent, against 0.08126 and 0.05571 for the same attribute measured on the
+        target itself. It carries almost nothing about the channel.</p>
+      <p class="lede">Module 03 showed why standardizing guarantees it a hearing: every attribute is given
+        a variance of one, which is a statement that they all deserve equal weight. Once that is granted,
+        an attribute carrying nothing still occupies a full dimension, and it can occupy a high-ranked
+        one. The first component falls from 52.19% to 44.83% and the components needed for ninety percent
+        go from four to five.</p>
+      <p class="lede">Nothing in the output flags it. The component looks like any other component, and
+        the only way to notice is to read the loadings and recognize that the largest one belongs to an
+        attribute that should not have been in the list.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The loadings, with and without it</h3>
+        <span class="hint">Read the largest bar on each component</span>
+      </div>
+      <canvas id="c4" aria-label="Loadings on each component with and without the attribute measured above the target"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 280px;min-width:260px">
+        <h2 style="margin:0 0 6px">The attribute set</h2>
+        <div class="seg" id="segWeak" role="group" aria-label="Include the attribute that misses the target">
+          <button type="button" data-weak="0">Six, on the target</button>
+          <button type="button" data-weak="1">Add the seventh</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>Every score in this module set was cheating</h3>
+      <span class="hint">Read this one</span>
+    </div>
+
+    <p class="lede">Eleven modules have quoted a number called the channel separation, and have used it
+      to say which component was good. <b>That number was computed from the model's own record of where
+      the channels are.</b></p>
+    <p class="lede">No survey supplies that. Every one of those judgments was made with the answer in
+      hand, by something that was not the method being judged.</p>
+
+    <details class="reveal"><summary>What to do instead, on real data</summary>
+      <p class="lede">Four substitutes, none as good, all available:</p>
+      <p class="lede"><b>A well.</b> The nearest thing to a ground truth in practice. A component that
+        separates facies at a well is evidence about the component, at one location.</p>
+      <p class="lede"><b>Repeatability.</b> Module 09's test. Re-run from a different start, or on a
+        different part of the survey, and see whether the same components come back. It needs no truth
+        and it catches the failure that looking cannot.</p>
+      <p class="lede"><b>The loadings.</b> Reading what a component is made of takes seconds and
+        catches an attribute that should not be there, as step 4 shows.</p>
+      <p class="lede"><b>Knowing the acquisition.</b> The footprint in step 2 is invisible to every
+        statistic in this set and obvious to anybody who knows the geometry.</p>
+      <p class="lede">The honest position is that dimension reduction reorganizes what you gave it,
+        ranks the result by a criterion of its own, and hands it over without comment. Deciding what any
+        of it means is interpretation, and it stays interpretation however the volumes were
+        produced.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Where to go from here</h3>
+        <span class="hint">Everything in this set was a straight line through the data</span>
+      </div>
+      <canvas id="c5" aria-label="A comparison of linear dimension reduction with the nonlinear methods that follow it"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 280px;min-width:260px">
+        <h2 style="margin:0 0 6px">Show</h2>
+        <div class="seg" id="segNext" role="group" aria-label="Which comparison">
+          <button type="button" data-next="lin">What linear means</button>
+          <button type="button" data-next="meth">The methods after these</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>Every method in this set draws straight lines through the data: a component is a weighted sum
+        of the inputs, with one set of weights for the whole survey. Where the relationship between
+        attributes bends, as module 02's tuning curve did, no weighted sum describes it, and that is
+        where self-organizing maps, generative topographic mapping and the rest of the nonlinear family
+        begin.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">The last thing the set has to say</span>
+    </div>
+    <p class="lede">A component volume arrives looking exactly like an attribute volume. It has a name, a
+      number, a colour bar and a rank, and none of those carry any information about whether it
+      corresponds to rock.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>Read the loadings before the map.</b> It takes seconds, it names the component, and it
+        catches inputs that should not have been in the list.</li>
+      <li><b>Know what artifacts your survey has.</b> A periodic footprint is strong, consistent and
+        exactly what a variance-maximizing method collects. It will be ranked.</li>
+      <li><b>When every method lands near the ceiling, stop changing methods.</b> Go back and compute
+        attributes that can see the thing you are looking for.</li>
+      <li><b>Distrust a good-looking result most of all.</b> Modules 09 and this one both produce clean,
+        convincing, structured maps of nothing in particular.</li>
+    </ul>
+    <p class="lede"><b>The two things worth carrying out of the whole set.</b> First, a component is a
+      weighted sum of your inputs, and reading the weights tells you what it is. Second, every method
+      here optimizes something — spread, or non-Gaussianity — and neither of those is "shows me the
+      reservoir". The gap between what was optimized and what you wanted is where the interpretation
+      lives, and it does not close.</p>
+    <div class="legend prose">
+      <span>That is the end of the set. If one sentence survives: <b>the method found a direction, not a
+        rock.</b></span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Judge four maps, then check.</b>
+          <em class="point">Why: everything in this module rests on how convincing a meaningless
+            component looks, and that only lands if you commit first.</em>
+          In step 1, decide which of the four maps you would present as a result. Write it down. Then
+          reveal.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Component 2 and component 3
+            are the channel components, separating the younger channel at 2.81 and 2.57. Component 1
+            holds 52.2% of the variance and separates it at 0.33, which is nothing; it is a general
+            brightness map. Component 4 holds 7.5% and is the acquisition footprint, carrying 0.213 of
+            the six-trace striping. All four are clean and coherent. The two that are not geology are the
+            largest and the fourth largest, so neither the rank nor the appearance
+            helped.</span></details></li>
+
+        <li><b>Track the artifact through both methods.</b>
+          <em class="point">Why: it is not a PCA problem, and it is worth confirming that rather than
+            assuming it.</em>
+          In step 2, read the footprint carried by each component under PCA, then switch to ICA.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Under PCA it concentrates in
+            component 4 at 0.213, which holds 7.5% of the variance. Under ICA it concentrates in
+            component 6 at 0.322, more strongly still, and module 08 found that component converged in
+            two iterations because it is nearly Gaussian. Both methods found the footprint, ranked it
+            among their outputs and handed it over. It entered the attribute set mainly through peak
+            envelope, which carries 0.27 of it, and RMS amplitude at 0.14 — so the place to have caught
+            it was the input attributes. Note that it is only identifiable as footprint here because the
+            striping was put into the survey deliberately and its period is known. On a real survey a
+            periodic map could be acquisition, or a genuine periodic feature such as a dune field or a
+            regular fracture set, and telling them apart needs the survey geometry rather than the
+            data.</span></details></li>
+
+        <li><b>Find the case where changing method cannot help.</b>
+          <em class="point">Why: knowing when to stop trying algorithms is worth more than knowing
+            another algorithm.</em>
+          In step 3, compare the younger and older channels: the ceiling, the best component of each
+          method, and the best raw attribute.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Younger channel: ceiling 8.97,
+            best principal component 2.81, best independent component 6.47. There is a large gap between
+            the methods and the ceiling, so method choice matters. Older channel: ceiling 1.62, best
+            principal component 1.03, best independent component 1.35, best raw attribute 1.44. Everything
+            is crowded against a low ceiling, which says the six attributes carry very little about that
+            channel. A third method would land in the same place. The useful response is to compute
+            attributes that can see a thinner bed at a different level, which is a decision about the
+            inputs and not about the algorithm.</span></details></li>
+
+        <li><b>Put a useless attribute in and find it from the output alone.</b>
+          <em class="point">Why: this is the check that catches it, and it is the only one
+            available.</em>
+          In step 4, switch the seventh attribute in, then try to identify it from the loadings without
+          looking at which one you added.
+          <details class="reveal"><summary>Hint</summary><span class="ans">It is the largest loading on
+            component 2, at 0.528, ahead of peak envelope at 0.516 — which is the way module 03 reads it.
+            Its own largest loading is on component 3, at &minus;0.672, where peak frequency at 0.682 is
+            marginally larger still. The two readings answer different questions and both are true. So it is
+            spread across two high-ranked components and dominates one of them. Adding it drops the first
+            component from 52.19% to 44.83% and pushes the components needed for ninety percent from four
+            to five. Nothing about the maps says anything is wrong. Reading the loadings and asking "what
+            is that attribute doing there" is the whole of the
+            defense.</span></details></li>
+
+        <li><b>Work out what you would actually use on a real survey.</b>
+          <em class="point">Why: every score in this set came from the model, and you will not have
+            one.</em>
+          Read step 5, then list the checks you could run on a survey with no ground truth.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Four, none as good as the
+            truth and all available: a well, which gives evidence at one location; repeatability, from
+            module 09, which catches components the data did not determine and needs no truth at all;
+            reading the loadings, which catches inputs that should not be in the list and takes seconds;
+            and knowing the acquisition geometry, which is the only thing that would have caught the
+            footprint in step 2. Notice what they have in common — none of them is a statistic computed
+            from the components, and every one brings in information from outside the
+            analysis.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>A component is a direction that satisfied a criterion.</b> Whether it is a rock is a
+          separate question no statistic on the page can answer.</li>
+        <li><b>An artifact will be ranked.</b> The acquisition footprint came back as component 4 under
+          PCA and component 6 under ICA, looking like a clean result in both.</li>
+        <li><b>The largest component is often nothing.</b> Here it holds 52.2% of the variance and
+          separates the channel at 0.33.</li>
+        <li><b>When everything lands near the ceiling, the inputs are the problem.</b> On the older
+          channel: ceiling 1.62, best method 1.35, best raw attribute 1.44.</li>
+        <li><b>An attribute on the wrong interval takes a high rank.</b> 0.528 on component 2, and
+          nothing in the output flags it.</li>
+        <li><b>Every score in this set was computed from the answer.</b> On real data you have a well,
+          repeatability, the loadings, and knowledge of the acquisition. Use all four.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>The survey, the six attributes, the seventh, the standardization, the separation
+      statistic and the footprint statistic</b> are all exactly as in modules 03 to 08, so every number
+      here can be set beside the ones there. The ceilings of 8.973 and 1.615 are module 06's supervised
+      discriminant and are described in its Method tab.</p>
+    <p class="lede"><b>The footprint statistic</b> is the projection of a map onto the six-trace striping
+      that was put into the survey, as a fraction of that map's own standard deviation. It is only
+      computable because the striping is known exactly, which is the whole point of step 2: on a real
+      survey the equivalent knowledge comes from the acquisition geometry rather than from any
+      measurement of the data.</p>
+    <p class="lede"><b>The admission in step 5 is not a rhetorical device.</b> Every figure in this set
+      called a channel separation was computed by comparing traces the model marks as channel against
+      traces the model marks as margin. That information does not exist for a real survey. It was used
+      throughout because a teaching set needs a way to say "this component is better than that one" and
+      an interpreter's judgment cannot be plotted. The substitutes listed in step 5 are what remains when
+      it is taken away, and they are genuinely weaker.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> One synthetic survey, one window, two
+      geological targets and one artifact. A real survey has more of all four and they are not cleanly
+      separable into a list. The footprint is perfectly periodic and real footprint is not. The channel
+      positions are known exactly and on real data they would themselves be interpretations with their
+      own uncertainty, which would widen every number quoted here.</p>
+    <p class="lede"><b>Where this departs from production software.</b> Nowhere in the arithmetic. The
+      diagnostics assembled on this page — the footprint projection, the separation against a known
+      target, the comparison against a supervised ceiling — are not things a package computes, because
+      they need information the package does not have.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Kohonen, T., 1982, Self-organized formation of topologically correct feature maps:
+          <em>Biological Cybernetics</em>, <b>43</b>, 59&ndash;69.</li>
+        <li>Bishop, C. M., M. Svensén, and C. K. I. Williams, 1998, GTM: the generative topographic
+          mapping: <em>Neural Computation</em>, <b>10</b>, 215&ndash;234.</li>
+        <li>van der Maaten, L., and G. Hinton, 2008, Visualizing data using t-SNE: <em>Journal of Machine
+          Learning Research</em>, <b>9</b>, 2579&ndash;2605.</li>
+        <li>McInnes, L., J. Healy, and J. Melville, 2018, UMAP: uniform manifold approximation and
+          projection for dimension reduction: <em>arXiv:1802.03426</em>.</li>
+        <li>Roden, R., T. Smith, and D. Sacrey, 2015, Geologic pattern recognition from seismic
+          attributes: principal component analysis and self-organizing maps:
+          <em>Interpretation</em>, <b>3</b>, SAE59&ndash;SAE83.</li>
+        <li>Lubo-Robles, D., H. Bedle, K. J. Marfurt, and M. J. Pranter, 2023, Evaluation of principal
+          component analysis for seismic attribute selection and self-organizing maps for seismic facies
+          discrimination in the presence of gas hydrates: <em>Marine and Petroleum Geology</em>,
+          <b>150</b>, 106097.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">That is the set</p>
+    <h3>Where to go next</h3>
+    <p>Everything here drew straight lines through the data. Self-organizing maps and generative
+      topographic mapping fit a surface through it instead, and they take the components from this set as
+      their inputs. A companion module set on those is in preparation.</p>
+    <a class="btn ghost" href="../index.html">Back to all modules</a>
+    <a class="btn ghost" href="toomany.html">Start again at the teapot →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="dimensions.html">← Module 10: what counts as a dimension</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="toomany.html">Start again at the teapot →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened &mdash; no cookie, no account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+  var NX = 72, NY = 72;
+  var CORE = ['rms', 'envelope', 'peakfreq', 'bandwidth', 'coherence', 'glcmcon'];
+  var WEAK = 'shallow';
+  var ALL = CORE.concat([WEAK]);
+  var SHORT = { rms: 'RMS', envelope: 'env', peakfreq: 'f peak', bandwidth: 'bandw',
+                coherence: 'coher', glcmcon: 'GLCM', shallow: 'shallow' };
+  var CEILING = { young: 8.973, old: 1.615 };
+
+  var DEF = { rev: 0, meth: 'pca', tgt: 'young', weak: 0, next: 'lin', tab: 'p1' };
+  var S = MV.readState(DEF);
+  S.rev = S.rev ? 1 : 0;
+  S.weak = S.weak ? 1 : 0;
+  if (S.meth !== 'pca' && S.meth !== 'ica') S.meth = 'pca';
+  if (S.tgt !== 'young' && S.tgt !== 'old') S.tgt = 'young';
+  if (S.next !== 'lin' && S.next !== 'meth') S.next = 'lin';
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  var SURVEY = null;
+  function survey() {
+    if (SURVEY) return SURVEY;
+    var slab = AF.build({ nx: NX, ny: NY, freq: 30, noise: 0.12, footprint: 0.10, seed: 2026 });
+    var attr = AF.attributes(slab, ALL);
+    SURVEY = {
+      slab: slab, attr: attr,
+      P6: MV.pca(CORE.map(function (n) { return attr[n]; }), { standardize: true }),
+      P7: MV.pca(ALL.map(function (n) { return attr[n]; }), { standardize: true }),
+      I6: MV.fastICA(CORE.map(function (n) { return attr[n]; }), 6,
+        { contrast: 'logcosh', standardize: true })
+    };
+    return SURVEY;
+  }
+
+  var MASKS = {};
+  function masksFor(which) {
+    if (MASKS[which]) return MASKS[which];
+    var spec = which === 'young' ? AF.YOUNG : AF.OLD;
+    var axis = [], marg = [], ix, iy;
+    for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+      var yc = AF.centerline(ix, NX, spec) * (NY - 1);
+      var d = Math.abs(iy - yc) / (spec.halfWidth * (NY - 1));
+      var k = ix * NY + iy;
+      if (d < 0.45) axis.push(k); else if (d > 1.1 && d < 2.0) marg.push(k);
+    }
+    MASKS[which] = { axis: axis, marg: marg };
+    return MASKS[which];
+  }
+  function sep(m, which) {
+    var M = masksFor(which || S.tgt);
+    var a = M.axis.map(function (k) { return m[k]; });
+    var b = M.marg.map(function (k) { return m[k]; });
+    var ma = MV.mean(a), mb = MV.mean(b);
+    var sa = MV.std(a, ma), sb = MV.std(b, mb);
+    return (ma - mb) / Math.sqrt((sa * sa + sb * sb) / 2 || 1);
+  }
+  function foot(m) {
+    var s = 0, n = 0, ix, iy;
+    for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+      s += m[ix * NY + iy] * Math.cos(2 * Math.PI * ix / 6) * Math.cos(2 * Math.PI * iy / 6);
+      n++;
+    }
+    return Math.abs(s / n) / (MV.std(m) || 1);
+  }
+  function comps() {
+    var sv = survey();
+    return S.meth === 'pca' ? sv.P6.scores : sv.I6.S;
+  }
+  function share(i) {
+    var sv = survey();
+    return S.meth === 'pca' ? sv.P6.explained[i] : 1 / 6;
+  }
+
+  /* The four shown in step 1: two that carry the channel, the largest one,
+     and the footprint. Chosen from the measurements rather than by hand. */
+  function quartet() {
+    var list = comps(), i;
+    var fb = 0;
+    for (i = 0; i < list.length; i++) if (foot(list[i]) > foot(list[fb])) fb = i;
+    var ranked = list.map(function (m, k) { return { k: k, s: Math.abs(sep(m, 'young')) }; })
+      .sort(function (a, b) { return b.s - a.s; });
+    var g1 = ranked[0].k, g2 = ranked[1].k;
+    var big = 0;
+    if (S.meth === 'pca') big = 0; else {
+      var kb = 0;
+      for (i = 0; i < list.length; i++) {
+        if (MV.kurtosis(list[i]) > MV.kurtosis(list[kb])) kb = i;
+      }
+      big = kb;
+    }
+    var out = [], seen = {};
+    [g1, g2, big, fb].forEach(function (k) { if (!(k in seen)) { seen[k] = 1; out.push(k); } });
+    for (i = 0; out.length < 4 && i < list.length; i++) if (!(i in seen)) { seen[i] = 1; out.push(i); }
+    return out.slice(0, 4).sort(function (a, b) { return a - b; });
+  }
+  function verdict(k) {
+    var list = comps();
+    var sy = Math.abs(sep(list[k], 'young')), so = Math.abs(sep(list[k], 'old'));
+    var fp = foot(list[k]);
+    if (fp > 0.19) return { txt: 'acquisition footprint', ok: false };
+    if (sy > 1.5 || so > 1.2) return { txt: 'carries a channel', ok: true };
+    return { txt: 'neither channel', ok: false };
+  }
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
+    c.width = Math.round(w * dpr); c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+  function grid(ctx, r, y0, y1, nx, ny, yfmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE; ctx.strokeStyle = '#E4E7EA'; ctx.lineWidth = 1;
+    var i, X, Y, v;
+    for (i = 0; i <= nx; i++) {
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      if (yfmt !== false) ctx.fillText(yfmt ? yfmt(v) : v.toFixed(1), r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var stops = [[26, 47, 63], [61, 109, 125], [166, 196, 198], [244, 240, 227],
+                 [214, 156, 110], [166, 71, 52], [102, 20, 24]];
+    var u = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(u)), f = u - i;
+    var a = stops[i], b = stops[i + 1];
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * f) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * f) + ',' + Math.round(a[2] + (b[2] - a[2]) * f) + ')';
+  }
+  function drawMap(ctx, r, m, title, sub, marks) {
+    var q = Math.max(Math.abs(AF.percentile(m, 0.01)), Math.abs(AF.percentile(m, 0.99))) || 1;
+    var cw = r.w / NX, ch = r.h / NY, ix, iy;
+    for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+      ctx.fillStyle = cmap((m[ix * NY + iy] + q) / (2 * q));
+      ctx.fillRect(r.x + ix * cw, r.y + (NY - 1 - iy) * ch, cw + 0.6, ch + 0.6);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    if (marks) {
+      ctx.lineWidth = 1.1;
+      [[AF.YOUNG, 'rgba(255,255,255,0.9)', []], [AF.OLD, 'rgba(255,255,255,0.65)', [4, 3]]]
+        .forEach(function (p) {
+          ctx.strokeStyle = p[1]; ctx.setLineDash(p[2]);
+          ctx.beginPath();
+          for (var jx = 0; jx < NX; jx++) {
+            var yc = AF.centerline(jx, NX, p[0]) * (NY - 1);
+            var X = r.x + (jx + 0.5) * r.w / NX, Y = r.y + r.h - (yc + 0.5) * r.h / NY;
+            if (jx === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+          }
+          ctx.stroke();
+        });
+      ctx.setLineDash([]);
+    }
+    if (title) {
+      ctx.fillStyle = INK; ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 5);
+    }
+    if (sub) {
+      ctx.fillStyle = sub.ok === false ? CRIM : (sub.ok ? TEAL : SLATE);
+      ctx.textAlign = 'left';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(sub.txt, r.x, r.y + r.h + 14);
+    }
+    ctx.restore();
+  }
+
+  function drawQuartet(id, size) {
+    var host = $(id);
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var sz = Math.min(size, (w - 60) / 4);
+    var ctx = fit(id, w, sz + 46);
+    if (!ctx) return;
+    var list = comps(), q = quartet();
+    var gap = Math.max(10, (w - 12 - 4 * sz) / 4);
+    q.forEach(function (k, i) {
+      var r = { x: 6 + i * (sz + gap), y: 22, w: sz, h: sz };
+      var title = S.rev ? ((S.meth === 'pca' ? 'PC' : 'IC') + (k + 1) + '   ' +
+        (share(k) * 100).toFixed(1) + '%') : String.fromCharCode(65 + i);
+      drawMap(ctx, r, list[k], title, S.rev ? verdict(k) : null, S.rev);
+    });
+  }
+
+  function drawHead() { drawQuartet('cHead', 150); }
+  function drawStep1() { drawQuartet('c1', 230); }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 290;
+    var ctx = fit('c2', w, h);
+    if (!ctx) return;
+    var list = comps();
+    var r = { x: 56, y: 14, w: w - 56 - 24, h: h - 14 - 58 };
+    grid(ctx, r, 0, 7, 6, 7);
+    var cw = r.w / 6, i;
+    for (i = 0; i < 6; i++) {
+      var cx = r.x + (i + 0.5) * cw;
+      var sy = Math.abs(sep(list[i], 'young'));
+      var fp = foot(list[i]);
+      var y1 = r.y + r.h - Math.min(7, sy) / 7 * r.h;
+      ctx.save();
+      ctx.globalAlpha = 0.9; ctx.fillStyle = TEAL;
+      ctx.fillRect(cx - cw * 0.30, y1, cw * 0.26, r.y + r.h - y1);
+      ctx.restore();
+      // footprint on its own scale, 0 to 0.35, drawn against the same box
+      var y2 = r.y + r.h - Math.min(0.35, fp) / 0.35 * r.h;
+      ctx.save();
+      ctx.globalAlpha = 0.9; ctx.fillStyle = CRIM;
+      ctx.fillRect(cx + cw * 0.04, y2, cw * 0.26, r.y + r.h - y2);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = SLATE; ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText((S.meth === 'pca' ? 'PC' : 'IC') + (i + 1), cx, r.y + r.h + 16);
+      ctx.fillText(fp.toFixed(3), cx + cw * 0.17, r.y + r.h + 30);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = TEAL;
+    ctx.fillText('channel separation (left bars, 0 to 7)', r.x + 8, r.y + 14);
+    ctx.fillStyle = CRIM;
+    ctx.fillText('footprint carried (right bars, 0 to 0.35)', r.x + 8, r.y + 30);
+    ctx.restore();
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 280;
+    var ctx = fit('c3', w, h);
+    if (!ctx) return;
+    var sv = survey();
+    var bars = [
+      ['best PC', Math.max.apply(null, sv.P6.scores.map(function (m) {
+        return Math.abs(sep(m, S.tgt)); })), SLATE],
+      ['best IC', Math.max.apply(null, sv.I6.S.map(function (m) {
+        return Math.abs(sep(m, S.tgt)); })), TEAL],
+      ['best raw attribute', Math.max.apply(null, CORE.map(function (n) {
+        return Math.abs(sep(sv.attr[n], S.tgt)); })), SLATE],
+      ['best found', CEILING[S.tgt], CRIM]
+    ];
+    var r = { x: 56, y: 14, w: w - 56 - 24, h: h - 14 - 58 };
+    grid(ctx, r, 0, 10, 4, 5);
+    var cw = r.w / 4;
+    bars.forEach(function (b, i) {
+      var cx = r.x + (i + 0.5) * cw;
+      var y = r.y + r.h - Math.min(10, b[1]) / 10 * r.h;
+      ctx.save();
+      ctx.globalAlpha = 0.88; ctx.fillStyle = b[2];
+      ctx.fillRect(cx - cw * 0.26, y, cw * 0.52, r.y + r.h - y);
+      ctx.restore();
+      ctx.save();
+      ctx.fillStyle = INK; ctx.textAlign = 'center';
+      ctx.font = '600 11px ui-monospace,Menlo,monospace';
+      ctx.fillText(b[1].toFixed(2), cx, y - 7);
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillStyle = SLATE;
+      ctx.fillText(b[0], cx, r.y + r.h + 18);
+      ctx.restore();
+    });
+    var Y = r.y + r.h - Math.min(10, CEILING[S.tgt]) / 10 * r.h;
+    ctx.save();
+    ctx.strokeStyle = CRIM; ctx.lineWidth = 1.4; ctx.setLineDash([6, 4]);
+    ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.fillStyle = SLATE; ctx.textAlign = 'left';
+    ctx.fillText((S.tgt === 'young' ? 'younger' : 'older') +
+      ' channel \u2014 everything crowds the best available when the inputs are the limit',
+      r.x + 6, r.y + 14);
+    ctx.restore();
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var sv = survey();
+    var names = S.weak ? ALL : CORE;
+    var P = S.weak ? sv.P7 : sv.P6;
+    var nshow = Math.min(4, names.length);
+    var rowH = 22, blockH = nshow * rowH + 34;
+    var ctx = fit('c4', w, blockH + 18);
+    if (!ctx) return;
+    var x0 = 96, colW = (w - x0 - 30) / nshow;
+    for (var c = 0; c < nshow; c++) {
+      var cx = x0 + c * colW;
+      ctx.save();
+      ctx.fillStyle = INK; ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText('PC' + (c + 1) + '  ' + (P.explained[c] * 100).toFixed(1) + '%', cx, 16);
+      ctx.restore();
+      var big = 0, i;
+      for (i = 0; i < names.length; i++) {
+        if (Math.abs(P.vectors[c][i]) > Math.abs(P.vectors[c][big])) big = i;
+      }
+      for (i = 0; i < names.length; i++) {
+        var y = 26 + i * rowH;
+        var v = P.vectors[c][i];
+        var mid = cx + colW * 0.42;
+        var bw = v * colW * 0.34;
+        ctx.save();
+        ctx.fillStyle = (names[i] === WEAK) ? CRIM : (i === big ? INK : SLATE);
+        ctx.globalAlpha = (i === big) ? 0.95 : 0.55;
+        ctx.fillRect(Math.min(mid, mid + bw), y, Math.abs(bw), 9);
+        ctx.restore();
+        if (c === 0) {
+          ctx.save();
+          ctx.fillStyle = (names[i] === WEAK) ? CRIM : SLATE;
+          ctx.textAlign = 'right';
+          ctx.font = (names[i] === WEAK ? '600 ' : '') + '10px ui-monospace,Menlo,monospace';
+          ctx.fillText(SHORT[names[i]], x0 - 8, y + 8);
+          ctx.restore();
+        }
+      }
+    }
+    ctx.save();
+    ctx.fillStyle = SLATE; ctx.textAlign = 'left';
+    ctx.font = '10px ui-monospace,Menlo,monospace';
+    ctx.fillText(S.weak
+      ? 'crimson is the attribute measured above the target; darkest bar in each column is that component\u2019s largest loading'
+      : 'darkest bar in each column is that component\u2019s largest loading',
+      8, blockH + 8);
+    ctx.restore();
+  }
+
+  var NEXT = {
+    lin: ['What "linear" means, and where it stops', [
+      ['these methods', 'a component is a weighted sum of the inputs'],
+      ['these methods', 'one set of weights for the whole survey'],
+      ['these methods', 'straight lines through the cloud, nothing else'],
+      ['where it fails', 'amplitude against bed thickness, from module 02'],
+      ['where it fails', 'that relationship bends, and no weighted sum bends'],
+      ['what follows', 'methods that fit a surface through the cloud instead']
+    ]],
+    meth: ['The methods that come after these', [
+      ['SOM', 'a grid of nodes pulled through the cloud; facies maps'],
+      ['GTM', 'the same idea with a probability model behind it'],
+      ['t-SNE', 'good at showing clusters, distances between them unreliable'],
+      ['UMAP', 'faster, keeps more of the large-scale structure'],
+      ['autoencoders', 'a network that learns its own compression'],
+      ['all of them', 'usually take PCA or ICA components as their input']
+    ]]
+  };
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var T = NEXT[S.next], rows = T[1], rowH = 32;
+    var ctx = fit('c5', w, rows.length * rowH + 44);
+    if (!ctx) return;
+    ctx.save();
+    ctx.fillStyle = INK; ctx.textAlign = 'left';
+    ctx.font = '600 12px ui-monospace,Menlo,monospace';
+    ctx.fillText(T[0], 8, 18);
+    ctx.restore();
+    rows.forEach(function (row, i) {
+      var y = 32 + i * rowH;
+      ctx.save();
+      if (i % 2 === 0) { ctx.fillStyle = '#F4F6F7'; ctx.fillRect(8, y, w - 16, rowH - 2); }
+      ctx.fillStyle = /fail/.test(row[0]) ? CRIM : TEAL;
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(row[0], 18, y + 20);
+      ctx.fillStyle = INK;
+      ctx.font = '12px system-ui, -apple-system, sans-serif';
+      ctx.fillText(row[1], 140, y + 20);
+      ctx.restore();
+    });
+  }
+
+  /* =====================================================================
+     READOUTS
+     ===================================================================== */
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function drawStats() {
+    var sv = survey(), list = comps();
+    if ($('s1')) {
+      var q = quartet();
+      if (!S.rev) {
+        $('s1').innerHTML =
+          stat('Four maps', 'A B C D', 'all from the same run') +
+          stat('All of them', 'clean', 'coherent and structured') +
+          stat('Geological', '?', 'decide before revealing') +
+          stat('Method', S.meth.toUpperCase(), 'both do this');
+      } else {
+        $('s1').innerHTML = q.map(function (k, i) {
+          return stat(String.fromCharCode(65 + i) + ' = ' +
+            (S.meth === 'pca' ? 'PC' : 'IC') + (k + 1),
+            Math.abs(sep(list[k], 'young')).toFixed(2), verdict(k).txt);
+        }).join('');
+      }
+    }
+    if ($('s2')) {
+      var fb = 0, i;
+      for (i = 0; i < list.length; i++) if (foot(list[i]) > foot(list[fb])) fb = i;
+      $('s2').innerHTML =
+        stat('Most footprint', (S.meth === 'pca' ? 'PC' : 'IC') + (fb + 1),
+          foot(list[fb]).toFixed(3) + ' of the striping') +
+        stat('It holds', (share(fb) * 100).toFixed(1) + '%',
+          S.meth === 'pca' ? 'of the variance' : 'every IC is equal') +
+        stat('Its channel separation', Math.abs(sep(list[fb], 'young')).toFixed(2), 'essentially none') +
+        stat('Footprint in peak envelope', foot(sv.attr.envelope).toFixed(2),
+          'where it got in');
+    }
+    if ($('s3')) {
+      var bp = Math.max.apply(null, sv.P6.scores.map(function (m) {
+        return Math.abs(sep(m, S.tgt)); }));
+      var bi = Math.max.apply(null, sv.I6.S.map(function (m) {
+        return Math.abs(sep(m, S.tgt)); }));
+      var ba = Math.max.apply(null, CORE.map(function (n) {
+        return Math.abs(sep(sv.attr[n], S.tgt)); }));
+      $('s3').innerHTML =
+        stat('Best found', CEILING[S.tgt].toFixed(2), 'from the discriminant') +
+        stat('Best component', Math.max(bp, bi).toFixed(2),
+          bi > bp ? 'independent' : 'principal') +
+        stat('Best raw attribute', ba.toFixed(2), ba > Math.max(bp, bi) ? 'beats both methods' : '') +
+        stat('Gap to the best', (100 * (1 - Math.max(bp, bi, ba) / CEILING[S.tgt])).toFixed(0) + '%',
+          S.tgt === 'old' ? 'the inputs are the limit' : 'room for a better method');
+    }
+    if ($('s4')) {
+      if (!S.weak) {
+        $('s4').innerHTML =
+          stat('Attributes', '6', 'all measured on the target') +
+          stat('PC1', (sv.P6.explained[0] * 100).toFixed(2) + '%', 'of the variance') +
+          stat('For 90%', String(MV.componentsFor(sv.P6, 0.9)), 'components needed') +
+          stat('Now add', 'the seventh', 'and read PC2 again');
+      } else {
+        var wi = ALL.indexOf(WEAK), b2 = 0, j;
+        for (j = 0; j < ALL.length; j++) {
+          var big2 = 0, q2;
+          for (q2 = 0; q2 < ALL.length; q2++) {
+            if (Math.abs(sv.P7.vectors[j][q2]) > Math.abs(sv.P7.vectors[j][big2])) big2 = q2;
+          }
+          if (big2 === wi) { b2 = j; break; }
+        }
+        $('s4').innerHTML =
+          stat('It dominates', 'PC' + (b2 + 1), 'loading ' + sv.P7.vectors[b2][wi].toFixed(3)) +
+          stat('PC1 falls to', (sv.P7.explained[0] * 100).toFixed(2) + '%',
+            'from ' + (sv.P6.explained[0] * 100).toFixed(2) + '%') +
+          stat('For 90%', MV.componentsFor(sv.P6, 0.9) + ' \u2192 ' + MV.componentsFor(sv.P7, 0.9),
+            'components needed') +
+          stat('In the channel', '0.04559', 'against 0.04660 in the background');
+      }
+    }
+    if ($('s5')) {
+      $('s5').innerHTML =
+        stat('Scores in this set', 'supervised', 'computed from the model') +
+        stat('On a real survey', 'four checks', 'well, repeatability, loadings, geometry') +
+        stat('All four', 'from outside', 'none is a statistic of the components') +
+        stat('What stays', 'interpretation', 'however the volumes were made');
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+
+  function syncLabels() {
+    document.querySelectorAll('#segReveal button, #segReveal1 button').forEach(function (b) {
+      var on = String(S.rev) === b.dataset.rev;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    });
+    document.querySelectorAll('#segMeth button, #segMeth2 button').forEach(function (b) {
+      var on = b.dataset.meth === S.meth;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    });
+    document.querySelectorAll('#segTgt button').forEach(function (b) {
+      var on = b.dataset.tgt === S.tgt;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    });
+    document.querySelectorAll('#segWeak button').forEach(function (b) {
+      var on = String(S.weak) === b.dataset.weak;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    });
+    document.querySelectorAll('#segNext button').forEach(function (b) {
+      var on = b.dataset.next === S.next;
+      b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
+    });
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !/^p[12]$/.test(id);
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm' || id === 'p5');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  [['#segReveal button, #segReveal1 button', 'rev', 'rev', true],
+   ['#segMeth button, #segMeth2 button', 'meth', 'meth', false],
+   ['#segTgt button', 'tgt', 'tgt', false],
+   ['#segWeak button', 'weak', 'weak', true],
+   ['#segNext button', 'next', 'next', false]].forEach(function (q) {
+    document.querySelectorAll(q[0]).forEach(function (b) {
+      b.addEventListener('click', function () {
+        S[q[1]] = q[3] ? parseInt(b.dataset[q[2]], 10) : b.dataset[q[2]];
+        syncLabels(); drawAll(); saveState();
+      });
+    });
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt); rt = setTimeout(drawAll, 140);
+  });
+
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M11 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    components: function (meth) {
+      var sv = survey();
+      var list = meth === 'ica' ? sv.I6.S : sv.P6.scores;
+      return list.map(function (m, i) {
+        return { i: i + 1,
+          share: meth === 'ica' ? 1 / 6 : sv.P6.explained[i],
+          young: sep(m, 'young'), old: sep(m, 'old'),
+          foot: foot(m), kurt: MV.kurtosis(m) };
+      });
+    },
+    ceilings: function () {
+      var sv = survey(), out = {};
+      ['young', 'old'].forEach(function (t) {
+        out[t] = {
+          ceiling: CEILING[t],
+          bestPC: Math.max.apply(null, sv.P6.scores.map(function (m) { return Math.abs(sep(m, t)); })),
+          bestIC: Math.max.apply(null, sv.I6.S.map(function (m) { return Math.abs(sep(m, t)); })),
+          bestAttr: Math.max.apply(null, CORE.map(function (n) {
+            return Math.abs(sep(sv.attr[n], t)); }))
+        };
+      });
+      return out;
+    },
+    weakCase: function () {
+      var sv = survey(), wi = ALL.indexOf(WEAK), out = [];
+      for (var c = 0; c < ALL.length; c++) {
+        var big = 0, i;
+        for (i = 0; i < ALL.length; i++) {
+          if (Math.abs(sv.P7.vectors[c][i]) > Math.abs(sv.P7.vectors[c][big])) big = i;
+        }
+        out.push({ pc: c + 1, share: sv.P7.explained[c],
+          weakLoading: sv.P7.vectors[c][wi], largest: ALL[big] });
+      }
+      return { rows: out, pc1six: sv.P6.explained[0], pc1seven: sv.P7.explained[0],
+        k6: MV.componentsFor(sv.P6, 0.9), k7: MV.componentsFor(sv.P7, 0.9) };
+    },
+    footprintIn: function () {
+      var sv = survey(), out = {};
+      CORE.forEach(function (n) { out[n] = foot(sv.attr[n]); });
+      return out;
+    }
+  };
+})();
+</script>
+</body>
+</html>

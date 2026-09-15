@@ -78,6 +78,17 @@ JSDOM.fromFile(file, {
     console.log('  best for the young channel: '+by.deg+' deg, separation '+by.young.toFixed(3)+
       ', variance '+by.variance.toFixed(3));
 
+
+    console.log('\n=== THE SCORE BAR: rotating in the PC2-PC3 plane (younger channel)');
+    M.set('tgt','young');
+    [0,15,30,45,60,90,135].forEach(function(a){
+      M.set('rot',a); const s=M.score();
+      console.log('  '+String(a).padStart(3)+'deg   separation '+s.now.toFixed(3).padStart(7)+
+        '   '+s.pct.toFixed(1)+'% of best   bar '+
+        (100*(s.now-s.worst)/(s.best-s.worst)).toFixed(0)+'%'+(s.pct>=99?'   WIN':''));
+    });
+    M.set('rot',0);
+
     console.log('\n=== GLOSSARY');
     const marked=win.document.querySelectorAll('button.gterm');
     const names=new Set(); marked.forEach(x=>names.add(x.getAttribute('data-term')));

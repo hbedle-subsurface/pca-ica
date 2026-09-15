@@ -1,0 +1,1214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The two, side by side | How PCA and ICA Actually Work</title>
+<meta name="description" content="Two known sources, mixed on purpose, put through both methods at once. Includes the mixing where PCA recovers the sources almost perfectly, the control that turns out to do nothing at all, and the Gaussian case where ICA looks like it succeeded and has not.">
+<link rel="stylesheet" href="../assets/fonts.css">
+<link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+
+<div class="wrap">
+  <header class="masthead">
+    <a class="brand" href="../index.html"><span class="dot"></span>How PCA and ICA <b>actually</b> work</a>
+    <nav>
+      <a href="../index.html">All modules</a>
+      <a href="ica.html">← Module 08</a>
+      <a href="#notes">Method &amp; references</a>
+    </nav>
+  </header>
+
+  <div class="mod-head">
+    <p class="eyebrow">Module 09 &nbsp;·&nbsp; Dimension reduction</p>
+    <h1>The two, side by side</h1>
+    <p class="sub">Everywhere else in this set the right answer had to be argued for. Here it is built in: two maps are mixed together on purpose, both methods are handed the mixtures, and what each one gives back can be compared against what actually went in. That makes it possible to ask the question the previous eight modules could not — not which method is better, but what has to be true of the data for each one to work.</p>
+  </div>
+
+  <div class="labhead">
+    <div class="labgrid">
+      <div>
+        <p class="cap">What went in, and what each method gave back</p>
+        <canvas id="cHead" aria-label="The two source maps, the two mixtures, and the components returned by each method"></canvas>
+        <div class="score" id="score">
+          <span class="say" id="scoreSay">try the mixing angle</span>
+          <span class="track"><span class="fill" id="scoreFill"></span><span class="target" id="scoreTgt"></span></span>
+          <span class="pct" id="scorePct">&mdash;</span>
+        </div>
+      </div>
+      <div>
+        <p class="cap">Mix them yourself <span>&mdash; both methods rerun as you drag</span></p>
+        <div class="controls" id="winControls">
+          <div class="ctl-col">
+            <h2>How they are mixed</h2>
+            <div class="ctl">
+              <label for="ang">Mixing angle <span class="val" id="angV">45&deg;</span></label>
+              <input type="range" data-key="ang" id="ang" min="0" max="89" step="1" value="45">
+            </div>
+            <div class="ctl">
+              <label for="ratio">Strength of the first mixture
+                <span class="val" id="ratioV">1.0&times;</span></label>
+              <input type="range" data-key="ratio" id="ratio" min="0" max="12" step="1" value="0">
+            </div>
+            <div class="ctl">
+              <label for="noise">Noise added <span class="val" id="noiseV">0%</span></label>
+              <input type="range" data-key="noise" id="noise" min="0" max="60" step="10" value="0">
+            </div>
+          </div>
+          <div class="ctl-col">
+            <h2>What the sources are</h2>
+            <div class="seg" id="segSrc" role="group" aria-label="Which sources">
+              <button type="button" data-src="chan">Two channels</button>
+              <button type="button" data-src="gauss">Two Gaussian fields</button>
+            </div>
+            <p class="hint-line" style="margin:6px 0 0">The second pair have the same covariance as the
+              first and no shape at all. Step 4 is about what that does.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="tabhint">Five steps. <b>Two of them are traps</b>, and both are worth walking into.</p>
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Module steps">
+    <button role="tab" data-tab="p1" aria-selected="false">1 · What went in</button>
+    <button role="tab" data-tab="p2" aria-selected="false">2 · Both at once</button>
+    <button role="tab" data-tab="p3" aria-selected="false">3 · Make PCA win</button>
+    <button role="tab" data-tab="p4" aria-selected="false">4 · Make ICA lie</button>
+    <button role="tab" data-tab="p5" aria-selected="false">5 · So which one</button>
+    <button role="tab" data-tab="pw" aria-selected="false">Why it matters</button>
+    <span class="gap"></span>
+    <button role="tab" data-tab="pe" aria-selected="false">Exercises</button>
+    <button role="tab" data-tab="pk" aria-selected="false">Key points</button>
+    <button role="tab" data-tab="pm" aria-selected="false">Method</button>
+  </nav>
+
+  <!-- =============================== STEP 1 =============================== -->
+  <section class="tabpane" id="p1" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">1</span>Two maps, deliberately stirred together</h3>
+      <span class="hint">You get to see the answer first, once</span>
+    </div>
+
+    <p class="qbox"><b>This is the only module where the answer is known.</b> Two maps go in, mixed by
+      weights we choose. Everything after this pretends not to have seen them.</p>
+
+    <p class="lede"><b>Drag the mixing angle.</b> The two panels on the right are the only thing either
+      method is allowed to look at.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">The two sources are the younger and older channel systems from the same synthetic
+        survey the whole set uses, drawn as maps of where each one is. They are good sources for this
+        because they are sparse — mostly empty, with a thin bright feature — which is exactly the kind
+        of distribution module 07 showed is far from Gaussian.</p>
+      <p class="lede">Each mixture is a weighted sum of both, with the weights set by the angle. At zero
+        the two mixtures are the two sources. Turning the angle up stirs them together, and at
+        forty-five degrees each mixture is an equal blend.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>Sources, and the mixtures made from them</h3>
+        <span class="hint">Only the right-hand pair is given to the methods</span>
+      </div>
+      <canvas id="c1" aria-label="The two source maps beside the two mixtures formed from them"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="ang1">Mixing angle <span class="val" id="ang1V">45&deg;</span></label>
+        <input type="range" data-key="ang" id="ang1" min="0" max="89" step="1" value="45">
+      </div>
+    </div>
+    <div class="stats" id="s1"></div>
+  </section>
+
+  <!-- =============================== STEP 2 =============================== -->
+  <section class="tabpane" id="p2" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">2</span>Both methods, same two mixtures</h3>
+      <span class="hint">Compare each row against step 1</span>
+    </div>
+
+    <p class="lede"><b>Four maps. Two of them are the sources.</b> Neither method was shown which.</p>
+    <p class="lede"><b>Now set the mixing angle to zero</b>, so the mixtures <em>are</em> the sources,
+      already separated, nothing to undo. PCA still hands back two blends.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">Both methods get the same two mixtures, standardized the same way. PCA returns the
+        two directions of greatest spread; ICA whitens first and then turns until each projection is as
+        far from Gaussian as it can be made.</p>
+      <p class="lede">The number under each map is how strongly it correlates with the source it comes
+        closest to. One means the source came back exactly. The sign is meaningless, as module 04
+        established, so the magnitude is what is quoted.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>What each method returned</h3>
+        <span class="hint">PCA above, ICA below</span>
+      </div>
+      <canvas id="c2" aria-label="The two components returned by PCA above the two returned by ICA, each labelled with how well it matches a source"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="ang2">Mixing angle <span class="val" id="ang2V">45&deg;</span></label>
+        <input type="range" data-key="ang" id="ang2" min="0" max="89" step="1" value="45">
+      </div>
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="noise2">Noise added <span class="val" id="noise2V">0%</span></label>
+        <input type="range" data-key="noise" id="noise2" min="0" max="60" step="10" value="0">
+      </div>
+    </div>
+    <div class="stats" id="s2"></div>
+  </section>
+
+  <!-- =============================== STEP 3 =============================== -->
+  <section class="tabpane" id="p3" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">3</span>Now make PCA win</h3>
+      <span class="hint">It can be done, and that is the point</span>
+    </div>
+
+    <p class="lede"><b>Find a mixing angle where PCA recovers the sources as well as ICA does.</b> One
+      exists. Fill the bar.</p>
+    <p class="lede">Then try the strength slider, which looks like it ought to matter.</p>
+
+    <details class="reveal"><summary>Why the curve has that shape</summary>
+      <p class="lede">Module 03 found that with exactly two standardized attributes the first principal
+        component always points at forty-five degrees, whatever the correlation between them. That result
+        is doing all the work here. PCA's two directions are frozen at the diagonals before it sees
+        anything, so the only question is whether the mixing happened to leave the sources sitting on
+        those diagonals.</p>
+      <p class="lede">At forty and fifty degrees it did, and PCA returns the sources at 0.991 and 0.999.
+        At zero degrees it did not, and PCA takes two sources that arrived already separated and hands
+        back two blends of them at 0.739 each.</p>
+      <p class="lede">The spike down at exactly forty-five degrees is a different thing again, and it is
+        the case module 04's Method tab said it was not covering. There the two mixtures are exactly
+        uncorrelated and their two eigenvalues are both exactly 1.0000. When two eigenvalues are equal
+        there is no widest direction &mdash; every direction is equally wide &mdash; so the answer is
+        whatever the solver happened to produce, and it is not a property of the data at all.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>How each method does at every mixing angle</h3>
+        <span class="hint">Your angle marked in ink</span>
+      </div>
+      <canvas id="c3" aria-label="Recovery of the sources by each method plotted against the mixing angle"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="ang3">Mixing angle <span class="val" id="ang3V">45&deg;</span></label>
+        <input type="range" data-key="ang" id="ang3" min="0" max="89" step="1" value="45">
+      </div>
+      <div class="ctl" style="flex:1 1 240px;min-width:220px">
+        <label for="ratio3">Strength of the first mixture
+          <span class="val" id="ratio3V">1.0&times;</span></label>
+        <input type="range" data-key="ratio" id="ratio3" min="0" max="12" step="1" value="0">
+      </div>
+    </div>
+    <div class="stats" id="s3"></div>
+    <div class="legend prose">
+      <span>The strength slider changes one mixture by up to a factor of sixty and moves neither method's
+        answer at all. Both standardize their inputs first, and standardizing divides that factor straight
+        back out. It is on the page because it looks like it should matter, and finding out that it does
+        not is worth more than being told.</span>
+    </div>
+  </section>
+
+  <!-- =============================== STEP 4 =============================== -->
+  <section class="tabpane" id="p4" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">4</span>Now make ICA lie</h3>
+      <span class="hint">Switch the sources in the header</span>
+    </div>
+
+    <p class="lede"><b>Switch to the Gaussian fields.</b> ICA reports 0.98 against the true sources, so
+      it looks like it worked.</p>
+    <p class="lede"><b>It did not.</b> Run it again from four different starting rotations and the
+      answers disagree with each other.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+      <p class="lede">Module 07 established that a Gaussian is the one shape non-Gaussianity cannot
+        distinguish, so with Gaussian sources there is nothing for the search to find and any rotation is
+        as good as any other. Whitening a mixture of two independent Gaussians already returns a rotation
+        of them, so a lucky rotation can score well against the truth by accident.</p>
+      <p class="lede">That is why measuring a method against a known answer is a weaker test than it
+        looks. The test that catches this one is repeatability: change the starting rotation and see
+        whether the answer changes. With the channel sources it does not. With Gaussian fields it
+        does.</p></details>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The same data, four different starting rotations</h3>
+        <span class="hint">How much each run agrees with the first</span>
+      </div>
+      <canvas id="c4" aria-label="Agreement between independent component analysis runs started from four different rotations, for both kinds of source"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 280px;min-width:260px">
+        <h2 style="margin:0 0 6px">What the sources are</h2>
+        <div class="seg" id="segSrc4" role="group" aria-label="Which sources">
+          <button type="button" data-src="chan">Two channels</button>
+          <button type="button" data-src="gauss">Two Gaussian fields</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s4"></div>
+  </section>
+
+  <!-- =============================== STEP 5 =============================== -->
+  <section class="tabpane" id="p5" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3><span class="stepno">5</span>What each one is for</h3>
+      <span class="hint">Properties, not a recommendation</span>
+    </div>
+
+    <p class="lede">Nothing above says one method is better. It says they answer different questions and
+      the data decides which question was the right one to ask.</p>
+
+    <div class="plot">
+      <div class="plot-head">
+        <h3>The two, as properties</h3>
+        <span class="hint">Everything here was measured in this set</span>
+      </div>
+      <canvas id="c5" aria-label="A side-by-side comparison of the properties of principal component analysis and independent component analysis"></canvas>
+    </div>
+    <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
+      <div class="ctl" style="flex:1 1 280px;min-width:260px">
+        <h2 style="margin:0 0 6px">Show</h2>
+        <div class="seg" id="segTab" role="group" aria-label="Which comparison">
+          <button type="button" data-cmp="what">What they do</button>
+          <button type="button" data-cmp="out">What comes out</button>
+          <button type="button" data-cmp="use">Where each is used</button>
+        </div>
+      </div>
+    </div>
+    <div class="stats" id="s5"></div>
+    <div class="legend prose">
+      <span>On the seismic attribute set from modules 06 to 08, the best independent component separated
+        the channel at 6.47 and the best principal component at 2.81, against a best-found 8.97. That is
+        one target on one synthetic survey, and it is an argument for trying the method rather than a
+        general result.</span>
+    </div>
+  </section>
+
+  <!-- ============================ WHY IT MATTERS =========================== -->
+  <section class="tabpane" id="pw" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3>Why it matters</h3>
+      <span class="hint">Where this shows up in real work</span>
+    </div>
+    <p class="lede">Real data never comes with the sources attached, so every judgment about whether a
+      method worked has to be made without the comparison this module is built on.</p>
+    <ul class="lede" style="padding-left:20px">
+      <li><b>A good-looking result is not evidence.</b> Step 3 produces a near-perfect PCA recovery from
+        a method with no mechanism for separating anything. Step 4 produces a near-perfect ICA recovery
+        that is a coincidence. Both look like success.</li>
+      <li><b>Repeatability is a test you can run without truth.</b> Re-run from a different start. If the
+        components change, the data did not determine them. That works on a real survey, where measuring
+        against the answer does not.</li>
+      <li><b>Check whether a control does anything.</b> The strength slider here changes an input by a
+        factor of sixty and moves nothing, because both methods standardize. Any parameter can be tested
+        the same way in twenty seconds.</li>
+      <li><b>A result that improves when you add noise is telling you something.</b> At 45 degrees here,
+        noise takes PCA from 0.739 to 0.979, because it breaks a tie that had left the answer arbitrary.
+        Nothing about the signal got better.</li>
+      <li><b>Know what your sources are likely to look like.</b> ICA rests on the inputs being mixtures
+        of a few non-Gaussian things. Sparse geological features qualify. Broad, smooth, diffuse ones do
+        not, and on those ICA has nothing to work with.</li>
+    </ul>
+    <p class="lede"><b>Two points that are commonly confused.</b> The first is that ICA supersedes PCA.
+      ICA is normally run <em>on</em> PCA-whitened data — it is an extra rotation after PCA has done its
+      work, not a replacement for it. The second is that a method matching a known answer proves it
+      works. Step 4 is a worked counterexample, and it is the reason the verification file for this set
+      tests repeatability rather than accuracy on the Gaussian case.</p>
+    <div class="legend prose">
+      <span>The honest summary of the whole set: PCA answers "which combinations vary most", reliably and
+        in one step. ICA answers "which combinations look like single causes", by searching, sometimes
+        failing, and never ranking its answers. Neither answers "which combination is the reservoir", and
+        module 11 is about that.</span>
+    </div>
+  </section>
+
+  <!-- ============================== EXERCISES ============================= -->
+  <section class="tabpane" id="pe" role="tabpanel" hidden>
+    <div class="tryit" style="max-width:none">
+      <h3>Exercises</h3>
+      <ol>
+        <li><b>Make PCA look like it works.</b>
+          <em class="point">Why: a good result from a method that cannot do the job is the most dangerous
+            thing in this set, and producing one yourself is the way to stop trusting appearances.</em>
+          In step 3, hunt for the mixing angle that gives PCA its best recovery, then find its worst.
+          <em class="predict">Before starting: PCA has no mechanism for separating sources. Commit to how
+            well you expect it to be able to do.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">At 40 and 50 degrees PCA
+            recovers the sources at 0.991 and 0.999 — visually indistinguishable from the ICA result. At
+            0, 5 and 85 degrees it manages about 0.74. ICA sits between 0.996 and 1.000 at every angle.
+            The reason is module 03: with two standardized attributes the principal components always
+            point at 45 and 135 degrees, so PCA's answer is fixed before it sees the data and the only
+            question is whether the mixing put the sources there. The worst case is the one that should
+            be easiest — at 0 degrees the mixtures <em>are</em> the sources, already separated, and PCA
+            blends them back together. On a real survey you would see the good case and conclude the
+            method separated your geology, with no way of knowing you had been lucky in the
+            mixing.</span></details></li>
+
+        <li><b>Find the control that does nothing.</b>
+          <em class="point">Why: a parameter that cannot matter is worth identifying, and the reason it
+            cannot is module 03.</em>
+          In step 3, take the strength slider from 1&times; to 60&times; and watch both recovery numbers.
+          <details class="reveal"><summary>Hint</summary><span class="ans">Neither number moves, at any
+            angle. Both methods Z-score their inputs before doing anything else, and standardizing
+            divides out exactly the factor the slider applied. This is module 03's lesson arriving from
+            the other direction: there the choice to standardize changed the answer completely, and here
+            it is what makes a sixtyfold change in the data irrelevant. Both are the same fact. It is
+            worth running this check on any parameter in any package — change it by a large factor, and
+            if nothing moves, it is being removed somewhere upstream.</span></details></li>
+
+        <li><b>Catch ICA succeeding by accident.</b>
+          <em class="point">Why: this is why the verification file for this set tests repeatability and
+            not accuracy.</em>
+          Switch the sources to the Gaussian fields in the header, read ICA's recovery against the true
+          sources, then look at the four starts in step 4.
+          <details class="reveal"><summary>Hint</summary><span class="ans">ICA reports 0.981 and 0.978
+            against the true sources, which reads as a success. But four runs from different starting
+            rotations agree with the first at 0.593, 0.565, 0.473 and 0.962 — they are not finding the
+            same thing as each other, so none of them found anything. Whitening a mixture of two
+            independent Gaussians already returns a rotation of them, so one rotation out of many scored
+            well by luck. With the channel sources the same four runs agree at essentially 1.000. The
+            difference between those two patterns is the test, and unlike the recovery number it can be
+            run on data whose answer is unknown.</span></details></li>
+
+        <li><b>Add noise and watch PCA get better.</b>
+          <em class="point">Why: it is the clearest possible demonstration that PCA&rsquo;s result here
+            is about geometry rather than about signal.</em>
+          In step 2, set the mixing angle to 45 degrees and take the noise from 0 to 60%.
+          <em class="predict">Before starting: commit to what noise will do to each method.</em>
+          <details class="reveal"><summary>Hint</summary><span class="ans">PCA goes from 0.739 with no
+            noise at all to 0.979 at 20% — adding noise nearly perfects it. ICA goes the other way, from
+            0.996 down to 0.976, and by 60% the two are level at about 0.855. The reason PCA improves is
+            the degeneracy in step 3: at exactly 45 degrees the two eigenvalues are identical and PCA has
+            no preferred direction, so its answer is arbitrary. Independent noise added to each mixture
+            breaks that tie, gives PCA a direction to prefer, and the direction it then prefers happens
+            to be a good one. Nothing about the signal improved. If a result gets better when you add
+            noise, what you are looking at is a property of the arrangement and not of the
+            data.</span></details></li>
+
+        <li><b>Write down when you would use each.</b>
+          <em class="point">Why: the answer is a property of the data, and stating it in advance is how
+            you avoid choosing by habit.</em>
+          In step 5, read the three comparison tables, then answer for your own data: are the attributes
+          likely to be mixtures of a few sparse effects, or one broad continuum?
+          <details class="reveal"><summary>Hint</summary><span class="ans">If the attributes are
+            redundant and you want them compressed, decorrelated, or reduced to three channels for a
+            blend, PCA does that exactly, in one step, reproducibly, with a ranking. If you believe a few
+            distinct physical effects are superimposed in your attributes and you want them pulled apart,
+            ICA is the method built for that — provided those effects are sparse or otherwise
+            non-Gaussian, which sparse geological features usually are and broad smooth trends usually
+            are not. The two are not alternatives in practice: ICA is normally run on PCA-whitened data,
+            so the real question is whether to stop after PCA or keep going.</span></details></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============================= KEY POINTS ============================= -->
+  <section class="tabpane" id="pk" role="tabpanel" hidden>
+    <div class="takeaway">
+      <h3>If you remember nothing else</h3>
+      <ul>
+        <li><b>PCA can appear to unmix sources.</b> At one mixing angle here it recovers both at 0.991
+          and at another 0.739 &mdash; and the worst case is zero mixing, where the sources arrive
+          already separated and it blends them back together.</li>
+        <li><b>That is module 03 arriving with teeth.</b> With two standardized attributes the components
+          always point at 45 degrees, so PCA&rsquo;s answer is fixed before it sees the data.</li>
+        <li><b>ICA can appear to succeed on data it cannot handle.</b> With Gaussian sources it scores
+          0.98 against the truth and four different starts disagree with each other.</li>
+        <li><b>Repeatability is the test you can actually run.</b> Re-run from a different start. It
+          works without knowing the answer, which is the situation you are always in.</li>
+        <li><b>A control that changes an input sixtyfold and moves nothing</b> is being standardized away
+          upstream. Test any parameter this way.</li>
+        <li><b>ICA is an extra rotation after PCA, not a replacement for it.</b> The whitening step is
+          PCA.</li>
+        <li><b>The choice is a statement about your data.</b> Mixtures of a few sparse effects suit ICA.
+          Redundancy you want compressed suits PCA.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- =============================== METHOD =============================== -->
+  <section class="tabpane" id="pm" role="tabpanel" hidden>
+    <div class="plot-head" style="margin-bottom:14px">
+      <h3 id="notes">Method</h3>
+      <span class="hint">What is computed, and what is left out</span>
+    </div>
+    <p class="lede"><b>The sources</b> are maps of where each channel system sits in the same synthetic
+      survey the rest of the set uses: for each trace, a value that peaks on the channel axis and falls
+      to zero at its margin, and zero everywhere else. Both are standardized. They are sparse and
+      strongly non-Gaussian, with excess kurtosis of 6.25 and 11.15, which is what makes them suitable
+      sources. They are not quite independent of each other — the two channels cross, so the maps
+      correlate at &minus;0.091 — and a perfectly independent pair is not available from real
+      geology.</p>
+    <p class="lede"><b>The mixing</b> is a rotation by the chosen angle followed by a scaling of the
+      first mixture by the strength slider, which runs from 1&times; to 60&times; in half-decade steps.
+      Noise, when added, is Gaussian and independent on each mixture. At a mixing angle of zero the two
+      mixtures are the two sources.</p>
+    <p class="lede"><b>Both methods are run standardized</b>, which is the correlation route of module
+      03 and the arrangement ICA implementations use anyway. That is why the strength slider has no
+      effect: standardizing divides it straight back out. It was left on the page deliberately.</p>
+    <p class="lede"><b>Recovery</b> is the largest absolute correlation between a returned component and
+      a true source, taking the best match for each source. Absolute, because the sign of a component is
+      arbitrary. Taking the best match, because the order is arbitrary too. Both of those conventions
+      hide a real difficulty that modules 04 and 08 cover: on real data there is no true source to match
+      against and the matching is done by eye.</p>
+    <p class="lede"><b>The degenerate case at forty-five degrees.</b> There the two mixtures are exactly
+      uncorrelated and both eigenvalues are 1.0000, so the principal directions are genuinely undetermined
+      and what the solver returns is an artifact of the solver. Module 04's Method tab lists repeated
+      eigenvalues as something that does not arise on real attribute data and is the reason textbook
+      uniqueness statements carry a condition. It arises here, on constructed data, and it is left in
+      rather than designed around because it is the honest thing for the curve to do.</p>
+    <p class="lede"><b>Simplifications, stated plainly.</b> Two sources and two mixtures is the smallest
+      case that shows anything, and a real problem has more of both. The mixing is linear and the same
+      everywhere in the survey, which is the assumption ICA rests on and which real data does not always
+      satisfy. The sources are known exactly, which never happens. Every number on this page is one
+      synthetic survey and should be read as an illustration of a mechanism rather than as a measured
+      property of seismic data in general.</p>
+    <p class="lede"><b>Where this departs from production software.</b> Nowhere in the arithmetic. The
+      comparison itself is not something a package offers, because it needs the sources, and assembling
+      it is the reason this module exists.</p>
+    <details class="reveal">
+      <summary>References</summary>
+      <ul class="lede" style="padding-left:20px">
+        <li>Hyvärinen, A., and E. Oja, 2000, Independent component analysis: algorithms and applications:
+          <em>Neural Networks</em>, <b>13</b>, 411&ndash;430.</li>
+        <li>Comon, P., 1994, Independent component analysis, a new concept?: <em>Signal Processing</em>,
+          <b>36</b>, 287&ndash;314.</li>
+        <li>Jolliffe, I. T., 2002, <em>Principal Component Analysis</em>, 2nd ed.: Springer.</li>
+        <li>Lubo-Robles, D., and K. J. Marfurt, 2019, Independent component analysis for reservoir
+          geomorphology and unsupervised seismic facies classification in the Taranaki Basin, New
+          Zealand: <em>Interpretation</em>, <b>7</b>, SE19&ndash;SE42.</li>
+        <li>Lubo-Robles, D., H. Bedle, K. J. Marfurt, and M. J. Pranter, 2023, Evaluation of principal
+          component analysis for seismic attribute selection and self-organizing maps for seismic facies
+          discrimination in the presence of gas hydrates: <em>Marine and Petroleum Geology</em>,
+          <b>150</b>, 106097.</li>
+      </ul>
+    </details>
+  </section>
+
+  <section class="nextup" id="nextup" hidden>
+    <p class="eyebrow">Next up</p>
+    <h3>10 · What counts as a dimension in seismic data</h3>
+    <p>Everything so far has treated an attribute as a dimension. A window of time samples is a dimension
+      too, and so is a frequency. Same arithmetic, three different meanings for an eigenvector, and
+      eigenvectors that come out as wavelets.</p>
+    <a class="btn ghost" href="dimensions.html">Module 10 →</a>
+  </section>
+
+  <div class="pager" id="pager" hidden>
+    <a class="btn ghost" href="ica.html">← Module 08: ICA, whiten then rotate</a>
+    <a class="btn ghost" href="../index.html">All modules</a>
+    <a class="btn ghost" href="dimensions.html">Module 10: what counts as a dimension →</a>
+  </div>
+
+  <footer>
+    <div class="foot-grid">
+      <p>Built for teaching by Dr. Heather Bedle and Dr. April Moreno-Ward, University of Oklahoma.</p>
+      <p class="lic">To cite: H. Bedle and A. Moreno-Ward, 2026, <i>How PCA and ICA Actually Work:
+        Interactive Browser-Based Modules for Learning Dimension Reduction</i>: SSRN working paper,
+        University of Oklahoma. <span class="k">SSRN: [article link to follow]</span></p>
+      <p class="lic">Licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>.
+        Free to use, adapt and share, including in teaching, provided the source is credited and any
+        adaptation is released under the same license.</p>
+      <p class="lic">Nothing you do in this module leaves your browser. The only thing recorded is that
+        the page was opened &mdash; no cookie, no account, nothing about you.</p>
+    </div>
+  </footer>
+</div>
+
+<script src="../assets/count.js"></script>
+<script src="../assets/popout.js"></script>
+<script src="../assets/panelout.js"></script>
+<script src="../assets/glossary.js"></script>
+<script src="../assets/score.js"></script>
+<script src="../assets/multivar.js"></script>
+<script src="../assets/attrfield.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  if (typeof MV === 'undefined' || typeof AF === 'undefined') {
+    var el = document.createElement('div');
+    el.setAttribute('style', 'background:#841617;color:#fff;padding:14px 18px;margin:16px 0;' +
+      'font:13px/1.6 ui-monospace,Menlo,monospace');
+    el.textContent = 'This module could not load assets/multivar.js and assets/attrfield.js. It ' +
+      'expects them one directory up, at ../assets/, and file names are case-sensitive on GitHub Pages.';
+    var w0 = document.querySelector('.wrap');
+    (w0 || document.body).insertBefore(el, w0 ? w0.firstChild : null);
+    return;
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  var CRIM = '#841617', TEAL = '#0B7285', SLATE = '#5C6670', INK = '#16191C';
+  var NX = 72, NY = 72, N = NX * NY;
+
+  var DEF = { ang: 45, ratio: 0, noise: 0, src: 'chan', cmp: 'what', tab: 'p1' };
+  var S = MV.readState(DEF);
+  S.ang = Math.max(0, Math.min(89, Math.round(S.ang)));
+  S.ratio = Math.max(0, Math.min(12, Math.round(S.ratio)));
+  S.noise = Math.max(0, Math.min(60, Math.round(S.noise / 10) * 10));
+  if (S.src !== 'chan' && S.src !== 'gauss') S.src = 'chan';
+  if (['what', 'out', 'use'].indexOf(S.cmp) < 0) S.cmp = 'what';
+
+  var CAN_LINK = location.protocol !== 'file:';
+  function saveState() {
+    if (!CAN_LINK) return;
+    try { MV.writeState(S, DEF); } catch (e) { /* nothing shareable */ }
+  }
+
+  function gainOf() { return Math.pow(10, S.ratio / 7); }   // 1x to about 60x
+
+  /* =====================================================================
+     THE SOURCES
+
+     Two maps of where each channel system is. Sparse, strongly non-Gaussian,
+     and not quite independent of each other, because the two channels cross
+     and real geology does not come in independent pieces.
+     ===================================================================== */
+
+  function standardize(m) {
+    var mu = MV.mean(m), sd = MV.std(m, mu) || 1, o = new Float64Array(m.length);
+    for (var i = 0; i < m.length; i++) o[i] = (m[i] - mu) / sd;
+    return o;
+  }
+  function lcg(seed) {
+    var s = (seed >>> 0) || 1;
+    return function () { s = (1664525 * s + 1013904223) >>> 0; return s / 4294967296; };
+  }
+
+  var SRC = null;
+  function sources() {
+    if (SRC) return SRC;
+    function channel(spec) {
+      var m = new Float64Array(N), ix, iy;
+      for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+        var yc = AF.centerline(ix, NX, spec) * (NY - 1);
+        var d = Math.abs(iy - yc) / (spec.halfWidth * (NY - 1));
+        m[ix * NY + iy] = d <= 1 ? Math.sqrt(Math.max(0, 1 - d * d)) : 0;
+      }
+      return standardize(m);
+    }
+    function field(seed) {
+      var r = lcg(seed), o = new Float64Array(N), i;
+      for (i = 0; i < N; i++) {
+        o[i] = Math.sqrt(-2 * Math.log(Math.max(r(), 1e-12))) * Math.cos(2 * Math.PI * r());
+      }
+      return standardize(o);
+    }
+    SRC = {
+      chan: [channel(AF.YOUNG), channel(AF.OLD)],
+      gauss: [field(11), field(23)]
+    };
+    return SRC;
+  }
+  function srcNow() { return sources()[S.src]; }
+
+  /* The mixtures: rotate the two sources together, then scale the first. */
+  var MIXC = {};
+  function mixture() {
+    var key = S.src + '|' + S.ang + '|' + S.ratio + '|' + S.noise;
+    if (MIXC[key]) return MIXC[key];
+    var s = srcNow(), th = S.ang * Math.PI / 180;
+    var c = Math.cos(th), sn = Math.sin(th), g = gainOf();
+    var r = lcg(4242), nz = S.noise / 100;
+    var x1 = new Float64Array(N), x2 = new Float64Array(N), i;
+    for (i = 0; i < N; i++) {
+      var n1 = 0, n2 = 0;
+      if (nz > 0) {
+        n1 = Math.sqrt(-2 * Math.log(Math.max(r(), 1e-12))) * Math.cos(2 * Math.PI * r());
+        n2 = Math.sqrt(-2 * Math.log(Math.max(r(), 1e-12))) * Math.cos(2 * Math.PI * r());
+      }
+      x1[i] = g * (c * s[0][i] - sn * s[1][i]) + nz * n1;
+      x2[i] = (sn * s[0][i] + c * s[1][i]) + nz * n2;
+    }
+    MIXC[key] = [x1, x2];
+    return MIXC[key];
+  }
+
+  function absCorr(a, b) {
+    var ma = MV.mean(a), mb = MV.mean(b);
+    var sa = MV.std(a, ma) || 1, sb = MV.std(b, mb) || 1, s = 0;
+    for (var i = 0; i < a.length; i++) s += (a[i] - ma) * (b[i] - mb);
+    return Math.abs(s / a.length / (sa * sb));
+  }
+  /* How well a set of returned components recovers the sources: for each
+     source, the best match among the components. Absolute because the sign is
+     arbitrary; best match because the order is too. */
+  function recovery(found) {
+    var s = srcNow();
+    return s.map(function (q) {
+      return Math.max.apply(null, found.map(function (f) { return absCorr(q, f); }));
+    });
+  }
+
+  var RUNC = {};
+  function results() {
+    var key = S.src + '|' + S.ang + '|' + S.ratio + '|' + S.noise;
+    if (RUNC[key]) return RUNC[key];
+    var X = mixture();
+    var P = MV.pca(X, { standardize: true });
+    var I = MV.fastICA(X, 2, { contrast: 'logcosh', standardize: true });
+    RUNC[key] = {
+      X: X, pca: P.scores, ica: I.S,
+      pcaRec: recovery(P.scores), icaRec: recovery(I.S)
+    };
+    return RUNC[key];
+  }
+
+  /* Recovery at every mixing angle, for the curve in step 3. Computed once
+     per source type and noise level, since it is twenty ICA runs. */
+  var CURVEC = {};
+  function curve() {
+    var key = S.src + '|' + S.noise;
+    if (CURVEC[key]) return CURVEC[key];
+    var keep = S.ang, out = [], a;
+    for (a = 0; a <= 89; a += 5) {
+      S.ang = a;
+      var r = results();
+      out.push({ ang: a, pca: Math.min(r.pcaRec[0], r.pcaRec[1]),
+                 ica: Math.min(r.icaRec[0], r.icaRec[1]) });
+    }
+    S.ang = keep;
+    CURVEC[key] = out;
+    return out;
+  }
+
+  /* Four seeded restarts, and how much each agrees with the reference run.
+     This is the test that works without knowing the sources. */
+  var STARTC = {};
+  function starts() {
+    var key = S.src + '|' + S.ang + '|' + S.noise;
+    if (STARTC[key]) return STARTC[key];
+    var X = mixture();
+    var ref = MV.fastICA(X, 2, { contrast: 'logcosh', standardize: true });
+    var out = [1, 2, 3, 4].map(function (sd) {
+      var alt = MV.fastICA(X, 2, { contrast: 'logcosh', standardize: true, seed: sd * 7919 });
+      return Math.max(absCorr(alt.S[0], ref.S[0]), absCorr(alt.S[0], ref.S[1]));
+    });
+    STARTC[key] = out;
+    return out;
+  }
+
+  /* =====================================================================
+     DRAWING
+     ===================================================================== */
+
+  function contentWidth(el) {
+    var p = el.parentElement || el;
+    var cs = getComputedStyle(p);
+    return Math.max(260, p.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight));
+  }
+
+  function fit(id, w, h) {
+    var c = $(id);
+    if (!c) return null;
+    var dpr = window.devicePixelRatio || 1;
+    c.style.width = w + 'px';
+    c.style.height = h + 'px';
+    c.width = Math.round(w * dpr);
+    c.height = Math.round(h * dpr);
+    var ctx = c.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, w, h);
+    ctx.font = '11px ui-monospace,Menlo,monospace';
+    return ctx;
+  }
+
+  function cmap(t) {
+    t = Math.max(0, Math.min(1, t));
+    var stops = [[26, 47, 63], [61, 109, 125], [166, 196, 198], [244, 240, 227],
+                 [214, 156, 110], [166, 71, 52], [102, 20, 24]];
+    var u = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(u)), f = u - i;
+    var a = stops[i], b = stops[i + 1];
+    return 'rgb(' + Math.round(a[0] + (b[0] - a[0]) * f) + ',' +
+      Math.round(a[1] + (b[1] - a[1]) * f) + ',' +
+      Math.round(a[2] + (b[2] - a[2]) * f) + ')';
+  }
+
+  function drawMap(ctx, r, m, title, sub) {
+    var q = Math.max(Math.abs(AF.percentile(m, 0.01)), Math.abs(AF.percentile(m, 0.99))) || 1;
+    var cw = r.w / NX, ch = r.h / NY, ix, iy;
+    for (ix = 0; ix < NX; ix++) for (iy = 0; iy < NY; iy++) {
+      ctx.fillStyle = cmap((m[ix * NY + iy] + q) / (2 * q));
+      ctx.fillRect(r.x + ix * cw, r.y + (NY - 1 - iy) * ch, cw + 0.6, ch + 0.6);
+    }
+    ctx.save();
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    if (title) {
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'left';
+      ctx.font = '600 10px ui-monospace,Menlo,monospace';
+      ctx.fillText(title, r.x, r.y - 5);
+    }
+    if (sub) {
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'left';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText(sub, r.x, r.y + r.h + 14);
+    }
+    ctx.restore();
+  }
+
+  function grid(ctx, r, y0, y1, nx, ny, yfmt) {
+    ctx.save();
+    ctx.fillStyle = SLATE;
+    ctx.strokeStyle = '#E4E7EA';
+    ctx.lineWidth = 1;
+    var i, X, Y, v;
+    for (i = 0; i <= nx; i++) {
+      X = r.x + r.w * i / nx;
+      ctx.beginPath(); ctx.moveTo(X, r.y); ctx.lineTo(X, r.y + r.h); ctx.stroke();
+    }
+    ctx.textAlign = 'right';
+    for (i = 0; i <= ny; i++) {
+      v = y0 + (y1 - y0) * i / ny;
+      Y = r.y + r.h - r.h * i / ny;
+      ctx.beginPath(); ctx.moveTo(r.x, Y); ctx.lineTo(r.x + r.w, Y); ctx.stroke();
+      ctx.fillText(yfmt ? yfmt(v) : v.toFixed(1), r.x - 8, Y + 4);
+    }
+    ctx.strokeStyle = '#C9CDD2';
+    ctx.strokeRect(r.x + 0.5, r.y + 0.5, r.w, r.h);
+    ctx.restore();
+  }
+
+  /* =====================================================================
+     HEADER: the whole story in one row
+     ===================================================================== */
+
+  function drawHead() {
+    var host = $('cHead');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(122, (w - 56) / 6);
+    var ctx = fit('cHead', w, size + 46);
+    if (!ctx) return;
+    var s = srcNow(), R = results();
+    var gap = Math.max(6, (w - 12 - 6 * size) / 6);
+    var panels = [
+      [s[0], 'source 1', ''],
+      [s[1], 'source 2', ''],
+      [R.X[0], 'mixture 1', ''],
+      [R.X[1], 'mixture 2', ''],
+      [R.pca[bestFor(R.pca)], 'PCA', R.pcaRec[0].toFixed(2)],
+      [R.ica[bestFor(R.ica)], 'ICA', R.icaRec[0].toFixed(2)]
+    ];
+    panels.forEach(function (p, k) {
+      var r = { x: 6 + k * (size + gap), y: 20, w: size, h: size };
+      drawMap(ctx, r, p[0], p[1], p[2]);
+    });
+  }
+
+  /* Which returned component matches the first source best. */
+  function bestFor(list) {
+    var s = srcNow()[0], b = 0, i;
+    for (i = 1; i < list.length; i++) {
+      if (absCorr(s, list[i]) > absCorr(s, list[b])) b = i;
+    }
+    return b;
+  }
+
+  /* =====================================================================
+     STEPS
+     ===================================================================== */
+
+  function drawStep1() {
+    var host = $('c1');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(180, (w - 90) / 4);
+    var ctx = fit('c1', w, size + 46);
+    if (!ctx) return;
+    var s = srcNow(), X = mixture();
+    var gap = Math.max(12, (w - 12 - 4 * size) / 4);
+    [[s[0], 'source 1', 'known'], [s[1], 'source 2', 'known'],
+     [X[0], 'mixture 1', 'given to the methods'],
+     [X[1], 'mixture 2', 'given to the methods']].forEach(function (p, k) {
+      var r = { x: 6 + k * (size + gap), y: 20, w: size, h: size };
+      drawMap(ctx, r, p[0], p[1], p[2]);
+    });
+  }
+
+  function drawStep2() {
+    var host = $('c2');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var size = Math.min(170, (w - 70) / 2);
+    var ctx = fit('c2', w, 2 * (size + 40));
+    if (!ctx) return;
+    var R = results();
+    var gap = Math.max(16, (w - 12 - 2 * size) / 2);
+    [['PCA', R.pca, R.pcaRec], ['ICA', R.ica, R.icaRec]].forEach(function (row, ri) {
+      row[1].forEach(function (m, k) {
+        var r = { x: 6 + k * (size + gap), y: 22 + ri * (size + 40), w: size, h: size };
+        var rec = Math.max(absCorr(srcNow()[0], m), absCorr(srcNow()[1], m));
+        drawMap(ctx, r, m, row[0] + ' component ' + (k + 1),
+          'matches a source at ' + rec.toFixed(3));
+      });
+    });
+  }
+
+  function drawStep3() {
+    var host = $('c3');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 280;
+    var ctx = fit('c3', w, h);
+    if (!ctx) return;
+    var C = curve();
+    var r = { x: 56, y: 14, w: w - 56 - 24, h: h - 14 - 52 };
+    grid(ctx, r, 0.5, 1, 6, 5, function (v) { return v.toFixed(2); });
+    [['ica', TEAL, 'ICA'], ['pca', CRIM, 'PCA']].forEach(function (q) {
+      ctx.save();
+      ctx.strokeStyle = q[1];
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      C.forEach(function (p, i) {
+        var X = r.x + p.ang / 90 * r.w;
+        var Y = r.y + r.h - (Math.max(0.5, Math.min(1, p[q[0]])) - 0.5) / 0.5 * r.h;
+        if (i === 0) ctx.moveTo(X, Y); else ctx.lineTo(X, Y);
+      });
+      ctx.stroke();
+      ctx.restore();
+    });
+    var XC = r.x + S.ang / 90 * r.w;
+    ctx.save();
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 1.6;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(XC, r.y); ctx.lineTo(XC, r.y + r.h); ctx.stroke();
+    ctx.restore();
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = TEAL;
+    ctx.fillText('ICA', r.x + 8, r.y + 16);
+    ctx.fillStyle = CRIM;
+    ctx.fillText('PCA', r.x + 50, r.y + 16);
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText('mixing angle, degrees', r.x + r.w / 2, r.y + r.h + 32);
+    ctx.restore();
+  }
+
+  function drawStep4() {
+    var host = $('c4');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host), h = 270;
+    var ctx = fit('c4', w, h);
+    if (!ctx) return;
+    var keep = S.src, rows = [], k;
+    ['chan', 'gauss'].forEach(function (which) {
+      S.src = which;
+      rows.push({ which: which, agree: starts().slice(), rec: results().icaRec.slice() });
+    });
+    S.src = keep;
+    var r = { x: 66, y: 14, w: w - 66 - 24, h: h - 14 - 56 };
+    grid(ctx, r, 0, 1, 4, 5, function (v) { return v.toFixed(1); });
+    var cw = r.w / 4;
+    rows.forEach(function (row, ri) {
+      row.agree.forEach(function (v, i) {
+        var cx = r.x + (i + 0.5) * cw;
+        var bw = cw * 0.26;
+        var y = r.y + r.h - v * r.h;
+        ctx.save();
+        ctx.globalAlpha = (row.which === S.src) ? 0.92 : 0.30;
+        ctx.fillStyle = ri === 0 ? TEAL : CRIM;
+        ctx.fillRect(cx + (ri === 0 ? -0.30 : 0.04) * cw, y, bw, r.y + r.h - y);
+        ctx.restore();
+        if (row.which === S.src) {
+          ctx.save();
+          ctx.fillStyle = INK;
+          ctx.textAlign = 'center';
+          ctx.font = '10px ui-monospace,Menlo,monospace';
+          ctx.fillText(v.toFixed(3), cx + (ri === 0 ? -0.17 : 0.17) * cw, y - 5);
+          ctx.restore();
+        }
+      });
+    });
+    for (k = 0; k < 4; k++) {
+      ctx.save();
+      ctx.fillStyle = SLATE;
+      ctx.textAlign = 'center';
+      ctx.font = '10px ui-monospace,Menlo,monospace';
+      ctx.fillText('start ' + (k + 1), r.x + (k + 0.5) * cw, r.y + r.h + 18);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.textAlign = 'left';
+    ctx.fillStyle = TEAL;
+    ctx.fillText('two channels \u2014 every start agrees', r.x + 8, r.y + 16);
+    ctx.fillStyle = CRIM;
+    ctx.fillText('two Gaussian fields \u2014 they do not', r.x + 8, r.y + 32);
+    ctx.fillStyle = SLATE;
+    ctx.textAlign = 'center';
+    ctx.fillText('agreement with the reference run', r.x + r.w / 2, r.y + r.h + 36);
+    ctx.restore();
+  }
+
+  var TABLES = {
+    what: ['What it maximizes', [
+      ['PCA', 'the spread along a direction'],
+      ['ICA', 'how far the projection is from Gaussian'],
+      ['PCA', 'uses variances and covariances only'],
+      ['ICA', 'uses third and fourth order statistics as well'],
+      ['PCA', 'solved in one step, always the same answer'],
+      ['ICA', 'searched for, and the search can fail to converge']
+    ]],
+    out: ['What comes out', [
+      ['PCA', 'components ranked by variance, with eigenvalues'],
+      ['ICA', 'components with no ranking and variance 1 each'],
+      ['PCA', 'perpendicular by construction'],
+      ['ICA', 'not required to be perpendicular in the original space'],
+      ['PCA', 'sign arbitrary, order fixed'],
+      ['ICA', 'sign, order and scale all arbitrary']
+    ]],
+    use: ['Where each is used', [
+      ['PCA', 'compressing a redundant attribute set'],
+      ['PCA', 'decorrelating inputs before clustering'],
+      ['PCA', 'reducing many volumes to three for an RGB blend'],
+      ['PCA', 'whitening \u2014 which is the first step of ICA'],
+      ['ICA', 'pulling apart effects superimposed in several attributes'],
+      ['ICA', 'only where those effects are sparse or otherwise non-Gaussian']
+    ]]
+  };
+
+  function drawStep5() {
+    var host = $('c5');
+    if (!host || host.offsetParent === null) return;
+    var w = contentWidth(host);
+    var T = TABLES[S.cmp], rows = T[1];
+    var rowH = 34;
+    var ctx = fit('c5', w, rows.length * rowH + 44);
+    if (!ctx) return;
+    ctx.save();
+    ctx.fillStyle = INK;
+    ctx.textAlign = 'left';
+    ctx.font = '600 12px ui-monospace,Menlo,monospace';
+    ctx.fillText(T[0], 8, 18);
+    ctx.restore();
+    rows.forEach(function (row, i) {
+      var y = 32 + i * rowH;
+      ctx.save();
+      if (i % 2 === 0) {
+        ctx.fillStyle = '#F4F6F7';
+        ctx.fillRect(8, y, w - 16, rowH - 2);
+      }
+      ctx.fillStyle = row[0] === 'PCA' ? CRIM : TEAL;
+      ctx.font = '600 11px ui-monospace,Menlo,monospace';
+      ctx.textAlign = 'left';
+      ctx.fillText(row[0], 18, y + 21);
+      ctx.fillStyle = INK;
+      ctx.font = '12px system-ui, -apple-system, sans-serif';
+      ctx.fillText(row[1], 66, y + 21);
+      ctx.restore();
+    });
+  }
+
+  /* =====================================================================
+     SCORE AND READOUTS
+     ===================================================================== */
+
+  function scoreNow() {
+    var C = curve();
+    var best = 0, worst = 1, i;
+    for (i = 0; i < C.length; i++) {
+      if (C[i].pca > best) best = C[i].pca;
+      if (C[i].pca < worst) worst = C[i].pca;
+    }
+    var R = results();
+    var now = Math.min(R.pcaRec[0], R.pcaRec[1]);
+    return { now: now, best: best, worst: worst, pct: 100 * now / best };
+  }
+
+  function drawScore() {
+    var s = scoreNow();
+    SCORE.set({ now: s.now, best: s.best, worst: s.worst, key: 'pca-' + S.src,
+      verb: 'drag the mixing angle',
+      won: 'PCA just recovered the sources',
+      next: 'nothing about PCA changed \u2014 only the mixing' });
+  }
+
+  function stat(label, value, note) {
+    return '<div class="stat"><span class="lab">' + label + '</span>' +
+      '<span class="num">' + value + '</span>' +
+      (note ? '<span class="sub">' + note + '</span>' : '') + '</div>';
+  }
+
+  function drawStats() {
+    var R = results();
+    if ($('s1')) {
+      var s = srcNow();
+      $('s1').innerHTML =
+        stat('Mixing angle', S.ang + '\u00b0', S.ang === 0 ? 'no mixing at all' : 'stirred together') +
+        stat('Source 1 kurtosis', MV.kurtosis(s[0]).toFixed(2),
+          S.src === 'chan' ? 'sparse, far from Gaussian' : 'Gaussian') +
+        stat('Source 2 kurtosis', MV.kurtosis(s[1]).toFixed(2), 'excess') +
+        stat('They correlate at', MV.corr(s)[0][1].toFixed(3), 'not perfectly independent');
+    }
+    if ($('s2')) {
+      $('s2').innerHTML =
+        stat('PCA recovery', R.pcaRec.map(function (v) { return v.toFixed(3); }).join(' / '),
+          'each source, best match') +
+        stat('ICA recovery', R.icaRec.map(function (v) { return v.toFixed(3); }).join(' / '),
+          'each source, best match') +
+        stat('Mixing angle', S.ang + '\u00b0', 'set above') +
+        stat('Noise', S.noise + '%', 'added to each mixture');
+    }
+    if ($('s3')) {
+      var C = curve(), bp = C[0], wp = C[0], i;
+      for (i = 1; i < C.length; i++) {
+        if (C[i].pca > bp.pca) bp = C[i];
+        if (C[i].pca < wp.pca) wp = C[i];
+      }
+      $('s3').innerHTML =
+        stat('PCA here', Math.min(R.pcaRec[0], R.pcaRec[1]).toFixed(3), 'at ' + S.ang + '\u00b0') +
+        stat('PCA at its best', bp.pca.toFixed(3), 'at ' + bp.ang + '\u00b0') +
+        stat('PCA at its worst', wp.pca.toFixed(3), 'at ' + wp.ang + '\u00b0') +
+        stat('Strength slider', gainOf().toFixed(1) + '\u00d7', 'and it changes nothing');
+    }
+    if ($('s4')) {
+      var ag = starts();
+      var lo = Math.min.apply(null, ag), hi = Math.max.apply(null, ag);
+      $('s4').innerHTML =
+        stat('Sources', S.src === 'chan' ? 'two channels' : 'Gaussian',
+          S.src === 'chan' ? 'sparse' : 'Gaussian') +
+        stat('ICA recovery', R.icaRec.map(function (v) { return v.toFixed(3); }).join(' / '),
+          'looks like success either way') +
+        stat('Starts agree from', lo.toFixed(3), 'up to ' + hi.toFixed(3)) +
+        stat('Verdict', lo > 0.95 ? 'determined' : 'not determined',
+          lo > 0.95 ? 'the data fixed the answer' : 'the start fixed it');
+    }
+    if ($('s5')) {
+      $('s5').innerHTML =
+        stat('On the attribute set', '6.47', 'best independent component') +
+        stat('Best principal component', '2.81', 'same target, same six attributes') +
+        stat('Best single attribute', '5.97', 'peak frequency, on its own') +
+        stat('Best found', '8.97', 'the discriminant direction');
+    }
+  }
+
+  /* =====================================================================
+     WIRING
+     ===================================================================== */
+
+  var PANES = ['p1', 'p2', 'p3', 'p4', 'p5', 'pw', 'pe', 'pk', 'pm'];
+
+  function syncLabels() {
+    ['ang', 'ang1', 'ang2', 'ang3'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.ang;
+      var v = $(id + 'V'); if (v) v.textContent = S.ang + '\u00b0';
+    });
+    ['ratio', 'ratio3'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.ratio;
+      var v = $(id + 'V'); if (v) v.textContent = gainOf().toFixed(1) + '\u00d7';
+    });
+    ['noise', 'noise2'].forEach(function (id) {
+      var e = $(id); if (e) e.value = S.noise;
+      var v = $(id + 'V'); if (v) v.textContent = S.noise + '%';
+    });
+    document.querySelectorAll('#segSrc button, #segSrc4 button').forEach(function (b) {
+      var on = b.dataset.src === S.src;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+    document.querySelectorAll('#segTab button').forEach(function (b) {
+      var on = b.dataset.cmp === S.cmp;
+      b.classList.toggle('on', on);
+      b.setAttribute('aria-pressed', on);
+    });
+  }
+
+  function drawAll() {
+    drawHead();
+    drawStep1(); drawStep2(); drawStep3(); drawStep4(); drawStep5();
+    drawStats();
+    drawScore();
+  }
+
+  function showTab(id) {
+    PANES.forEach(function (q) { var el = $(q); if (el) el.hidden = q !== id; });
+    document.querySelectorAll('#tabs button').forEach(function (b) {
+      b.setAttribute('aria-selected', b.dataset.tab === id);
+    });
+    var lab = document.querySelector('.labhead');
+    if (lab) lab.hidden = !/^p[1-4]$/.test(id);
+    // the challenge is step 3, where the reader is asked to make PCA look good
+    SCORE.show(id === 'p3');
+    var done = (id === 'pe' || id === 'pk' || id === 'pm');
+    if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
+    if ($('pager')) $('pager').hidden = !done;
+    S.tab = id;
+    drawAll();
+    saveState();
+    offerInvite(id);
+  }
+
+  /* The mixing angle drifts once, when the step that asks for a hunt appears,
+     and returns to exactly where it started. */
+  function offerInvite(id) {
+    if (id !== 'p3') return;
+    var a0 = S.ang;
+    SCORE.invite(function (phase) {
+      S.ang = Math.max(0, Math.min(89, Math.round(a0 + 12 * Math.sin(phase * Math.PI * 2))));
+      syncLabels(); drawAll();
+    }, { key: 'mix', frames: 34 });
+  }
+
+  document.querySelectorAll('#tabs button').forEach(function (b) {
+    b.addEventListener('click', function () { showTab(b.dataset.tab); });
+  });
+  document.querySelectorAll('#segSrc button, #segSrc4 button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.src = b.dataset.src;
+      SCORE.reset();
+      syncLabels(); drawAll(); saveState();
+    });
+  });
+  document.querySelectorAll('#segTab button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      S.cmp = b.dataset.cmp; syncLabels(); drawAll(); saveState();
+    });
+  });
+
+  document.addEventListener('input', function (ev) {
+    var t = ev.target;
+    if (!t || t.tagName !== 'INPUT') return;
+    var key = t.dataset.key || t.id;
+    if (!(key in DEF)) return;
+    S[key] = parseFloat(t.value);
+    syncLabels(); drawAll(); saveState();
+  });
+
+  var rt;
+  window.addEventListener('resize', function () {
+    clearTimeout(rt);
+    rt = setTimeout(drawAll, 140);
+  });
+
+  syncLabels();
+  showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
+
+  window.__M09 = {
+    set: function (k, v) { S[k] = v; syncLabels(); drawAll(); },
+    recovery: function () {
+      var R = results();
+      return { pca: R.pcaRec.slice(), ica: R.icaRec.slice(),
+               ang: S.ang, gain: gainOf(), noise: S.noise, src: S.src };
+    },
+    curve: function () { return curve(); },
+    starts: function () { return starts(); },
+    score: function () { return scoreNow(); },
+    sourceStats: function () {
+      var s = srcNow();
+      return { k1: MV.kurtosis(s[0]), k2: MV.kurtosis(s[1]), r: MV.corr(s)[0][1] };
+    }
+  };
+})();
+</script>
+</body>
+</html>

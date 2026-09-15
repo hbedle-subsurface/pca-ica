@@ -93,17 +93,23 @@
       easier to see as a count: how many traces sit on the same side of both averages, against how many
       sit on opposite sides.</p>
 
-    <p class="lede">Take one trace. Subtract the survey average from its value in the first attribute,
-      and subtract the survey average from its value in the second. Multiply those two deviations
-      together. If the trace is above average in both, the product is positive. If it is below average
-      in both, both deviations are negative and the product is positive again. If it is above average in
-      one and below in the other, the product is negative.</p>
-    <p class="lede">Covariance is the average of that product over every trace. The panel below sorts the
-      traces into the four quadrants and shows what each contributes. A cloud that leans one way has
-      most of its traces in the two positive quadrants; a round cloud has them spread evenly and the
-      positive and negative contributions cancel.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Pick a second attribute and watch the four boxes.</b> Every trace lands in one of them, and which one decides whether it pushes the number up or pulls it down.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Take one trace. Subtract the survey average from its value in the first attribute,
+        and subtract the survey average from its value in the second. Multiply those two deviations
+        together. If the trace is above average in both, the product is positive. If it is below average
+        in both, both deviations are negative and the product is positive again. If it is above average in
+        one and below in the other, the product is negative.</p>
+        <p class="lede">Covariance is the average of that product over every trace. The panel below sorts the
+        traces into the four quadrants and shows what each contributes. A cloud that leans one way has
+        most of its traces in the two positive quadrants; a round cloud has them spread evenly and the
+        positive and negative contributions cancel.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>What each quadrant contributes</h3>
         <span class="hint">Positive in crimson, negative in teal</span>
@@ -132,16 +138,22 @@
       <span class="hint">One number moves, the other does not</span>
     </div>
 
-    <p class="lede">Covariance carries the units of both attributes multiplied together. Amplitude times
-      amplitude, or amplitude times hertz. That makes its size depend on how the attributes happen to
-      have been written out, and two volumes describing identical rocks in different units give
-      different covariances.</p>
-    <p class="lede">Correlation removes that dependence by dividing the covariance by both standard
-      deviations before reporting it. What is left is a pure number between minus one and one. The two
-      panels below share a single horizontal axis of gain, so the difference between the two behaviors
-      can be read straight down.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Drag the gain to 10&times;.</b> One of the two numbers below follows it. The other does not move at all.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Covariance carries the units of both attributes multiplied together. Amplitude times
+        amplitude, or amplitude times hertz. That makes its size depend on how the attributes happen to
+        have been written out, and two volumes describing identical rocks in different units give
+        different covariances.</p>
+        <p class="lede">Correlation removes that dependence by dividing the covariance by both standard
+        deviations before reporting it. What is left is a pure number between minus one and one. The two
+        panels below share a single horizontal axis of gain, so the difference between the two behaviors
+        can be read straight down.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Covariance and correlation as the gain changes</h3>
         <span class="hint">One shared gain axis, both fixed</span>
@@ -170,18 +182,24 @@
       <span class="hint">Change the pair and watch it thin</span>
     </div>
 
-    <p class="lede">Two variances and one covariance are three numbers, and three numbers specify an
-      ellipse. Drawn onto the cloud it encloses the traces within a chosen number of standard
-      deviations, and its shape says the same thing the correlation does: a nearly circular ellipse
-      means the two attributes are close to unrelated, and a thin one means they are close to being the
-      same measurement twice.</p>
-    <p class="lede">The ratio of the long axis to the short one is fixed by the correlation alone when
-      both axes are drawn in standard deviations, which is how this panel is scaled. That is a different
-      picture from module 01, where both axes were in the same amplitude units and the angle of the long
-      axis was the quantity being hunted. Neither picture is more correct; they answer different
-      questions, and which one is on screen has to be known before an angle read off it means anything.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Change the pair.</b> Every pair of attributes in the set is a dot on the curve below. Yours is the crimson one.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Two variances and one covariance are three numbers, and three numbers specify an
+        ellipse. Drawn onto the cloud it encloses the traces within a chosen number of standard
+        deviations, and its shape says the same thing the correlation does: a nearly circular ellipse
+        means the two attributes are close to unrelated, and a thin one means they are close to being the
+        same measurement twice.</p>
+        <p class="lede">The ratio of the long axis to the short one is fixed by the correlation alone when
+        both axes are drawn in standard deviations, which is how this panel is scaled. That is a different
+        picture from module 01, where both axes were in the same amplitude units and the angle of the long
+        axis was the quantity being hunted. Neither picture is more correct; they answer different
+        questions, and which one is on screen has to be known before an angle read off it means anything.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Ellipse ratio against correlation</h3>
         <span class="hint">Every attribute pair in the set, plotted</span>
@@ -208,16 +226,38 @@
       <span class="hint">Raise the threshold and watch what survives</span>
     </div>
 
-    <p class="lede">With more than two attributes the same calculation is done for every pair and
-      collected into a square table. The diagonal is each attribute with itself, which is one by
-      construction. Everything off the diagonal is a pair, and the table is symmetric, so half of it
-      repeats the other half.</p>
-    <p class="lede">Read as an image, the table is the fastest way to see redundancy in an attribute set
-      before any method is run on it. Raising the threshold below hides the weak pairs and leaves the
-      groups: attributes that are measuring nearly the same thing cluster into blocks that stay dark
-      while everything around them fades.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Push the threshold up.</b> The weak pairs fade out and the groups that are saying the same thing stay dark.</p>
+
+    <details class="reveal"><summary>What the attributes in this matrix measure</summary>
+      <p class="lede">Eleven attributes are computed over the same window. Three of them &mdash; RMS
+        amplitude, mean absolute amplitude and peak absolute amplitude &mdash; are different summaries of
+        how strong the reflections are, so they are expected to agree. Peak envelope is the same idea
+        computed from the analytic trace. Peak frequency and spectral bandwidth describe the shape of the
+        window&rsquo;s spectrum rather than its size, and respond to interference between closely spaced
+        reflections. Coherence is the lateral similarity of neighbouring traces and the amplitude
+        gradient is the rate of lateral change, so both fall at edges. The two GLCM measures describe
+        texture. Sweetness is the envelope divided by the square root of peak frequency, so it is built
+        from two of the others.</p>
+      <p class="lede">Any underlined term opens a definition, and each links out to the module set where
+        that attribute is taught properly. Two things worth carrying into the matrix: attributes built
+        from each other are guaranteed to correlate, and a low coherence value has several possible
+        causes &mdash; a channel margin, a fault, or steeply dipping strata, since the version used here
+        does not follow dip.</p></details>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">With more than two attributes the same calculation is done for every pair and
+        collected into a square table. The diagonal is each attribute with itself, which is one by
+        construction. Everything off the diagonal is a pair, and the table is symmetric, so half of it
+        repeats the other half.</p>
+        <p class="lede">Read as an image, the table is the fastest way to see redundancy in an attribute set
+        before any method is run on it. Raising the threshold below hides the weak pairs and leaves the
+        groups: attributes that are measuring nearly the same thing cluster into blocks that stay dark
+        while everything around them fades.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The correlation matrix</h3>
         <span class="hint">Crimson positive, teal negative</span>
@@ -395,7 +435,11 @@
             and falls back to about 74 at 26 ms, which is the tuning curve: below the tuning thickness
             the top and base reflections reinforce as the bed thickens, and above it they separate. A
             correlation coefficient fits one straight line through both limbs and reports the average
-            slope, which describes neither.</span></details></li>
+            slope, which describes neither. Turn it around and the warning is sharper: a dim amplitude on
+            a real survey could mean a bed below tuning, a bed well above it, a small impedance contrast,
+            or destructive interference from something unrelated. The attribute cannot distinguish them,
+            so an amplitude map is evidence about several possibilities at once rather than a thickness
+            measurement.</span></details></li>
 
         <li><b>Split a correlation by facies.</b>
           <em class="point">Why: a survey is rarely one population, and a correlation computed across
@@ -414,7 +458,10 @@
             three and a half thousand background traces dilute it. RMS against GLCM contrast changes
             sign: +0.534 across the survey, +0.254 in the background, &minus;0.102 inside the channel.
             All three are the same trap. Knowing how many populations are inside the window is a
-            precondition for quoting any correlation computed across it.</span></details></li>
+            precondition for quoting any correlation computed across it &mdash; and on a real survey you rarely
+            know. A crossplot that separates into two clouds could be two facies, two depositional
+            environments, an acquisition boundary, or a processing change partway across the survey. The
+            statistics say there are two groups; which two is an interpretation.</span></details></li>
       </ol>
     </div>
   </section>

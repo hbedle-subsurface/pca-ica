@@ -46,6 +46,8 @@ textbook version of the same figure — and in two places, it does.
 | 10 | What counts as a dimension in seismic data | attribute, waveform, spectrum |
 | 11 | Components are not geology | and where SOM, GTM and UMAP sit |
 
+All twelve are built.
+
 ## Using them in a course
 
 The state of every control is held in the address bar, so a link opens a module
@@ -58,6 +60,45 @@ Nothing you do in a module leaves your browser. There is no server, no account,
 no upload. A single shared script records that a page was opened, so that the
 university can see the modules are being used; no cookie, no identifier,
 nothing about you. Saved to disk, every module runs with no network at all.
+
+## Repository layout
+
+    index.html              landing page
+    modules/*.html          the twelve modules, one file each, self-contained
+    assets/multivar.js      all the statistics and linear algebra
+    assets/attrfield.js     the synthetic survey and the attributes computed from it
+    assets/shape3d.js       the teapot in module 00, built from equations
+    assets/score.js         the progress bar and the drag/invitation helpers
+    assets/glossary.js      48 terms: dimension reduction, and the seismic
+                            vocabulary, which links out to the other module sets
+    assets/style.css        shared with the other teaching repositories
+    docs/                   style brief, module plan, and the add-* procedures
+    verify-multivar.js      49 checks of the arithmetic against known answers
+    harness-NN.js           one per module: opens it headless and reads back
+                            every number its exercises quote
+    harness-invite.js       checks the attract animation moves and stops on touch
+
+## Checking it
+
+Everything on every page is computed in the browser. Nothing is a stored image
+and no numbers are typed into the prose by hand — each one is read out of the
+running page by a harness, and the harnesses are how the text and the code are
+kept in agreement.
+
+    npm install jsdom
+    node verify-multivar.js      # the arithmetic, against closed-form answers
+    node harness-00.js           # ... through harness-11.js
+    node harness-invite.js
+
+`verify-multivar.js` checks the eigensolver against a rotated ellipse of known
+angle, a perfectly redundant pair whose second eigenvalue must vanish, and a
+matrix whose trace must be preserved; checks whitening produces the identity;
+checks kurtosis against distributions whose values are known exactly; and
+checks FastICA recovers sources from a mixing matrix chosen in the test.
+
+Several times during the build a measurement contradicted a draft of the text.
+On every occasion the text was what changed, and those corrections are recorded
+in `docs/MODULE-PLAN.md`.
 
 ## Citing
 

@@ -88,18 +88,24 @@
       and then used. It is easier to accept as the answer to a question that has already been asked and
       answered a slower way.</p>
 
-    <p class="lede">The curve below is the one from module 01: the spread of the projection at every
-      angle from zero to a hundred and eighty degrees, for two standardized attributes. Its maximum is
-      the first principal component. Finding it by sweeping takes a hundred and eighty projections of
-      five thousand traces each.</p>
-    <p class="lede">The teal marker is the same direction obtained from the covariance matrix instead.
-      A direction <b>v</b> is an eigenvector of a matrix <b>C</b> when multiplying it by <b>C</b> points
-      the result the same way it already pointed, changing only its length; the factor by which the
-      length changes is the eigenvalue. For a covariance matrix that condition picks out exactly the
-      directions where the spread is at a maximum or a minimum, which is why the two answers below sit
-      on top of each other.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Pick two attributes.</b> The crimson curve is the hunt from module 01. The teal marker is arithmetic, arriving at the same place in one move.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">The curve below is the one from module 01: the spread of the projection at every
+        angle from zero to a hundred and eighty degrees, for two standardized attributes. Its maximum is
+        the first principal component. Finding it by sweeping takes a hundred and eighty projections of
+        five thousand traces each.</p>
+        <p class="lede">The teal marker is the same direction obtained from the covariance matrix instead.
+        A direction <b>v</b> is an eigenvector of a matrix <b>C</b> when multiplying it by <b>C</b> points
+        the result the same way it already pointed, changing only its length; the factor by which the
+        length changes is the eigenvalue. For a covariance matrix that condition picks out exactly the
+        directions where the spread is at a maximum or a minimum, which is why the two answers below sit
+        on top of each other.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Sweep the angle, or solve for it</h3>
         <span class="hint">Crimson: the sweep. Teal: the eigenvector</span>
@@ -132,20 +138,26 @@
       <span class="hint">Every direction in space, colored by its spread</span>
     </div>
 
-    <p class="lede">With two attributes a direction is one angle. With three it takes two, and the sweep
-      becomes the map below: every direction in three-dimensional attribute space, colored by the spread
-      of the projection along it. The horizontal axis is the direction's bearing within the plane of the
-      first two attributes and the vertical axis is how far it tilts toward the third.</p>
-    <p class="lede">Three maxima appear, marked with circles, and three minima between them. They are the
-      three eigenvectors, and they are at right angles to each other in the space even though the map
-      flattens that out. The eigenvalue of each is the value of the map at its marker.</p>
-    <p class="lede">The arithmetic that returns all three does not care how many attributes there are.
-      The sweep does: two attributes need a hundred and eighty directions tried, three need about thirty
-      thousand at the same spacing, and the six attributes in the header would need five angles and
-      something like ten billion. That is the whole practical reason the eigenvector route is the one
-      that gets used.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Change the third attribute.</b> Three bright spots appear. Those are the three eigenvectors, and finding them by sweeping would have meant trying 32,400 directions.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">With two attributes a direction is one angle. With three it takes two, and the sweep
+        becomes the map below: every direction in three-dimensional attribute space, colored by the spread
+        of the projection along it. The horizontal axis is the direction's bearing within the plane of the
+        first two attributes and the vertical axis is how far it tilts toward the third.</p>
+        <p class="lede">Three maxima appear, marked with circles, and three minima between them. They are the
+        three eigenvectors, and they are at right angles to each other in the space even though the map
+        flattens that out. The eigenvalue of each is the value of the map at its marker.</p>
+        <p class="lede">The arithmetic that returns all three does not care how many attributes there are.
+        The sweep does: two attributes need a hundred and eighty directions tried, three need about thirty
+        thousand at the same spacing, and the six attributes in the header would need five angles and
+        something like ten billion. That is the whole practical reason the eigenvector route is the one
+        that gets used.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Spread in every direction, three attributes</h3>
         <span class="hint">Circles mark the three eigenvectors</span>
@@ -168,16 +180,22 @@
       <span class="hint">Remove components and run it again</span>
     </div>
 
-    <p class="lede">Subtract from every attribute the part of it that the first component accounts for.
-      What remains is a residual dataset with one less direction of spread in it. Run the same
-      calculation on that residual and its first component is the original second component, exactly.</p>
-    <p class="lede">The bars below show the eigenvalues of the original six-attribute set and of the
-      residual after removing however many components the slider is set to. Each removal shifts the whole
-      list one place to the left and leaves a zero at the end. That is what ordering by variance
-      means: the components are not chosen together, they are chosen one at a time, each from whatever
-      the previous ones did not take.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Remove one component, then two, then three.</b> Watch the whole list shift one place left each time.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Subtract from every attribute the part of it that the first component accounts for.
+        What remains is a residual dataset with one less direction of spread in it. Run the same
+        calculation on that residual and its first component is the original second component, exactly.</p>
+        <p class="lede">The bars below show the eigenvalues of the original six-attribute set and of the
+        residual after removing however many components the slider is set to. Each removal shifts the whole
+        list one place to the left and leaves a zero at the end. That is what ordering by variance
+        means: the components are not chosen together, they are chosen one at a time, each from whatever
+        the previous ones did not take.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Eigenvalues before and after removing components</h3>
         <span class="hint">Same component axis in both</span>
@@ -207,18 +225,24 @@
       <span class="hint">Both are called the principal component</span>
     </div>
 
-    <p class="lede">A component has two parts and they are different shapes. The loadings are one number
-      per attribute, six in this set, saying how much of each attribute went into the direction. The
-      scores are one number per trace, 5184 here, saying where each trace sits along it. The loadings
-      define the component and the scores are what gets written out as a volume.</p>
-    <p class="lede">Both are routinely called the principal component. Statistics distinguishes them as
-      loadings and scores; the AASPI documentation for its waveform programs calls the eigenvectors the
-      initial training waveforms and the projections the principal components. Neither usage is wrong and
-      both are common, so the question to ask of any figure labeled PC2 is which of the two it is
-      showing. Six numbers and a map of a survey are not easily confused once the distinction is in
-      mind.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Six numbers on the left, 5184 on the right.</b> Both of them get called the principal component.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">A component has two parts and they are different shapes. The loadings are one number
+        per attribute, six in this set, saying how much of each attribute went into the direction. The
+        scores are one number per trace, 5184 here, saying where each trace sits along it. The loadings
+        define the component and the scores are what gets written out as a volume.</p>
+        <p class="lede">Both are routinely called the principal component. Statistics distinguishes them as
+        loadings and scores; the AASPI documentation for its waveform programs calls the eigenvectors the
+        initial training waveforms and the projections the principal components. Neither usage is wrong and
+        both are common, so the question to ask of any figure labeled PC2 is which of the two it is
+        showing. Six numbers and a map of a survey are not easily confused once the distinction is in
+        mind.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The same component, both ways</h3>
         <span class="hint">Channel axes marked on the map</span>
@@ -254,17 +278,23 @@
       <span class="hint">Flip it in the header and watch the numbers</span>
     </div>
 
-    <p class="lede">If a direction satisfies the eigenvector equation, so does the same direction
-      reversed. Nothing in the arithmetic prefers one over the other, so the sign that comes back is
-      whatever the implementation happened to settle on. Flipping it negates every loading and every
-      score, which turns the map inside out, and leaves the eigenvalue, the share of variance and the
-      shape of everything untouched.</p>
-    <p class="lede">The consequence for interpretation is small and easy to trip over. Two figures of
-      the same component computed by two packages can be exact negatives of each other, and a reader
-      comparing them without noticing will describe the channel as bright in one and dim in the other.
-      The readouts below are the quantities that do not move.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Flip the sign in the header.</b> The map turns inside out. Not one measurable quantity moves.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">If a direction satisfies the eigenvector equation, so does the same direction
+        reversed. Nothing in the arithmetic prefers one over the other, so the sign that comes back is
+        whatever the implementation happened to settle on. Flipping it negates every loading and every
+        score, which turns the map inside out, and leaves the eigenvalue, the share of variance and the
+        shape of everything untouched.</p>
+        <p class="lede">The consequence for interpretation is small and easy to trip over. Two figures of
+        the same component computed by two packages can be exact negatives of each other, and a reader
+        comparing them without noticing will describe the channel as bright in one and dim in the other.
+        The readouts below are the quantities that do not move.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The same component, both signs</h3>
         <span class="hint">Two maps, one color bar convention</span>
@@ -348,7 +378,8 @@
             covers why two standardized attributes only ever give those two answers.</span></details></li>
 
         <li><b>Count the directions a sweep would have to try.</b>
-          <em class="point">Why: the reason nobody sweeps is not elegance, it is arithmetic.</em>
+          <em class="point">Why: sweeping becomes impossible very quickly, and the numbers show how
+            quickly.</em>
           In step 2, note that a direction in three dimensions needs two angles. Work out how many
           directions a sweep at one-degree spacing would try for three attributes, and then for the six
           in the header.
@@ -385,7 +416,11 @@
             appear in it. Component 2 loads 0.555 on peak frequency and 0.525 on peak envelope against
             &minus;0.537 on GLCM contrast, with almost nothing on RMS amplitude at &minus;0.010 — a
             tuning image rather than a brightness one. Component 3 is dominated by peak frequency at
-            0.694 with bandwidth at 0.407 opposing coherence at &minus;0.390. The eigenvalues are 3.1317,
+            0.694 with bandwidth at 0.407 opposing coherence at &minus;0.390. One caution on reading
+            loadings this way: they say what a component is made of arithmetically, not what it responds
+            to in the ground. A component loading heavily on amplitude could be tracking impedance
+            contrast, bed thickness near tuning, or fluid, and the loadings are identical in all three
+            cases. The eigenvalues are 3.1317,
             1.2860 and 0.7386, holding 52.19%, 21.43% and 12.31% of the variance.</span></details></li>
 
         <li><b>Flip a sign and find what changed.</b>

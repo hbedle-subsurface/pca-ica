@@ -218,6 +218,44 @@ Three things that followed from the same pass and are worth repeating:
   reads 26%, the side 68%, the top 83%. The `.score` block in `style.css` is
   reusable for any module that can state a best achievable value.
 
+**Move it, or it reads as a picture.** The most reliable way to say a panel is
+interactive is for it to move on its own. When a step that asks for a hunt is
+first opened, its control drifts for about a second and a half and then stops.
+Four rules came out of building it, all of them learned by getting them wrong
+first:
+
+- **Drift from a remembered base, not from the current value.** A relative
+  nudge applied per frame accumulates rounding and creeps; the first version
+  walked the teapot 29 degrees away from where the reader left it.
+- **Do not record a score while drifting.** The first version swung the control
+  through the answer and handed the reader a personal best of 100% before they
+  had touched anything, which is both a lie and a spoiler.
+- **Offer it when the step appears, not on page load.** A reader arrives on
+  step 1 and reaches step 4 minutes later; an invitation that fired at load is
+  long over by then. It is fired from the tab handler, once per step.
+- **Stop permanently on the first interaction anywhere on the page.** Pointer,
+  key or slider. Something that keeps twitching after the reader has taken
+  control is an irritation, not an invitation.
+
+**Show a personal best.** One number appended to the status line — *best so far
+81%* — and only when the reader has previously been better than they are now.
+It costs nothing and it is most of the reason anybody moves a control a second
+time.
+
+**Say what to try next when they win.** The win state replaces the prompt with
+a specific suggestion: *now try it on real data, in step 4*, or *look at the
+channel in the bottom panel*. A dead end after a success is a place to stop
+reading.
+
+**Where the score mechanic must not go.** It suits a question with an answer:
+the widest view, the widest direction, the rotation that shows the feature, the
+settings that give the best component. It does not suit a question whose point
+is that it has no answer. Module 05 asks how many components to keep and its
+whole argument is that five standard rules disagree; a bar filling up at one
+particular cut would contradict the module while looking like a summary of it.
+Applying a good interaction uniformly is one of the easier ways for a teaching
+set to acquire a falsehood.
+
 The trap to avoid: none of this means saying less that is true. Every number,
 caveat and simplification is still there. What changed is the order — the thing
 to touch first, the sentence that says why second, the argument behind a

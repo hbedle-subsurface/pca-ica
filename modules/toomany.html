@@ -385,7 +385,9 @@
             than it was for the teapot. Its horizontal axis is 0.393 RMS + 0.735 envelope + 0.553 peak
             amplitude, a mixture of all three. What is missing is any way to tell whether that view is
             good. With the teapot you could see it. Here the number went up and nothing on the screen
-            says whether anything geological came with it.</span></details></li>
+            says whether anything geological came with it. That gap never closes: a direction that
+            spreads the data out could be following a change in lithology, in bed thickness, in fluid, or
+            in the acquisition. All four spread the cloud.</span></details></li>
 
         <li><b>Add attributes one at a time.</b>
           <em class="point">Why: this is the situation the whole set exists for, and it is worth seeing
@@ -507,6 +509,7 @@
 <script src="../assets/popout.js"></script>
 <script src="../assets/panelout.js"></script>
 <script src="../assets/glossary.js"></script>
+<script src="../assets/score.js"></script>
 <script src="../assets/multivar.js"></script>
 <script src="../assets/attrfield.js"></script>
 <script src="../assets/shape3d.js"></script>
@@ -1001,53 +1004,17 @@
     var best = v[0] + v[1];
     var worst = v[v.length - 1] + v[v.length - 2];
     var now = SHAPE.spread(cloud, viewNow()).total;
-    return {
-      now: now, best: best,
-      pct: 100 * now / best,
-      frac: Math.max(0, Math.min(1, (now - worst) / (best - worst || 1)))
-    };
+    return { now: now, best: best, worst: worst, pct: 100 * now / best };
   }
 
   function drawScore() {
-    var box = $('score');
-    if (!box) return;
     var s = scoreNow();
-    var win = s.pct >= 99;
-    box.classList.toggle('win', win);
-    var fill = $('scoreFill'), tgt = $('scoreTgt'), pct = $('scorePct'), say = $('scoreSay');
-    if (fill) fill.style.width = (s.frac * 100).toFixed(1) + '%';
-    if (tgt) tgt.style.left = 'calc(100% - 1px)';
-    if (pct) pct.textContent = s.pct.toFixed(1) + '%';
-    if (say) {
-      say.textContent = win ? 'that is the widest view there is'
-        : s.pct >= 96 ? 'very close \u2014 keep nudging'
-        : s.pct >= 88 ? 'better. keep going'
-        : 'drag it around';
-    }
-  }
-
-  /* Dragging beats two sliders for turning an object, and the canvas says so
-     with its cursor. Pointer events cover mouse, pen and touch together. */
-  function wireDrag(id) {
-    var c = $(id);
-    if (!c) return;
-    var down = false, lx = 0, ly = 0;
-    c.addEventListener('pointerdown', function (ev) {
-      down = true; lx = ev.clientX; ly = ev.clientY;
-      c.setPointerCapture(ev.pointerId);
-      ev.preventDefault();
-    });
-    c.addEventListener('pointermove', function (ev) {
-      if (!down) return;
-      var dx = ev.clientX - lx, dy = ev.clientY - ly;
-      lx = ev.clientX; ly = ev.clientY;
-      S.az = Math.round(((S.az - dx * 0.55 + 180 + 360) % 360) - 180);
-      S.el = Math.round(Math.max(-89, Math.min(89, S.el + dy * 0.45)));
-      syncLabels(); drawAll(); ev.preventDefault();
-    });
-    ['pointerup', 'pointercancel', 'pointerleave'].forEach(function (e) {
-      c.addEventListener(e, function () { if (down) { down = false; saveState(); } });
-    });
+    SCORE.set({ now: s.now, best: s.best, worst: s.worst,
+                key: S.tab === 'p4' ? 'attributes' : 'teapot',
+                verb: 'grab it and turn it',
+                won: 'that is the widest view there is',
+                next: S.tab === 'p4' ? 'now read what it is made of, in step 3'
+                                     : 'now try it on real data, in step 4' });
   }
 
   /* =====================================================================
@@ -1098,15 +1065,29 @@
     });
     var lab = document.querySelector('.labhead');
     if (lab) lab.hidden = !/^p[1-4]$/.test(id);
-    var sc = $('score');
-    // the score is a challenge on the two steps that ask for one
-    if (sc) sc.hidden = !(id === 'p2' || id === 'p4');
+    // a challenge belongs only on the steps that ask for one
+    SCORE.show(id === 'p2' || id === 'p4');
     var done = (id === 'pe' || id === 'pk' || id === 'pm');
     if ($('nextup')) $('nextup').hidden = !(id === 'pk' || id === 'pm');
     if ($('pager')) $('pager').hidden = !done;
     S.tab = id;
     drawAll();
     saveState();
+    offerInvite(id);
+  }
+
+  /* The teapot turns by itself for a moment when a step that asks for a hunt
+     first appears, so that it reads as something to pick up rather than a
+     figure. Measured from a remembered base so it ends exactly where it
+     started, and it stops the instant anything is touched. */
+  function offerInvite(id) {
+    if (id !== 'p2' && id !== 'p4') return;
+    var az0 = S.az, el0 = S.el;
+    SCORE.invite(function (phase) {
+      S.az = Math.round(az0 + 7 * Math.sin(phase * Math.PI * 2));
+      S.el = Math.round(Math.max(-89, Math.min(89, el0 + 4 * Math.sin(phase * Math.PI * 4))));
+      syncLabels(); drawAll();
+    }, { key: 'teapot-' + id });
   }
 
   document.querySelectorAll('#tabs button').forEach(function (b) {
@@ -1134,7 +1115,14 @@
     rt = setTimeout(drawAll, 140);
   });
 
-  wireDrag('cHead');
+  SCORE.drag('cHead', {
+    onMove: function (dx, dy) {
+      S.az = Math.round(((S.az - dx * 0.55 + 180 + 360) % 360) - 180);
+      S.el = Math.round(Math.max(-89, Math.min(89, S.el + dy * 0.45)));
+      syncLabels(); drawAll();
+    },
+    onEnd: saveState
+  });
   syncLabels();
   showTab(PANES.indexOf(S.tab) >= 0 ? S.tab : 'p1');
 

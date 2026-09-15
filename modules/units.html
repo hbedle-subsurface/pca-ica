@@ -90,16 +90,22 @@
       two settings do not produce slightly different versions of one answer. They produce two different
       answers.</p>
 
-    <p class="lede">Six attributes are computed over the same window on the same survey: RMS amplitude,
-      peak envelope, peak frequency, spectral bandwidth, coherence and GLCM contrast. Nothing about them
-      changes between the two routes. What changes is whether each attribute has been divided by its own
-      standard deviation before the covariance matrix is formed.</p>
-    <p class="lede">The bars above the tabs give the loadings of the first component under each route:
-      how much of each attribute went into it. The maps below are the resulting first component drawn
-      back onto the survey, with the two channel axes marked on both so the same feature can be found in
-      each.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Look at the two sets of bars above the tabs.</b> Same six attributes, same survey, one checkbox apart.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Six attributes are computed over the same window on the same survey: RMS amplitude,
+        peak envelope, peak frequency, spectral bandwidth, coherence and GLCM contrast. Nothing about them
+        changes between the two routes. What changes is whether each attribute has been divided by its own
+        standard deviation before the covariance matrix is formed.</p>
+        <p class="lede">The bars above the tabs give the loadings of the first component under each route:
+        how much of each attribute went into it. The maps below are the resulting first component drawn
+        back onto the survey, with the two channel axes marked on both so the same feature can be found in
+        each.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The first component, drawn on the survey</h3>
         <span class="hint">Channel axes marked on both</span>
@@ -131,16 +137,22 @@
       <span class="hint">Nothing about the rocks changes</span>
     </div>
 
-    <p class="lede">A volume written out in different units is the same volume. If a method is measuring
-      something about the subsurface, rescaling one input should leave its answer alone. The slider in
-      the header does exactly that rescaling, over three decades either way, and the panel below tracks
-      what each route makes of it.</p>
-    <p class="lede">The upper panel is the loading of the first component on the attribute being
-      rescaled, under the covariance route. The lower panel is the same quantity under the correlation
-      route. They share one horizontal axis of gain so the two behaviors can be read straight down
-      against each other.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Take the gain to 1000&times;.</b> No rock in the survey changed. Watch which of the two routes notices.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">A volume written out in different units is the same volume. If a method is measuring
+        something about the subsurface, rescaling one input should leave its answer alone. The slider in
+        the header does exactly that rescaling, over three decades either way, and the panel below tracks
+        what each route makes of it.</p>
+        <p class="lede">The upper panel is the loading of the first component on the attribute being
+        rescaled, under the covariance route. The lower panel is the same quantity under the correlation
+        route. They share one horizontal axis of gain so the two behaviors can be read straight down
+        against each other.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>What each route does as one attribute is rescaled</h3>
         <span class="hint">One shared gain axis, both fixed</span>
@@ -173,16 +185,22 @@
       <span class="hint">Note the axis: it runs over seven decades</span>
     </div>
 
-    <p class="lede">The reason the covariance route behaves the way it does is visible as soon as the
-      variances are put side by side. The upper panel gives the variance of each attribute in its own
-      units, on a logarithmic axis because they are not otherwise comparable on one page. The lower panel
-      gives the size of that attribute's loading on the first component under the covariance route.</p>
-    <p class="lede">The two panels have the same shape. An attribute whose numbers are large has a large
-      variance whatever it is measuring, and the direction of greatest variance runs along it. Attributes
-      recorded as fractions contribute a loading indistinguishable from zero, not because they carry
-      nothing but because their numbers are small.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Read the axis on the upper panel.</b> It runs over seven decades. Then compare the two panels to each other.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">The reason the covariance route behaves the way it does is visible as soon as the
+        variances are put side by side. The upper panel gives the variance of each attribute in its own
+        units, on a logarithmic axis because they are not otherwise comparable on one page. The lower panel
+        gives the size of that attribute's loading on the first component under the covariance route.</p>
+        <p class="lede">The two panels have the same shape. An attribute whose numbers are large has a large
+        variance whatever it is measuring, and the direction of greatest variance runs along it. Attributes
+        recorded as fractions contribute a loading indistinguishable from zero, not because they carry
+        nothing but because their numbers are small.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Variance in native units, and the loading it earns</h3>
         <span class="hint">Attributes in the same order in both panels</span>
@@ -210,17 +228,23 @@
       <span class="hint">Pick any pair and watch the right-hand panel</span>
     </div>
 
-    <p class="lede">Take exactly two attributes and standardize them. The matrix that gets decomposed
-      then has ones down its diagonal and the correlation in both off-diagonal positions, and a matrix of
-      that shape has the same two directions regardless of what the correlation is: one at forty-five
-      degrees and one at right angles to it. The correlation sets how long the two axes are and has no
-      say in where they point.</p>
-    <p class="lede">The left panel below draws the chosen pair with both axes on one common numeric
-      scale, so the angle on screen is the angle the covariance route would find in the units as given.
-      The right panel draws the same traces standardized. Change the pair and watch: the left angle moves
-      and the right one does not.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Step through the pairs.</b> The left angle moves every time. The right one only ever takes two values.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Take exactly two attributes and standardize them. The matrix that gets decomposed
+        then has ones down its diagonal and the correlation in both off-diagonal positions, and a matrix of
+        that shape has the same two directions regardless of what the correlation is: one at forty-five
+        degrees and one at right angles to it. The correlation sets how long the two axes are and has no
+        say in where they point.</p>
+        <p class="lede">The left panel below draws the chosen pair with both axes on one common numeric
+        scale, so the angle on screen is the angle the covariance route would find in the units as given.
+        The right panel draws the same traces standardized. Change the pair and watch: the left angle moves
+        and the right one does not.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>The same two attributes, two coordinate systems</h3>
         <span class="hint">Left in native units, right standardized</span>
@@ -253,15 +277,21 @@
       <span class="hint">Switch the seventh attribute in and out</span>
     </div>
 
-    <p class="lede">Standardizing gives every attribute a variance of exactly one. That is what makes the
-      attributes comparable, and it is also a statement that each of them deserves the same weight. The
-      seventh attribute in this set is RMS amplitude measured in a window above the channel system, which
-      is a correctly computed attribute on an interval that contains none of the target.</p>
-    <p class="lede">The panels below give the fraction of variance on each component, with and without
-      it, and the loading it carries on each. The covariance route ignores it. The correlation route
-      cannot, because it has already declared it equal.</p>
 
-    <div class="plot">
+    
+
+    <p class="lede"><b>Switch the seventh attribute in and out.</b> It is correctly computed, on a window that misses the target completely.</p>
+
+    <details class="reveal"><summary>The longer version</summary>
+        <p class="lede">Standardizing gives every attribute a variance of exactly one. That is what makes the
+        attributes comparable, and it is also a statement that each of them deserves the same weight. The
+        seventh attribute in this set is RMS amplitude measured in a window above the channel system, which
+        is a correctly computed attribute on an interval that contains none of the target.</p>
+        <p class="lede">The panels below give the fraction of variance on each component, with and without
+        it, and the loading it carries on each. The covariance route ignores it. The correlation route
+        cannot, because it has already declared it equal.</p>
+            </details>
+<div class="plot">
       <div class="plot-head">
         <h3>Variance per component, and where the weak attribute lands</h3>
         <span class="hint">Same component axis in both panels</span>
@@ -360,15 +390,18 @@
             spectral bandwidth's.</span></details></li>
 
         <li><b>Look at the variances that decide it.</b>
-          <em class="point">Why: the covariance route is not arbitrary, it is predictable, and knowing
-            what it will do is enough to know whether to use it.</em>
+          <em class="point">Why: the covariance route behaves predictably, and knowing in advance what it
+            will do is enough to decide whether to use it.</em>
           In step 3, read the variance of each attribute in native units off the logarithmic axis.
           <details class="reveal"><summary>Hint</summary><span class="ans">Spectral bandwidth 74.4,
             GLCM contrast 23.5, peak frequency 18.1, coherence 0.0101, peak envelope 0.000207, RMS
             amplitude 0.000105. The largest and the smallest differ by a factor of about seven hundred
             thousand. The first component under the covariance route loads on those attributes in the
             same order, which is why it is worth predicting the answer before running it: the covariance
-            route on a mixed-unit set returns the loudest attribute and a small correction.</span></details></li>
+            route on a mixed-unit set returns the loudest attribute and a small correction. Note what a large
+            variance can mean: strong geological contrast, a poorly conditioned attribute with outliers,
+            or simply a quantity that happens to be written in large numbers. The covariance route treats
+            all three the same way.</span></details></li>
 
         <li><b>Standardize two attributes and look for the angle.</b>
           <em class="point">Why: a result that is true only for two attributes is worth meeting
@@ -396,7 +429,10 @@
             component is 0.000 and the fractions of variance do not move at all. Under the correlation
             route the first component falls from 52.19% to 44.83%, and the seventh attribute takes over
             the second component outright, with a loading of 0.528 — larger than any other attribute
-            carries there. The number of components needed to reach ninety percent of the variance goes
+            carries there. Its own largest loading is elsewhere, on the third component at &minus;0.672,
+            where peak frequency at 0.682 is marginally larger still; module 11 reads it that way round.
+            Both statements are true and they answer different questions: which attribute dominates a
+            given component, and which component a given attribute contributes to most. The number of components needed to reach ninety percent of the variance goes
             from four to five. The second most important direction in the analysis is now dominated by a
             window that does not contain the target.</span></details></li>
       </ol>

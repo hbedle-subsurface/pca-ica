@@ -162,7 +162,154 @@
       aka: ['unsupervised learning', 'supervised'], mod: 'notgeology', title: 'Module 11',
       what: 'A method that works from the data alone, with no labeled examples of what the right answer looks like. Supervised methods are given labeled examples and learn to reproduce them.',
       earth: 'Everything in this module set is unsupervised, which is why nothing in it can tell you that a component is a channel. It has never been shown one.'
+    },
+    /* ===================================================================
+       SEISMIC TERMS
+
+       This set is about dimension reduction, not about seismic attributes,
+       and it runs on attributes a student may not have met. Rather than
+       explaining each one in the prose and slowing down a reader who already
+       knows them, they are defined here and each entry points at the module
+       set where the attribute itself is taught properly.
+
+       Same two-part structure as everything above: what the quantity is
+       arithmetically, then what it tends to correspond to in the earth.
+       =================================================================== */
+
+    'seismic trace': {
+      aka: ['trace', 'traces'], url: 'https://hbedle-subsurface.github.io/seismic_resolution',
+      title: 'the seismic resolution modules',
+      what: 'The recorded amplitude at one surface location as a function of time. One trace is one column of numbers.',
+      earth: 'Each trace in this set contributes one sample to every cloud of points: its attributes are its coordinates. A survey of 5184 traces is a cloud of 5184 points.'
+    },
+    'wavelet': {
+      aka: ['wavelets', 'Ricker'], url: 'https://hbedle-subsurface.github.io/seismic_resolution',
+      title: 'the seismic resolution modules',
+      what: 'The short oscillating pulse the source puts into the ground, as it appears after processing. A Ricker wavelet is a common idealized form, described by its peak frequency.',
+      earth: 'The earth reflects at every impedance contrast, and what is recorded is a wavelet at each one, summed. Everything an attribute measures is measured on that sum rather than on the reflectivity itself.'
+    },
+    'acoustic impedance': {
+      aka: ['impedance'], url: 'https://hbedle-subsurface.github.io/avo-basics',
+      title: 'the AVO and rock physics modules',
+      what: 'Density multiplied by velocity, for a given rock. It is a property of the rock rather than of the seismic data.',
+      earth: 'Reflections occur where impedance changes. A sand filled with hydrocarbon generally has lower density and often lower velocity than the shale around it, so its impedance is lower and the reflection at its top is negative.'
+    },
+    'reflection coefficient': {
+      aka: ['reflectivity'], url: 'https://hbedle-subsurface.github.io/avo-basics',
+      title: 'the AVO and rock physics modules',
+      what: 'The fraction of energy returned at an interface, for normal incidence the difference in impedance across it divided by the sum.',
+      earth: 'The channel sand in this set is given a lower impedance than the shale enclosing it, so the top of the channel is a negative reflection and its base a positive one.'
+    },
+    'two-way time': {
+      aka: ['TWT', 'travel time'], url: 'https://hbedle-subsurface.github.io/seismic_resolution',
+      title: 'the seismic resolution modules',
+      what: 'The time for energy to travel down to a reflector and back. Seismic data are recorded in it, so a thickness measured on a trace is in milliseconds rather than metres.',
+      earth: 'Converting it to thickness needs a velocity. The bed thicknesses quoted in module 02 are in two-way time for that reason.'
+    },
+    'thin bed': {
+      aka: ['thin beds', 'tuning', 'tuning thickness'],
+      url: 'https://hbedle-subsurface.github.io/seismic_resolution',
+      title: 'the seismic resolution modules',
+      what: 'A layer thin enough that the reflections from its top and base overlap in time instead of arriving separately.',
+      earth: 'As the bed thins toward that point the two reflections reinforce and the amplitude rises; below it they begin to cancel and the amplitude falls again. The thickness at the maximum is the tuning thickness. This is why amplitude is not a monotonic measure of thickness, which is the subject of module 02 step 5.'
+    },
+    'stratal slice': {
+      aka: ['stratal slab', 'horizon slice', 'time slice'],
+      url: 'https://hbedle-subsurface.github.io/geometric-attributes',
+      title: 'the geometric attributes modules',
+      what: 'A map extracted from a seismic volume along a surface, rather than at a fixed time. Attributes in this set are computed in a window and displayed as one value per trace, which is a map of that kind.',
+      earth: 'Following a depositional surface keeps the same geological interval in the window across the survey. A flat window across dipping strata mixes different intervals together, which is a simplification this set makes and states.'
+    },
+    'analytic trace': {
+      aka: ['complex trace', 'Hilbert transform'],
+      url: 'https://hbedle-subsurface.github.io/single-trace',
+      title: 'the single-trace attributes modules',
+      what: 'The trace paired with a copy of itself shifted ninety degrees in phase, treated as one complex signal. Its magnitude is the envelope and the rate of change of its phase is the instantaneous frequency.',
+      earth: 'It is the machinery behind most of the attributes computed from a single trace, and it is how the envelope in this set is calculated.'
+    },
+    'envelope': {
+      aka: ['peak envelope', 'instantaneous amplitude', 'reflection strength'],
+      url: 'https://hbedle-subsurface.github.io/single-trace',
+      title: 'the single-trace attributes modules',
+      what: 'The magnitude of the analytic trace: a smooth positive curve tracing the outline of the wiggle, independent of where the peaks and troughs happen to fall.',
+      earth: 'It responds to the strength of a reflection without being sensitive to its polarity or to small shifts in phase, so a bright event is bright in the envelope whichever way up it is. In this set the attribute used is the largest envelope value in the analysis window.'
+    },
+    'RMS amplitude': {
+      aka: ['root mean square amplitude', 'RMS'],
+      url: 'https://hbedle-subsurface.github.io/single-trace',
+      title: 'the single-trace attributes modules',
+      what: 'The square root of the mean of the squared samples in a window. Squaring first means large samples count for much more than small ones and the sign is discarded.',
+      earth: 'A standard measure of how strong the reflections are over an interval. It rises where impedance contrasts are large, and also where a bed is near its tuning thickness, so a bright RMS map has more than one possible cause.'
+    },
+    'mean absolute amplitude': {
+      aka: ['mean absolute'], url: 'https://hbedle-subsurface.github.io/single-trace',
+      title: 'the single-trace attributes modules',
+      what: 'The average of the absolute values in a window. The same idea as RMS amplitude without the squaring, so extreme samples carry less weight.',
+      earth: 'It correlates with RMS amplitude at 0.96 on this survey, which is why module 02 uses the pair as its example of two attributes that are almost the same measurement.'
+    },
+    'peak frequency': {
+      aka: ['dominant frequency'], url: 'https://hbedle-subsurface.github.io/spectral-attributes',
+      title: 'the spectral attributes modules',
+      what: 'The frequency at which the magnitude spectrum of a windowed piece of trace is largest.',
+      earth: 'A thin bed reinforces some frequencies and cancels others, so tuning shifts the peak frequency as well as changing the amplitude. That is why it separates the channel in this set better than any other single attribute.'
+    },
+    'spectral bandwidth': {
+      aka: ['bandwidth'], url: 'https://hbedle-subsurface.github.io/spectral-attributes',
+      title: 'the spectral attributes modules',
+      what: 'How spread out the magnitude spectrum is about its own mean frequency, computed as an amplitude-weighted standard deviation.',
+      earth: 'A single clean reflection has a broad spectrum resembling the wavelet. Interference between closely spaced reflections narrows it or notches it, so bandwidth carries information about layering that amplitude alone does not.'
+    },
+    'spectral decomposition': {
+      aka: ['spectral magnitude', 'magnitude spectrum'],
+      url: 'https://hbedle-subsurface.github.io/spectral-attributes',
+      title: 'the spectral attributes modules',
+      what: 'Breaking each trace into its frequency components and producing a volume for each frequency, rather than one volume of broadband amplitude.',
+      earth: 'It generally produces ten or more volumes from one, which is exactly the situation this module set exists for. Module 10 treats those frequencies as the dimensions and reduces them.'
+    },
+    'sweetness': {
+      url: 'https://hbedle-subsurface.github.io/single-trace',
+      title: 'the single-trace attributes modules',
+      what: 'The envelope divided by the square root of the peak frequency.',
+      earth: 'Introduced by Radovich and Oliveros (1998) on the argument that a clean sand in a shale section tends to be both brighter and lower in frequency than its surroundings, so dividing one by the other emphasizes it. It combines two attributes already in the set, which is a form of redundancy worth noticing in a correlation matrix.'
+    },
+    'coherence': {
+      aka: ['semblance', 'similarity', 'discontinuity'],
+      url: 'https://hbedle-subsurface.github.io/geometric-attributes',
+      title: 'the geometric attributes modules',
+      what: 'How similar neighbouring traces are to each other over a window. The version used here is the semblance of a three-by-three group: the energy of the summed traces divided by the summed energy of the traces, which is one where they agree exactly and lower where they disagree.',
+      earth: 'It is low where waveforms change laterally, which happens at faults, at channel margins and at any abrupt change of facies. It is also low where strata dip steeply, unless the calculation follows the dip, and the version in this set does not.'
+    },
+    'amplitude gradient': {
+      aka: ['edge detection', 'Sobel'], url: 'https://hbedle-subsurface.github.io/geometric-attributes',
+      title: 'the geometric attributes modules',
+      what: 'The size of the lateral rate of change of an attribute map, computed here with a Sobel stencil on the RMS amplitude map.',
+      earth: 'It is large wherever a map changes quickly from place to place, which for a channel is its margin rather than its axis. It correlates with coherence at minus 0.79 on this survey, since both respond to lateral change.'
+    },
+    'GLCM': {
+      aka: ['GLCM contrast', 'GLCM homogeneity', 'texture attribute', 'grey-level co-occurrence'],
+      url: 'https://hbedle-subsurface.github.io/geometric-attributes',
+      title: 'the geometric attributes modules',
+      what: 'A texture measure. The map is quantized into a small number of levels, how often each pair of levels occurs side by side is counted in a moving window, and statistics are formed from those counts. Contrast is large where neighbouring values differ; homogeneity is large where they agree.',
+      earth: 'Texture attributes respond to the character of a reflection pattern rather than to its strength, so they can separate a chaotic facies from a well layered one at the same amplitude. Haralick et al. (1973) defined the standard set.'
+    },
+    'acquisition footprint': {
+      aka: ['footprint'], url: 'https://hbedle-subsurface.github.io/geometric-attributes',
+      title: 'the geometric attributes modules',
+      what: 'A regular pattern in a seismic volume that follows the geometry of the survey rather than the geology, usually periodic along the shooting and receiver directions.',
+      earth: 'It is strong, consistent across the whole survey and periodic, which makes it exactly the kind of thing a variance-maximizing method collects and ranks. Module 11 finds it arriving as a component under both methods.'
+    },
+    'seismic facies': {
+      aka: ['facies', 'facies classification'], mod: 'notgeology', title: 'Module 11',
+      what: 'A grouping of the seismic response into classes intended to correspond to depositional or lithological units.',
+      earth: 'Unsupervised classification of attributes into facies is the usual destination of the components this set produces. Which components are fed in decides what the classifier can possibly separate.'
+    },
+    'multi-attribute analysis': {
+      aka: ['multi-dimensional attribute analysis', 'attribute selection'],
+      mod: 'toomany', title: 'Module 00',
+      what: 'Interpreting several seismic attribute volumes together rather than one at a time, on the argument that a geological feature may be clear in a combination of attributes while being ambiguous in each one separately.',
+      earth: 'It is the practical reason this module set exists. An interpreter can readily end up with ten or more attribute volumes over one interval, most of them partly redundant, and no way to display or interpret them at once.'
     }
+
   };
 
   /* =====================================================================
@@ -295,7 +442,9 @@
     card.className = 'gcard';
     card.innerHTML = entryHtml(key) +
       '<div class="g-foot">' +
-        '<a href="' + PREFIX + t.mod + '.html">Introduced in ' + t.title + '</a>' +
+        '<a href="' + (t.url ? t.url : PREFIX + t.mod + '.html') + '"' +
+          (t.url ? ' target="_blank" rel="noopener"' : '') + '>' +
+          (t.url ? 'Covered in ' : 'Introduced in ') + t.title + '</a>' +
         '<span><button type="button" class="g-x" data-act="keep">Keep in a window</button> ' +
         '<button type="button" class="g-x" data-act="close">Close</button></span>' +
       '</div>';

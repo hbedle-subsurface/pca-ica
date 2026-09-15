@@ -271,8 +271,9 @@ log cosh varies by 0.38 and kurtosis by 2.56. Robustness here means insensitivit
 to the OTHER parameter, not a uniformly better number, and the module now says
 that. The iteration readout also had to be fixed: it displayed the cap as 301.
 
-**09 · The two, side by side.** *Which should I run?* One dataset, one set of
-sliders, both methods live.
+**09 · The two, side by side.** *Which should I run?* Two known sources mixed
+on purpose, both methods on the same mixtures, the mixing where PCA looks
+perfect, the sources where ICA lies, and the comparison tables. **Built.**
 
 Design constraint found while verifying: whether PCA appears to unmix is a
 property of the mixing matrix, not of PCA. Sources of unequal variance let PCA
@@ -286,16 +287,11 @@ cannot unmix.
 
 ## Into seismic
 
-**10 · What counts as a dimension in seismic data.** *Waveform PCA and
-attribute PCA are the same method. Why do they look nothing alike?* Attribute
-vector, waveform vector, spectral vector. Eigenvectors as wavelets. Complex PCA
-on spectra. Sources: Guo et al. (2009); AASPI documentation for
-`pca_waveform_classification`, `real_pca_waveform`, `complex_pca_spectra`.
+**10 · What counts as a dimension.** *Waveform PCA and attribute PCA are the
+same method. Why do they look nothing alike?* **Built.**
 
 **11 · Components are not geology.** *Which component is the reservoir?*
-Footprint as a component, a real feature below the cut, and where linear
-dimension reduction sits next to SOM, GTM, t-SNE, UMAP and autoencoders. Hands
-off to the SOM/GTM set.
+**Built.** The set is complete.
 
 ## References the set is built on
 
@@ -345,12 +341,224 @@ Done in this pass:
   view reads 26%, the side 68%, the top 83%, and the answer 100%.
 - The pattern is written up as section 8 of STYLE_BRIEF.md.
 
-STILL TO DO: modules 02 through 08 have not had this pass. Their step panes
-still open with two or three full ledes. The work is mechanical — keep the
-first two sentences, bold the instruction in one of them, move the rest into a
-`<details class="reveal">` — and the measurement to check it by is the visible
-word count before the panel, which should land near 40 per step.
+Second sweep, same session — all of it now done:
 
-Also worth considering and not done: module 01's angle could be draggable
-directly on the crossplot line rather than only through a slider, which is the
-same argument as the teapot.
+- Modules 02 through 08 trimmed on the same pattern. Every step pane now opens
+  with one short line carrying a bolded instruction, and the ledes that were
+  there are intact behind a `<details class="reveal">` labelled *The longer
+  version*. Nothing was deleted from any module.
+- Module 01's direction line is draggable directly on the crossplot. The
+  pointer position is converted straight into an angle about the centre of the
+  plot, which is the natural action for choosing a direction and is what the
+  slider was a poor substitute for. The slider remains.
+- The `.score` strip added to module 01 as well, on steps 2 to 4. Range across
+  the swing: 0 degrees reads 39.7% of the best with the bar at 27%, 30 degrees
+  80.7%, 45 degrees 95.2%, and 59 degrees — the answer — 100% and a win.
+
+Visible words before the panels, measured after the pass, by step:
+
+    module 00 (teapot)    31  56  46  75 111    total 319
+    module 01             96  33  26  32  44    total 231
+    module 02             68  20  22  20  44    total 174
+    module 03             65  18  20  18  19    total 140
+    module 04             62  24  17  17  16    total 136
+    module 05             63  14  17  22  22    total 138
+    module 06             59  22  18  18  22    total 139
+    module 07             46  17  21  18  17    total 119
+    module 08             64  16  17  15  21    total 133
+
+Step 1 of each runs higher than the rest because it carries the `qbox`, which
+is the hook that says why the step exists. That is the one place the extra
+words earn their keep.
+
+Third sweep: the score mechanic extended, and one module deliberately left out.
+
+The strip is now shared code in `assets/score.js` rather than a private copy
+per module — four modules were carrying the same thirty lines. It also owns the
+pointer-drag helper, since the same two modules needed that.
+
+Added to:
+
+- **Module 06, step 4.** Rotating in the PC2-PC3 plane. Bar spans the worst and
+  best directions in the plane for the selected target: 0 degrees (component 2
+  itself) reads 37.9% of the best, 30 degrees 83.9%, 45 degrees fills it.
+- **Module 07, step 5.** The first unsupervised hunt in the set, and the best
+  place the mechanic could possibly go. The bar measures negentropy and nothing
+  else — no channel is involved in computing it — and the panel underneath
+  shows the channel separation coming along for the ride: 24.4% of the bar at 0
+  degrees with separation 2.81, 93.5% at 30 degrees with 7.09, and the win at
+  40 degrees with 7.33. A reader filling the bar has found a channel with a
+  criterion that never mentioned one.
+- **Module 08, step 5.** The hunt is over the two parameters rather than a
+  direction. Ten combinations, and the win lands on kurtosis with three
+  retained (6.60), not on the contrast the guidance calls robust. Filling the
+  bar teaches the module's actual finding rather than the folklore.
+
+NOT added to module 05, on purpose. Module 05's whole argument is that there is
+no right number of components — five standard rules return one, two, three,
+four and five on the same attribute set, and each is answering a different
+question. Putting a bar on it that fills up at one particular cut would
+contradict the module while appearing to summarise it. The mechanic is for
+questions that have an answer, and "how many components should I keep" is not
+one of them. Worth stating because the temptation to apply a nice interaction
+uniformly is exactly how a teaching set acquires a lie.
+
+
+## Fourth sweep: encouraging the fiddling (September 2026)
+
+The score bar tells a reader how they are doing once they have started. It does
+nothing to get them started, and a panel that sits still reads as a figure. So
+`assets/score.js` now also carries an invitation: when a step that asks for a
+hunt is first opened, its control drifts for about a second and a half and
+stops.
+
+Wired into module 00 (the teapot turns), module 01 (the direction line swings),
+modules 06 and 07 (the rotation slider nudges) and module 08 (the retained
+count steps down and back).
+
+Three bugs found by testing it rather than by looking at it, all now fixed and
+written up as rules in STYLE_BRIEF section 8:
+
+1. The drift was relative per frame, so rounding accumulated and it walked the
+   teapot 29 degrees from where the reader left it. Now computed from a
+   remembered base, so it ends exactly where it started.
+2. It drove the control through the answer and recorded a personal best of 100%
+   before the reader had touched anything. Scores are no longer recorded while
+   the panel is moving itself.
+3. It fired on page load, by which time a reader is still on step 1 and the
+   challenge steps are minutes away. Now fired from the tab handler, once per
+   step.
+
+Also added: a personal best appended to the status line once the reader has
+been closer than they are now, and a specific next thing to try on the win
+state rather than a dead end.
+
+`harness-invite.js` drives all five headless, clicks into the challenge step,
+samples the control forty times to catch a drift that returns to its own
+starting point, then dispatches a pointer event and confirms the movement stops
+and does not resume.
+
+
+## Module 09 findings (September 2026)
+
+The sources are maps of the two channel systems — sparse, excess kurtosis 6.25
+and 11.15, correlating with each other at -0.091 because the channels cross.
+Mixed by a rotation of chosen angle.
+
+THE CENTRAL RESULT, and it is module 03 arriving with teeth. PCA's recovery of
+the sources against mixing angle:
+
+    0 deg  0.739     40 deg  0.991     50 deg  0.991     85 deg  0.736
+    5 deg  0.736     45 deg  0.739     55 deg  0.976
+   ICA: 0.996 to 1.000 at every angle.
+
+The shape is entirely explained by the two-attribute degeneracy: with two
+standardized features the principal components ALWAYS point at 45 and 135
+degrees, so PCA's directions are fixed before it sees the data and the only
+question is whether the mixing put the sources on them. The worst case is the
+one that should be easiest — at 0 degrees the mixtures ARE the sources, already
+separated, and PCA blends them back together at 0.739. That is the most
+striking single fact in the module and it now leads step 2.
+
+At exactly 45 degrees something different happens: the mixtures are exactly
+uncorrelated and both eigenvalues are exactly 1.0000, so the principal
+directions are genuinely undetermined and the answer is an artifact of the
+solver. Module 04's Method tab lists repeated eigenvalues as not arising on
+real attribute data; it arises here on constructed data, and it is left in and
+explained rather than designed around.
+
+TWO DRAFT CLAIMS CORRECTED BY MEASUREMENT.
+
+1. I wrote that ICA holds up better than PCA under noise. The opposite: at 45
+degrees PCA goes from 0.739 at no noise to 0.979 at 20%, overtaking ICA, which
+falls from 0.996 to 0.976. Noise breaks the eigenvalue tie, gives PCA a
+direction to prefer, and the one it prefers is a good one. Nothing about the
+signal improved. The exercise is now built on that, with the general lesson: a
+result that improves when you add noise is a property of the arrangement.
+
+2. The strength slider does nothing across a sixtyfold change, because both
+methods standardize. Left on the page deliberately; it is module 03 from the
+other side.
+
+The Gaussian trap works as intended: ICA reports 0.981 and 0.978 against the
+true sources, looking like success, while four seeded starts agree with the
+reference at only 0.805, 0.825, 0.881 and 0.962. With the channel sources the
+same four agree at 1.000, 1.000, 0.997, 1.000. Repeatability is the test that
+works without knowing the answer, which is the situation real data is always
+in.
+
+Score bar on step 3, inverted from the usual: the reader is asked to make the
+WEAKER method look good. Starting at 45 degrees it reads 74.5%, and the win is
+at 40 or 50 degrees.
+
+
+## Modules 10 and 11 (September 2026) — the set is complete
+
+### Module 10: the framing beat the method
+
+Same window, same 5184 traces, three answers to "what is a dimension":
+
+    attributes    6 dims   90% at 4   best channel separation 2.81
+    time samples 28 dims   90% at 4   best channel separation 3.09
+    frequencies  12 dims   90% at 2   best channel separation 7.95
+
+THE HEADLINE. Plain PCA on the spectral framing reaches 7.95, against 6.47 for
+ICA on attributes (module 08) and 8.97 for the supervised ceiling. Changing
+what counted as a dimension did more than changing the algorithm did, on
+identical data, and cost nothing but a different way of writing it down. That
+is the module's argument and it was not anticipated when the plan was written.
+
+Waveform eigenvectors come out as wavelets, with 3, 3, 4, 4, 3, 6 zero
+crossings on the first six. Spectral eigenvector 1 is all one sign, peaking at
+39 Hz — a brightness. Eigenvector 2 changes sign, low against high — a
+frequency shift — and that is the one that finds the tuned channel at 7.95. The
+reading generalizes: all-one-sign loadings measure an amount, sign-changing
+loadings measure a balance, in any framing.
+
+Note that twelve frequency dimensions carry LESS independent content than six
+attributes: 2 components for 90% against 4. Neighbouring bins of a band-limited
+wavelet are nearly the same number.
+
+The AASPI documentation errors are recorded in the module's Method tab, where
+an instructor will actually see them, rather than only in this file.
+
+### Module 11: what none of it can do
+
+Four failures, all on the same survey:
+
+1. THE ARTIFACT RANKS. The acquisition footprint is PC4 under PCA (0.213 of the
+   striping, 7.5% of the variance, excess kurtosis -0.18, separates nothing)
+   and IC6 under ICA (0.322). Both methods found it, ranked it, and handed it
+   over looking like a result. It entered through peak envelope (0.27) and RMS
+   (0.14), so the place to have caught it was the inputs.
+
+2. NOTHING FINDS THE OLDER CHANNEL. Ceiling 1.615, best PC 1.030, best IC
+   1.351, best raw attribute 1.445 — the raw attribute beats both methods and
+   everything crowds a low ceiling. When that happens the inputs are the limit
+   and a third algorithm lands in the same place. Contrast the younger channel:
+   ceiling 8.97, best IC 6.47, a large gap where method choice matters.
+
+3. GARBAGE RANKS. The attribute on the wrong interval is the largest loading on
+   PC2 at 0.528; its own largest loading is on PC3 at -0.672, where peak
+   frequency at 0.682 is marginally larger. Module 03's claim was checked
+   against this and stands — the two statements are different questions and
+   both are true.
+
+4. THE CONFESSION. Step 5 states plainly that every "channel separation" quoted
+   in eleven modules was computed from the model's own record of where the
+   channels are, and that no survey supplies it. The four substitutes offered —
+   a well, repeatability, reading the loadings, knowing the acquisition
+   geometry — share the property that none is a statistic of the components and
+   every one brings information from outside the analysis.
+
+Step 1 is a judgment test rather than a score: four unlabelled component maps,
+decide which you would present, then reveal. Two of the four are not geology,
+and they are the largest component and the fourth largest — neither rank nor
+appearance helps. It is the one interactive in the set with no bar to fill, on
+purpose.
+
+### The set
+
+Twelve modules, all linked, no "in preparation" cards left. 49 library checks,
+twelve harnesses, one invitation test. Companion paper is the eighth in the
+SSRN series.
