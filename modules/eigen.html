@@ -81,17 +81,17 @@
   <section class="tabpane" id="p1" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
       <h3><span class="stepno">1</span>An eigenvector is an axis you can spin the thing about</h3>
-      <span class="hint">The aeroplane from module 00, again</span>
+      <span class="hint">The airplane from module 00, again</span>
     </div>
 
     <p class="qbox"><b>Start here if eigenvectors have never made sense.</b> Forget the word for a
-      moment. An aeroplane has three natural axes: across the wings, along the fuselage, and top to bottom. Those three
+      moment. An airplane has three natural axes: across the wings, along the fuselage, and top to bottom. Those three
       are its eigenvectors. Nothing more mysterious than that.</p>
 
     <p class="lede"><b>Pick an axis and spin it.</b> Watch how much of the aircraft you can see as it turns.</p>
 
     <details class="reveal"><summary>Why those three axes and not any other three</summary>
-      <p class="lede">Spin an aeroplane about a randomly chosen axis and it wobbles: the thing lurches
+      <p class="lede">Spin an airplane about a randomly chosen axis and it wobbles: the thing lurches
         about because the axis does not line up with the shape. Spin it about its own wingspan and it
         turns evenly. The three axes it turns evenly about are the three the shape itself picks out, and
         they are always at right angles to each other.</p>
@@ -107,7 +107,7 @@
         <h3>Spinning about each of the three axes</h3>
         <span class="hint">How much you can see, all the way round</span>
       </div>
-      <canvas id="c1" aria-label="The aeroplane spun about each of its three axes, with how much of it is visible plotted against the spin angle"></canvas>
+      <canvas id="c1" aria-label="The airplane spun about each of its three axes, with how much of it is visible plotted against the spin angle"></canvas>
     </div>
     <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
       <div class="ctl" style="flex:1 1 280px;min-width:260px">
@@ -1059,7 +1059,7 @@
     ctx.save();
     ctx.textAlign = 'left';
     ctx.fillStyle = SLATE;
-    ctx.fillText('grey: the original set', r.x + 8, r.y + 16);
+    ctx.fillText('gray: the original set', r.x + 8, r.y + 16);
     ctx.fillStyle = CRIM;
     ctx.fillText('crimson: the residual after removing ' + S.rem +
       (S.rem === 1 ? ' component' : ' components'), r.x + 8, r.y + 32);
@@ -1369,7 +1369,7 @@
 })();
 </script>
 </body>
-</html>        <li><b>Spin the aeroplane about each of its three axes.</b>
+</html>        <li><b>Spin the airplane about each of its three axes.</b>
           <em class="point">Why: an eigenvector is an axis, and this is the least abstract way to
             meet one.</em>
           In step 1, spin about each axis in turn and read how much of the aircraft you can see as it goes

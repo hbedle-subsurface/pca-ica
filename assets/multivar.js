@@ -165,7 +165,7 @@ var MV = (function () {
     if (how === 'minmax') return minmax(X);
     if (how === 'zscore') return zscore(X);
     if (how === 'gauss') return normalScore(X);
-    return center(X);                                // 'none': centred only
+    return center(X);                                // 'none': centered only
   }
 
   /* =====================================================================

@@ -172,7 +172,7 @@ var SCORE = (function () {
   /* Turning a canvas into something you grab rather than something you set
      with a slider. `onMove(dx, dy, ev)` is called with the movement since the
      last event; `onPoint(x, y, ev)` with the position in canvas coordinates,
-     which is what an angle-about-a-centre needs. Pointer events cover mouse,
+     which is what an angle-about-a-center needs. Pointer events cover mouse,
      pen and touch in one handler. */
   function drag(canvasId, handlers) {
     var c = el(canvasId);

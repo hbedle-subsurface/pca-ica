@@ -239,7 +239,7 @@ var SHAPE = (function () {
 
 
   /* =====================================================================
-     AN AEROPLANE
+     AN AIRPLANE
 
      Replaces the teapot. Same job, done better: the three extents are clearly
      ordered and clearly different (wingspan, then length, then height), every

@@ -173,7 +173,7 @@
     <details class="reveal"><summary>The longer version</summary>
       <p class="lede">Two components reach 95.6% here, against four for the waveform space and four for
         the attributes. Magnitude spectra of a band-limited wavelet are smooth and strongly redundant
-        between neighbouring frequencies, so there is very little independent information across twelve
+        between neighboring frequencies, so there is very little independent information across twelve
         bins.</p>
       <p class="lede">A component whose loadings are all the same sign is measuring how much there is of
         everything, which is an amplitude. A component whose loadings change sign is measuring a balance
@@ -289,7 +289,7 @@
       program was opened. It is worth choosing on purpose.</p>
     <ul class="lede" style="padding-left:20px">
       <li><b>Reading a paper or a manual.</b> "PCA on seismic data" describes at least three different
-        analyses. A figure of eigenvectors that look like wavelets is the waveform space; a bar chart
+        analyzes. A figure of eigenvectors that look like wavelets is the waveform space; a bar chart
         against attribute names is the attribute space. They are not comparable.</li>
       <li><b>Waveform classification.</b> Projecting traces onto a few eigen-wavelets and classifying the
         result is a standard facies workflow, and the eigen-wavelets are the vocabulary it uses.</li>
@@ -301,7 +301,7 @@
     </ul>
     <p class="lede"><b>Two points that are commonly confused.</b> The first is that more dimensions means
       more information. The spectral feature space has twelve dimensions carrying less independent content than
-      six attributes did — two components reach 95% — because neighbouring frequencies of a band-limited
+      six attributes did — two components reach 95% — because neighboring frequencies of a band-limited
       wavelet are nearly the same measurement. The second is that these are alternative methods. They are
       one method applied to three different descriptions of identical data.</p>
     <div class="legend prose">
@@ -361,7 +361,7 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">Attributes: 3.11. Time samples: 3.50. Frequencies: 8.46. Plain PCA on the spectral space beats the independent
             component analysis of module 08, which reached 6.30, and beats every attribute result in the
             set. Nothing about the method changed — same eigensolver, same covariance matrix, same
-            survey, same window. Only the axes were relabelled. Two readings of that are available and the page does not choose between them.
+            survey, same window. Only the axes were relabeled. Two readings of that are available and the page does not choose between them.
             It may be that spectra suit this target, because a tuned thin bed shifts the spectrum and the
             attribute set contains only one frequency measure. Or it may be that twelve frequency bins
             describe the window more completely than six hand-chosen attributes do. The experiment run
@@ -375,7 +375,7 @@
           <details class="reveal"><summary>Hint</summary><span class="ans">Attributes need four of six.
             Time samples need four of twenty-eight. Frequencies need two of twelve. The spectral feature space
             has twice as many dimensions as the attribute space and less independent content in them,
-            because the magnitude spectrum of a band-limited wavelet is smooth and neighbouring bins are
+            because the magnitude spectrum of a band-limited wavelet is smooth and neighboring bins are
             nearly the same number. Counting dimensions tells you about the description; counting
             components tells you about the data.</span></details></li>
       </ol>

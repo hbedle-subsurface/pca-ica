@@ -203,7 +203,7 @@
     'two-way time': {
       aka: ['TWT', 'travel time'], url: 'https://hbedle-subsurface.github.io/seismic_resolution',
       title: 'the seismic resolution modules',
-      what: 'The time for energy to travel down to a reflector and back. Seismic data are recorded in it, so a thickness measured on a trace is in milliseconds rather than metres.',
+      what: 'The time for energy to travel down to a reflector and back. Seismic data are recorded in it, so a thickness measured on a trace is in milliseconds rather than meters.',
       earth: 'Converting it to thickness needs a velocity. The bed thicknesses quoted in module 02 are in two-way time for that reason.'
     },
     'thin bed': {
@@ -276,7 +276,7 @@
       aka: ['semblance', 'similarity', 'discontinuity'],
       url: 'https://hbedle-subsurface.github.io/geometric-attributes',
       title: 'the geometric attributes modules',
-      what: 'How similar neighbouring traces are to each other over a window. The version used here is the semblance of a three-by-three group: the energy of the summed traces divided by the summed energy of the traces, which is one where they agree exactly and lower where they disagree.',
+      what: 'How similar neighboring traces are to each other over a window. The version used here is the semblance of a three-by-three group: the energy of the summed traces divided by the summed energy of the traces, which is one where they agree exactly and lower where they disagree.',
       earth: 'It is low where waveforms change laterally, which happens at faults, at channel margins and at any abrupt change of facies. It is also low where strata dip steeply, unless the calculation follows the dip, and the version in this set does not.'
     },
     'amplitude gradient': {
@@ -286,10 +286,10 @@
       earth: 'It is large wherever a map changes quickly from place to place, which for a channel is its margin rather than its axis. It correlates with coherence at minus 0.79 on this survey, since both respond to lateral change.'
     },
     'GLCM': {
-      aka: ['GLCM contrast', 'GLCM homogeneity', 'texture attribute', 'grey-level co-occurrence'],
+      aka: ['GLCM contrast', 'GLCM homogeneity', 'texture attribute', 'gray-level co-occurrence'],
       url: 'https://hbedle-subsurface.github.io/geometric-attributes',
       title: 'the geometric attributes modules',
-      what: 'A texture measure. The map is quantized into a small number of levels, how often each pair of levels occurs side by side is counted in a moving window, and statistics are formed from those counts. Contrast is large where neighbouring values differ; homogeneity is large where they agree.',
+      what: 'A texture measure. The map is quantized into a small number of levels, how often each pair of levels occurs side by side is counted in a moving window, and statistics are formed from those counts. Contrast is large where neighboring values differ; homogeneity is large where they agree.',
       earth: 'Texture attributes respond to the character of a reflection pattern rather than to its strength, so they can separate a chaotic facies from a well layered one at the same amplitude. Haralick et al. (1973) defined the standard set.'
     },
     'acquisition footprint': {

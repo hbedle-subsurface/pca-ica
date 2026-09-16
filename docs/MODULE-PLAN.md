@@ -10,19 +10,19 @@ written here before any of it is built.
 
 ## Fundamentals — no method named
 
-**00 · Looking at it from the right direction.** *You know what an aeroplane looks
+**00 · Looking at it from the right direction.** *You know what an airplane looks
 like. What happens when you do not?* **Built**, and rebuilt around Heather's
-aeroplane intuition rather than the original "too many measurements" framing.
+airplane intuition rather than the original "too many measurements" framing.
 
 The spine of the module: a view IS a projection, and the view that shows the
-most of an aeroplane is a mixture of all three axes rather than any one of them.
+most of an airplane is a mixture of all three axes rather than any one of them.
 Three axis views give spreads of 0.4540 (front), 0.5730 (side) and 0.6178
 (top); the widest available is 0.6659, at azimuth -61.2 and elevation -32.5.
 Its two picture axes are 0.840x + 0.533y - 0.097z across and 0.359x - 0.412y +
 0.837z up — every one of the six weights non-zero. The two kept directions hold
 81.0% and the discarded one 19.0%.
 
-CRITICAL BUILD DETAIL. The aeroplane is rotated by a fixed 34/27/19 degrees before
+CRITICAL BUILD DETAIL. The airplane is rotated by a fixed 34/27/19 degrees before
 anything is measured. Without the tilt the spout and handle lie in a coordinate
 plane, that plane IS the plane of greatest spread, and the best view comes out
 as exactly the side view — which would teach that the answer is an axis after
@@ -39,12 +39,12 @@ again. Step 5 makes the leap explicit: twelve attributes, 66 pairs, 5 above
 Three things stop working (turning by hand, recognizing a good view, getting
 away with two) and one keeps working (all the arithmetic).
 
-The honest caveat is in Why it matters: an aeroplane's best view is obviously its
-best view because you know what an aeroplane is, and that coincidence does not
+The honest caveat is in Why it matters: an airplane's best view is obviously its
+best view because you know what an airplane is, and that coincidence does not
 survive the move to attributes. Modules 05 and 06 are where that bill comes
 due.
 
-assets/shape3d.js builds the aeroplane from equations — surfaces of revolution for
+assets/shape3d.js builds the airplane from equations — surfaces of revolution for
 the body and lid, swept tubes for the spout and handle — so nothing is a stored
 model.
 
@@ -332,7 +332,7 @@ Done in this pass:
 - Module 00 and module 01 cut to 319 and 231 visible words, with everything
   removed placed behind `<details>` toggles rather than deleted. Nothing was
   lost from the page or from the companion paper.
-- Drag-to-rotate on the module 00 aeroplane, replacing two angle sliders as the
+- Drag-to-rotate on the module 00 airplane, replacing two angle sliders as the
   primary interaction (the sliders remain for fine adjustment and for anyone
   who cannot drag).
 - A `.score` strip: the reader is asked to beat the arithmetic's own answer,
@@ -345,10 +345,10 @@ Second sweep, same session — all of it now done:
 
 - Modules 02 through 08 trimmed on the same pattern. Every step pane now opens
   with one short line carrying a bolded instruction, and the ledes that were
-  there are intact behind a `<details class="reveal">` labelled *The longer
+  there are intact behind a `<details class="reveal">` labeled *The longer
   version*. Nothing was deleted from any module.
 - Module 01's direction line is draggable directly on the crossplot. The
-  pointer position is converted straight into an angle about the centre of the
+  pointer position is converted straight into an angle about the center of the
   plot, which is the natural action for choosing a direction and is what the
   slider was a poor substitute for. The slider remains.
 - The `.score` strip added to module 01 as well, on steps 2 to 4. Range across
@@ -357,7 +357,7 @@ Second sweep, same session — all of it now done:
 
 Visible words before the panels, measured after the pass, by step:
 
-    module 00 (aeroplane)    31  56  46  75 111    total 319
+    module 00 (airplane)    31  56  46  75 111    total 319
     module 01             96  33  26  32  44    total 231
     module 02             68  20  22  20  44    total 174
     module 03             65  18  20  18  19    total 140
@@ -398,7 +398,7 @@ NOT added to module 05, on purpose. Module 05's whole argument is that there is
 no right number of components — five standard rules return one, two, three,
 four and five on the same attribute set, and each is answering a different
 question. Putting a bar on it that fills up at one particular cut would
-contradict the module while appearing to summarise it. The mechanic is for
+contradict the module while appearing to summarize it. The mechanic is for
 questions that have an answer, and "how many components should I keep" is not
 one of them. Worth stating because the temptation to apply a nice interaction
 uniformly is exactly how a teaching set acquires a lie.
@@ -412,7 +412,7 @@ nothing to get them started, and a panel that sits still reads as a figure. So
 hunt is first opened, its control drifts for about a second and a half and
 stops.
 
-Wired into module 00 (the aeroplane turns), module 01 (the direction line swings),
+Wired into module 00 (the airplane turns), module 01 (the direction line swings),
 modules 06 and 07 (the rotation slider nudges) and module 08 (the retained
 count steps down and back).
 
@@ -420,7 +420,7 @@ Three bugs found by testing it rather than by looking at it, all now fixed and
 written up as rules in STYLE_BRIEF section 8:
 
 1. The drift was relative per frame, so rounding accumulated and it walked the
-   aeroplane 29 degrees from where the reader left it. Now computed from a
+   airplane 29 degrees from where the reader left it. Now computed from a
    remembered base, so it ends exactly where it started.
 2. It drove the control through the answer and recorded a personal best of 100%
    before the reader had touched anything. Scores are no longer recorded while
@@ -516,7 +516,7 @@ reading generalizes: all-one-sign loadings measure an amount, sign-changing
 loadings measure a balance, in any framing.
 
 Note that twelve frequency dimensions carry LESS independent content than six
-attributes: 2 components for 90% against 4. Neighbouring bins of a band-limited
+attributes: 2 components for 90% against 4. Neighboring bins of a band-limited
 wavelet are nearly the same number.
 
 The AASPI documentation errors are recorded in the module's Method tab, where
@@ -551,7 +551,7 @@ Four failures, all on the same survey:
    geometry — share the property that none is a statistic of the components and
    every one brings information from outside the analysis.
 
-Step 1 is a judgment test rather than a score: four unlabelled component maps,
+Step 1 is a judgment test rather than a score: four unlabeled component maps,
 decide which you would present, then reveal. Two of the four are not geology,
 and they are the largest component and the fourth largest — neither rank nor
 appearance helps. It is the one interactive in the set with no bar to fill, on

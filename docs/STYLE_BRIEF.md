@@ -93,7 +93,7 @@ tabhint .......... one line of instruction
 tabs ............. 1..N steps | Why it matters | Exercises | Key points | Method
 tabpanes ......... one per tab, only the visible one is drawn
 nextup / pager ... shown on the last reference tabs only
-footer ........... credit, licence, citation
+footer ........... credit, license, citation
 ```
 
 **The header is pinned deliberately.** An early version put controls above a long
@@ -171,7 +171,7 @@ balance, `$('id')` references against ids present, and the headless render.
 
 1. **The topic and its through-line.** Geometric attributes had one: everything
    is a derivative of dip and inherits its errors. A set without a spine reads as
-   a catalogue, which is the thing being replaced.
+   a catalog, which is the thing being replaced.
 2. **The module sequence**, ordered so each depends only on those before it, with
    the question each answers written out before any building starts.
 3. **What already exists in `assets/`** that can be reused, and what physics needs

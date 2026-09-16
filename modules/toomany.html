@@ -23,16 +23,16 @@
   <div class="mod-head">
     <p class="eyebrow">Module 00 &nbsp;·&nbsp; Start here</p>
     <h1>Looking at it from the right direction</h1>
-    <p class="sub">Nothing in this module is about seismic data, for the first three steps. It is about an aeroplane, seen from several directions, because the whole of dimension reduction is already in that problem and an aeroplane is a thing you can recognize when you have found a good view of it. Attributes are not. By the end the same arithmetic will have been applied to both, and the difference between them will be the reason the rest of the set exists.</p>
+    <p class="sub">Nothing in this module is about seismic data, for the first three steps. It is about an airplane, seen from several directions, because the whole of dimension reduction is already in that problem and an airplane is a thing you can recognize when you have found a good view of it. Attributes are not. By the end the same arithmetic will have been applied to both, and the difference between them will be the reason the rest of the set exists.</p>
   </div>
 
   <div class="labhead">
     <div class="labgrid">
       <div>
-        <p class="cap">An aeroplane, as a cloud of points <span>&mdash; drag it around</span></p>
-        <canvas id="cHead" class="grabbable" aria-label="An aeroplane drawn as a cloud of points, projected onto a viewing plane that can be rotated by dragging"></canvas>
+        <p class="cap">An airplane, as a cloud of points <span>&mdash; drag it around</span></p>
+        <canvas id="cHead" class="grabbable" aria-label="An airplane drawn as a cloud of points, projected onto a viewing plane that can be rotated by dragging"></canvas>
         <div class="score" id="score">
-          <span class="say" id="scoreSay">drag the aeroplane around</span>
+          <span class="say" id="scoreSay">drag the airplane around</span>
           <span class="track"><span class="fill" id="scoreFill"></span><span class="target" id="scoreTgt"></span></span>
           <span class="pct" id="scorePct">&mdash;</span>
         </div>
@@ -60,7 +60,7 @@
               <button type="button" data-view="best">The widest</button>
             </div>
             <p class="hint-line" style="margin:6px 0 0">The first three look straight down one of the
-              three axes the aeroplane is described in. The fourth is step 3.</p>
+              three axes the airplane is described in. The fourth is step 3.</p>
           </div>
         </div>
       </div>
@@ -88,7 +88,7 @@
       <span class="hint">Front, side, top, all at once</span>
     </div>
 
-    <p class="qbox"><b>An aeroplane has four parts.</b> Fuselage, wings, tail fin, tailplane. Find a direction that shows
+    <p class="qbox"><b>An airplane has four parts.</b> Fuselage, wings, tail fin, tailplane. Find a direction that shows
       you all four at once.</p>
 
     <p class="lede">These three are the obvious ones. Every one of them hides something.</p>
@@ -98,10 +98,10 @@
 
     <div class="plot">
       <div class="plot-head">
-        <h3>The same aeroplane, three ways</h3>
+        <h3>The same airplane, three ways</h3>
         <span class="hint">Spots on one side, stripes on the other</span>
       </div>
-      <canvas id="c1" aria-label="The aeroplane point cloud projected along each of the three coordinate axes"></canvas>
+      <canvas id="c1" aria-label="The airplane point cloud projected along each of the three coordinate axes"></canvas>
     </div>
     <div class="ctl-row" style="display:flex;flex-wrap:wrap;gap:18px;margin:12px 0 0">
       <div class="ctl" style="flex:1 1 260px;min-width:240px">
@@ -116,9 +116,9 @@
         measurement of the picture can bring it back.</span>
     </div>
     <div class="legend prose">
-      <span>The aeroplane is not built lined up with the axes. It sits at an angle to them, on purpose. A
+      <span>The airplane is not built lined up with the axes. It sits at an angle to them, on purpose. A
         set of seismic attributes is an arbitrary coordinate system in exactly the same way — nothing
-        arranged for coherence and peak frequency to line up with a channel — so an aeroplane that
+        arranged for coherence and peak frequency to line up with a channel — so an airplane that
         conveniently pointed along an axis would be teaching the wrong lesson.</span>
     </div>
   </section>
@@ -130,16 +130,16 @@
       <span class="hint">Use the two sliders above</span>
     </div>
 
-    <p class="lede"><b>Drag the aeroplane until it looks as much like an aeroplane as you can get it.</b> Watch
+    <p class="lede"><b>Drag the airplane until it looks as much like an airplane as you can get it.</b> Watch
       the bar. It is measuring how spread out the picture is, and the teal mark is the best view that
       exists. Get past 99% and it turns green.</p>
     <p class="lede">The curve below is that same measurement at every turning angle.</p>
 
     <details class="reveal"><summary>What the bar is actually measuring</summary>
-      <p class="lede">Project every point of the aeroplane onto the flat picture and add up how spread out
+      <p class="lede">Project every point of the airplane onto the flat picture and add up how spread out
         that picture is: the variance left to right plus the variance up and down. A view that squashes
         the aircraft gives a small number, a view that opens it out gives a large one. Nothing in that
-        calculation knows what an aeroplane is — it is counting how far apart the points land.</p></details>
+        calculation knows what an airplane is — it is counting how far apart the points land.</p></details>
 
     <div class="plot">
       <div class="plot-head">
@@ -180,7 +180,7 @@
         It gives a view from about 141 degrees around and 61 degrees below, with a spread of 1.521
         against 1.068, 0.748 and 1.311 for the front, side and top.</p>
       <p class="lede">What matters is not that small improvement in the number. It is what the answer is
-        made of. The coordinate system a thing arrives in — x, y and z for an aeroplane, coherence and
+        made of. The coordinate system a thing arrives in — x, y and z for an airplane, coherence and
         amplitude and frequency for a survey — was not chosen to suit the thing being looked at, so the
         good view is a combination rather than one of them.</p></details>
 
@@ -205,7 +205,7 @@
     <div class="stats" id="s3"></div>
     <div class="legend prose">
       <span>There were three directions available and the picture used two of them, so one was thrown
-        away. For this aeroplane the two kept hold 97.3% of the total spread and the discarded one holds
+        away. For this airplane the two kept hold 97.3% of the total spread and the discarded one holds
         2.7%, because an aircraft really is nearly flat &mdash; there is very little of it in the
         top-to-bottom direction to lose. Going from three numbers per point to two and losing almost
         nothing is a dimension reduction, and it is the same trade every module after this one is
@@ -227,15 +227,15 @@
       <span class="k">0.424&thinsp;RMS + 0.750&thinsp;envelope + 0.508&thinsp;peak</span>, holding 92.9%
       against 74.2%, 54.5% and 71.2% for the three axis views.</p>
     <p class="lede"><b>One thing is completely different, and it is the important one.</b> You knew when
-      the aeroplane looked right. Nobody knows what this is supposed to look like.</p>
+      the airplane looked right. Nobody knows what this is supposed to look like.</p>
 
     <details class="reveal"><summary>The longer version</summary>
       <p class="lede">The three attributes are RMS amplitude, peak envelope and peak absolute amplitude,
         computed over the same window on 5184 traces. Every trace has three numbers, exactly as every
-        point on the aeroplane had three numbers, and the cloud they make is a cloud in three dimensions in
+        point on the airplane had three numbers, and the cloud they make is a cloud in three dimensions in
         exactly the same sense.</p>
       <p class="lede">The arithmetic does not know or care which is which. What it cannot supply is the
-        recognition — with the aeroplane you could tell a good view from a bad one by looking. Here the
+        recognition — with the airplane you could tell a good view from a bad one by looking. Here the
         number is all there is, and whether the number is measuring anything you care about is the
         question the rest of this set is about.</p></details>
 
@@ -270,10 +270,10 @@
   <section class="tabpane" id="p5" role="tabpanel" hidden>
     <div class="plot-head" style="margin-bottom:14px">
       <h3><span class="stepno">5</span>Twelve attributes, and no picture at all</h3>
-      <span class="hint">Where the aeroplane stops helping</span>
+      <span class="hint">Where the airplane stops helping</span>
     </div>
 
-    <p class="lede">An aeroplane has three dimensions because space does. An attribute set has as many
+    <p class="lede">An airplane has three dimensions because space does. An attribute set has as many
       dimensions as there are attributes, and twelve is an ordinary number for a real interpretation.
       Every trace is then a point with twelve coordinates, in a space that cannot be drawn, turned, or
       looked at from anywhere.</p>
@@ -287,7 +287,7 @@
       <li><b>Recognizing a good view stops working.</b> There is no shape to see. A criterion has to
         stand in for the judgment, and choosing that criterion is the difference between the two methods
         in the title of this set.</li>
-      <li><b>Getting away with keeping two stops working.</b> The aeroplane's best two directions held 81%
+      <li><b>Getting away with keeping two stops working.</b> The airplane's best two directions held 81%
         of the spread, and three attributes gave 93%. Twelve attributes here need more: the best three
         hold 73.6%, and a display has only three color channels.</li>
       <li><b>Everything else keeps working.</b> A direction is still a recipe mixing the originals. A
@@ -314,7 +314,7 @@
     <div class="stats" id="s5"></div>
     <div class="legend prose">
       <span>Module 01 goes back to two attributes and finds the best direction by hand, the way you found
-        the aeroplane's by hand here. Everything after that adds one dimension, or one complication, at a
+        the airplane's by hand here. Everything after that adds one dimension, or one complication, at a
         time.</span>
     </div>
   </section>
@@ -325,20 +325,20 @@
       <h3>Why it matters</h3>
       <span class="hint">What this buys you before anything technical</span>
     </div>
-    <p class="lede">Every term in the rest of this set has an aeroplane version, and holding onto it makes
+    <p class="lede">Every term in the rest of this set has an airplane version, and holding onto it makes
       the technical version much easier to keep straight.</p>
     <ul class="lede" style="padding-left:20px">
-      <li><b>A feature is an axis.</b> x, y and z for the aeroplane. An attribute for a survey. The word
+      <li><b>A feature is an axis.</b> x, y and z for the airplane. An attribute for a survey. The word
         means the same thing in both.</li>
-      <li><b>A sample is a point.</b> One point on the aeroplane's surface, one trace in the survey.</li>
+      <li><b>A sample is a point.</b> One point on the airplane's surface, one trace in the survey.</li>
       <li><b>A projection is a view.</b> Choosing what to keep and what to throw away.</li>
       <li><b>A component is a recipe.</b> So much of this axis, so much of that one. The numbers in the
         recipe are called loadings and they are what a component <em>is</em>.</li>
       <li><b>Variance is how spread out the picture is.</b> The thing being maximized when you turn a
-        aeroplane to see more of it.</li>
+        airplane to see more of it.</li>
     </ul>
-    <p class="lede"><b>The one place the aeroplane misleads.</b> An aeroplane's best view is obviously its best
-      view, because you know what an aeroplane looks like. That coincidence does not survive the move to
+    <p class="lede"><b>The one place the airplane misleads.</b> An airplane's best view is obviously its best
+      view, because you know what an airplane looks like. That coincidence does not survive the move to
       attributes, and most of the difficulty in the rest of this set comes from it. Module 05 finds a
       component holding half the variance that shows a channel worst of any of them, and module 06
       measures how far the useful direction sits from the one the arithmetic returns.</p>
@@ -354,7 +354,7 @@
     <div class="tryit" style="max-width:none">
       <h3>Exercises</h3>
       <ol>
-        <li><b>Find a view where the aeroplane stops looking like an aeroplane.</b>
+        <li><b>Find a view where the airplane stops looking like an airplane.</b>
           <em class="point">Why: a projection throws a dimension away, and it is worth seeing how much
             can go with it.</em>
           Use the two sliders to find a view where you could not tell someone what the object is, then
@@ -393,9 +393,9 @@
           In step 4, turn the attribute cloud with the same sliders, then jump to the widest view.
           <details class="reveal"><summary>Hint</summary><span class="ans">The widest view holds 92.9% of
             the spread against 74.2%, 54.5% and 71.2% for the three axis views, so the gain is much larger
-            than it was for the aeroplane. Its horizontal axis is 0.424 RMS + 0.750 envelope + 0.508 peak
+            than it was for the airplane. Its horizontal axis is 0.424 RMS + 0.750 envelope + 0.508 peak
             amplitude, a mixture of all three. What is missing is any way to tell whether that view is
-            good. With the aeroplane you could see it. Here the number went up and nothing on the screen
+            good. With the airplane you could see it. Here the number went up and nothing on the screen
             says whether anything geological came with it. That gap never closes: a direction that
             spreads the data out could be following a change in lithology, in bed thickness, in fluid, or
             in the acquisition. All four spread the cloud.</span></details></li>
@@ -422,14 +422,14 @@
       <ul>
         <li><b>A view is a projection.</b> Keep two directions, throw the rest away. That is all any
           picture of a higher-dimensional thing ever is.</li>
-        <li><b>The good direction is a mixture of the axes you were given.</b> The aeroplane's best view is
+        <li><b>The good direction is a mixture of the axes you were given.</b> The airplane's best view is
           &minus;0.368x + 0.819y + 0.441z across and 0.852x + 0.487y &minus; 0.193z up. Not x, not y, not
           z.</li>
         <li><b>"How much you can see" is measurable.</b> Project every point and add up how spread out
-          the picture is. Turning the aeroplane to see more of it is maximizing that number.</li>
+          the picture is. Turning the airplane to see more of it is maximizing that number.</li>
         <li><b>The arithmetic transfers to attributes exactly.</b> Three attributes behave like three
           axes, and the best view is again a mixture: 0.424 RMS + 0.750 envelope + 0.508 peak.</li>
-        <li><b>The judgment does not transfer.</b> You know what an aeroplane should look like. Nobody knows
+        <li><b>The judgment does not transfer.</b> You know what an airplane should look like. Nobody knows
           what an attribute cloud should look like, so a number has to stand in for the judgment.</li>
         <li><b>Twelve dimensions cannot be turned by hand.</b> Eleven angles, about 6&times;10²⁴
           directions at one-degree spacing. The arithmetic does not care; you cannot look.</li>
@@ -443,13 +443,13 @@
       <h3 id="notes">Method</h3>
       <span class="hint">What is computed, and what is left out</span>
     </div>
-    <p class="lede"><b>The aeroplane</b> is built from equations in
+    <p class="lede"><b>The airplane</b> is built from equations in
       <span class="k">assets/shape3d.js</span> rather than loaded from a model file: the body and lid
       are surfaces of revolution, the spout and handle are tubes swept along curves, and points are
       placed on those surfaces with a small deterministic jitter so the result reads as a sampled
-      surface. The default density gives about three thousand points. It is an aeroplane in the tradition of
-      the Utah aeroplane used in computer graphics since 1975, and it is not that model.</p>
-    <p class="lede"><b>The tilt.</b> The aeroplane is rotated by a fixed 34, 27 and 19 degrees about the
+      surface. The default density gives about three thousand points. It is an airplane in the tradition of
+      the Utah airplane used in computer graphics since 1975, and it is not that model.</p>
+    <p class="lede"><b>The tilt.</b> The airplane is rotated by a fixed 34, 27 and 19 degrees about the
       three axes before anything is measured. Without it the spout and handle lie in one coordinate
       plane, that plane is the plane of greatest spread, and the best view comes out as exactly the side
       view — which would teach that the answer is an axis after all. Attribute spaces are arbitrary
@@ -469,21 +469,21 @@
       are not. The twelve-attribute matrix in step 5 adds mean absolute amplitude, sweetness, peak
       frequency, spectral bandwidth, coherence, an amplitude gradient, two texture measures, and RMS
       amplitude measured on a window above the target.</p>
-    <p class="lede"><b>How it is drawn.</b> The aeroplane is a cloud of points, but it is drawn solid:
+    <p class="lede"><b>How it is drawn.</b> The airplane is a cloud of points, but it is drawn solid:
       every point carries the outward normal of the surface it sits on, points whose surface faces away
       are dropped, and the rest are painted back to front so nearer ones cover farther ones. An earlier
       version drew it translucent, which let a reader see the lid from underneath and quietly contradicted
       the module &mdash; the whole argument is that a view hides things. The two markings on the body are
       generated from the point&rsquo;s own position, spots on one half and stripes on the other.</p>
     <p class="lede"><b>Simplifications, stated plainly.</b> The comparison
-      between the aeroplane and the attributes is an analogy and it breaks in the way the Why it matters tab
+      between the airplane and the attributes is an analogy and it breaks in the way the Why it matters tab
       describes. Nothing in this module is standardized or normalized, because both clouds are already in
       comparable units.</p>
     <details class="reveal">
       <summary>References</summary>
       <ul class="lede" style="padding-left:20px">
         <li>Newell, M. E., 1975, <em>The utilization of procedure models in digital image synthesis</em>:
-          Ph.D. dissertation, University of Utah — the original aeroplane.</li>
+          Ph.D. dissertation, University of Utah — the original airplane.</li>
         <li>Pearson, K., 1901, On lines and planes of closest fit to systems of points in space:
           <em>Philosophical Magazine</em>, <b>2</b>, 559&ndash;572.</li>
         <li>Jolliffe, I. T., 2002, <em>Principal Component Analysis</em>, 2nd ed.: Springer.</li>
@@ -495,7 +495,7 @@
     <p class="eyebrow">Next up</p>
     <h3>01 · A direction through a cloud</h3>
     <p>Back down to two attributes, where the cloud can be drawn flat on the page and the best direction
-      found by dragging a line through it — the same hunt you just did with the aeroplane, with the answer
+      found by dragging a line through it — the same hunt you just did with the airplane, with the answer
       measured at every angle.</p>
     <a class="btn ghost" href="directions.html">Module 01 →</a>
   </section>
@@ -596,7 +596,7 @@
       for (var i = 0; i < o.length; i++) o[i] = attr[n][i] * G;
       return o;
     });
-    // as a cloud of three-dimensional points, centred, exactly like the aeroplane
+    // as a cloud of three-dimensional points, centered, exactly like the airplane
     var mu = trio.map(MV.mean);
     var pts = new Array(trio[0].length), i;
     for (i = 0; i < pts.length; i++) {
@@ -642,7 +642,7 @@
      turning it makes the picture change shape rather than change size. */
   /* One cloud, one view, one box.
 
-     The aeroplane is drawn SOLID: points whose bit of surface faces away are
+     The airplane is drawn SOLID: points whose bit of surface faces away are
      dropped, and what is left is painted back to front so nearer points cover
      farther ones. That matters here more than it looks. A see-through pot lets
      a reader see the lid from underneath, which quietly undoes the whole
@@ -947,7 +947,7 @@
     ctx.font = '11px ui-monospace,Menlo,monospace';
     ctx.fillText('crimson: the two rise together   \u00b7   teal: one rises as the other falls',
       x0, y0 + side + 24);
-    ctx.fillText('grey: not in the set yet', x0, y0 + side + 42);
+    ctx.fillText('gray: not in the set yet', x0, y0 + side + 42);
     ctx.restore();
   }
 
@@ -1045,7 +1045,7 @@
   function drawScore() {
     var s = scoreNow();
     SCORE.set({ now: s.now, best: s.best, worst: s.worst,
-                key: S.tab === 'p4' ? 'attributes' : 'aeroplane',
+                key: S.tab === 'p4' ? 'attributes' : 'airplane',
                 verb: 'grab it and turn it',
                 won: 'that is the widest view there is',
                 next: S.tab === 'p4' ? 'now read what it is made of, in step 3'
@@ -1111,7 +1111,7 @@
     offerInvite(id);
   }
 
-  /* The aeroplane turns by itself for a moment when a step that asks for a hunt
+  /* The airplane turns by itself for a moment when a step that asks for a hunt
      first appears, so that it reads as something to pick up rather than a
      figure. Measured from a remembered base so it ends exactly where it
      started, and it stops the instant anything is touched. */
@@ -1122,7 +1122,7 @@
       S.az = Math.round(az0 + 7 * Math.sin(phase * Math.PI * 2));
       S.el = Math.round(Math.max(-89, Math.min(89, el0 + 4 * Math.sin(phase * Math.PI * 4))));
       syncLabels(); drawAll();
-    }, { key: 'aeroplane-' + id });
+    }, { key: 'airplane-' + id });
   }
 
   document.querySelectorAll('#tabs button').forEach(function (b) {

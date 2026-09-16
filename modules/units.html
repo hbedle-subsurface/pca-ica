@@ -531,7 +531,7 @@
         <li><b>Min-max, z-score and Gaussian are the three you will be offered.</b> The first two are
           linear and leave correlations untouched; the third reshapes the distribution and does not.</li>
         <li><b>There are two routes and they give different answers.</b> Decomposing the covariance
-          matrix and decomposing the correlation matrix are different analyses of the same data.</li>
+          matrix and decomposing the correlation matrix are different analyzes of the same data.</li>
         <li><b>The covariance route is decided by whichever attribute has the largest numbers.</b> On
           this set the variances span a factor of seven hundred and seventy thousand and the first component is
           ninety-four percent one attribute.</li>
@@ -1150,7 +1150,7 @@
     ctx.save();
     ctx.fillStyle = INK;
     ctx.textAlign = 'left';
-    ctx.fillText('percent of the variance \u2014 grey: six attributes, crimson: seven',
+    ctx.fillText('percent of the variance \u2014 gray: six attributes, crimson: seven',
       rA.x + 8, rA.y + 16);
     ctx.fillStyle = TEAL;
     ctx.fillText('loading of the seventh attribute on each component', rB.x + 8, rB.y + 16);
@@ -1165,7 +1165,7 @@
      onto a common footing before the covariance matrix is formed.
      ===================================================================== */
 
-  var SCNAME = { none: 'none, centred only', minmax: 'min-max', zscore: 'z-score', gauss: 'Gaussian' };
+  var SCNAME = { none: 'none, centered only', minmax: 'min-max', zscore: 'z-score', gauss: 'Gaussian' };
   var SCALED = {};
   function scaled(how) {
     if (SCALED[how]) return SCALED[how];
